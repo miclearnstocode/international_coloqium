@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import Header from "../components/Header";
+import Footer from "../components/Footer";
 import { 
   FaCoffee, FaBullhorn, FaMicrophoneAlt, FaGraduationCap, FaUtensils, 
   FaComments, FaUsers, FaGlassCheers, FaCalendarAlt, FaDownload, 
@@ -248,25 +249,7 @@ export default function ProgramPage() {
 
         </div>
       </section>
-
-      {/* ================= BOTTOM BANNER ================= */}
-      <section className="bg-[#F0F6FF] py-8">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="bg-white rounded-xl shadow-sm border border-blue-100 p-6 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-[#0A2540] text-xl">
-                <FaBell />
-              </div>
-              <p className="text-[#0A2540]">
-                <span className="font-bold">Stay updated!</span> Follow our announcements for any program changes.
-              </p>
-            </div>
-            <button className="border-2 border-[#0A2540] text-[#0A2540] px-8 py-3 rounded-lg font-bold hover:bg-[#0A2540] hover:text-white transition-colors flex items-center gap-2">
-              VIEW ANNOUNCEMENTS <span className="text-xl">→</span>
-            </button>
-          </div>
-        </div>
-      </section>
+    <Footer/>
     </div>
   );
 }

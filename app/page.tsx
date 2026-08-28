@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link"; 
 import Header from "./components/Header";
+import Footer from "./components/Footer";
 
 export default function Home() {
   // Countdown state
@@ -56,13 +57,13 @@ export default function Home() {
       <Header />
 
       {/* Main Hero Section */}
-      <main className="flex-1 relative overflow-hidden bg-gradient-to-br from-[#E8EEF9] via-[#EAF1FA] to-[#DCE6F5]">
+      <main className="flex-1 relative overflow-hidden bg-linear-to-br from-[#E8EEF9] via-[#EAF1FA] to-[#DCE6F5]">
         {/* Decorative circles */}
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#E3EAF5] rounded-full opacity-60 -translate-y-1/2 translate-x-1/3"></div>
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#E3EAF5] rounded-full opacity-40 translate-y-1/2 -translate-x-1/4"></div>
+        <div className="absolute top-0 right-0 w-150 h-150 bg-[#E3EAF5] rounded-full opacity-60 -translate-y-1/2 translate-x-1/3"></div>
+        <div className="absolute bottom-0 left-0 w-100 h-100 bg-[#E3EAF5] rounded-full opacity-40 translate-y-1/2 -translate-x-1/4"></div>
         
         {/* Video Globe positioned behind and to the right - following the image positioning */}
-        <div className="absolute right-[-230px] top-1/2 -translate-y-1/2 w-[1230px] h-[1230px] opacity-40 lg:opacity-70 pointer-events-none z-0">
+        <div className="absolute -right-57.5 top-1/2 -translate-y-1/2 w-307.5 h-307.5 opacity-40 lg:opacity-70 pointer-events-none z-0">
           <video 
             autoPlay 
             loop 
@@ -76,7 +77,7 @@ export default function Home() {
           </video>
         </div>
 
-        <div className="relative z-10 mx-auto max-w-[1400px] px-8 py-12 lg:py-16 min-h-[600px]">
+        <div className="relative z-10 mx-auto max-w-350 px-8 py-12 lg:py-16 min-h-150">
           <div className="relative">
             <div className="max-w-2xl">
               <span className="inline-block bg-[#E3D5C0] text-[#8B6F47] text-xs font-bold uppercase tracking-widest px-5 py-2 rounded-sm mb-8 shadow-sm">
@@ -98,7 +99,7 @@ export default function Home() {
 
             {/* Modal Card Positioned to the Right */}
             <div className="absolute top-0 right-0 lg:right-8 xl:right-16 hidden md:block">
-              <div className="bg-white rounded-xl shadow-2xl p-8 w-[420px] border border-gray-100 z-20 relative">
+              <div className="bg-white rounded-xl shadow-2xl p-8 w-105 border border-gray-100 z-20 relative">
                 <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -291,43 +292,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Footer / Bottom Features Section */}
-      <section className="bg-white py-12">
-        <div className="mx-auto max-w-7xl px-6 border-t border-gray-200 pt-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            
-            {/* Feature 1 */}
-            <div className="flex flex-col items-center text-center">
-              <svg className="w-12 h-12 text-[#1D3D6D] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-              <h4 className="font-bold text-[#0B2A4A] mb-2">Global Networking</h4>
-              <p className="text-sm text-gray-500">Connect with experts worldwide</p>
-            </div>
-
-            {/* Feature 2 */}
-            <div className="flex flex-col items-center text-center">
-              <svg className="w-12 h-12 text-[#1D3D6D] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
-              <h4 className="font-bold text-[#0B2A4A] mb-2">Knowledge Exchange</h4>
-              <p className="text-sm text-gray-500">Share and discover innovative ideas</p>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="flex flex-col items-center text-center">
-              <svg className="w-12 h-12 text-[#1D3D6D] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-              <h4 className="font-bold text-[#0B2A4A] mb-2">Research Excellence</h4>
-              <p className="text-sm text-gray-500">Promote high-quality research and impact</p>
-            </div>
-
-            {/* Feature 4 */}
-            <div className="flex flex-col items-center text-center">
-              <svg className="w-12 h-12 text-[#1D3D6D] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-              <h4 className="font-bold text-[#0B2A4A] mb-2">Collaboration Opportunities</h4>
-              <p className="text-sm text-gray-500">Build partnerships for the future</p>
-            </div>
-            
-          </div>
-        </div>
-      </section>
+      <Footer/>
     </div>
   );
 }

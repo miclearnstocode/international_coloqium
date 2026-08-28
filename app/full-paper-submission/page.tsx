@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import Header from "../components/Header";
+import Footer from "../components/Footer";
+
 import { 
   FaUser, FaFileAlt, FaCheckCircle, FaRegPaperPlane, FaTachometerAlt, 
   FaLanguage, FaDownload, FaPencilAlt, FaSearch, FaRegCalendarAlt, 
@@ -9,7 +11,7 @@ import {
   FaTwitter, FaLinkedinIn, FaYoutube,  FaBullhorn
 } from "react-icons/fa";
 
-export default function FullPaperSubmission() {
+export default function FullabstractSubmission() {
   return (
     <div className="min-h-screen bg-[#F4F7FB] font-sans text-[#0A2540]">
       
@@ -25,22 +27,22 @@ export default function FullPaperSubmission() {
           <div className="flex items-center gap-2 text-sm text-zinc-500 mb-8">
             <span>Home</span>
             <span className="text-zinc-300">›</span>
-            <span className="text-[#0A2540] font-medium">Full Paper Submission</span>
+            <span className="text-[#0A2540] font-medium">Abstract Submission</span>
           </div>
 
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* Left Content */}
             <div>
-              <h1 className="text-5xl font-bold text-[#0A2540] mb-4">Full Paper Submission</h1>
+              <h1 className="text-5xl font-bold text-[#0A2540] mb-4">Abstract Submission</h1>
               <div className="w-16 h-1 bg-[#F5A623] mb-6"></div>
               
               <p className="text-zinc-600 mb-8 leading-relaxed">
-                We welcome original, unpublished full papers that contribute to the advancement of knowledge and practice aligned with the conference themes. All submissions will undergo a rigorous peer-review process.
+                We welcome original, unpublished abstract that contribute to the advancement of knowledge and practice aligned with the conference themes. All submissions will undergo a rigorous peer-review process.
               </p>
 
               <div className="flex flex-wrap gap-4">
                 <button className="inline-flex items-center gap-2 bg-[#0A2540] text-white px-8 py-3 rounded-md font-semibold hover:bg-[#143b66] transition-colors shadow-md">
-                  Submit Your Paper <FaRegPaperPlane className="rotate-[-20deg]" />
+                  Submit Your abstract <FaRegPaperPlane className="rotate-[-20deg]" />
                 </button>
                 <button className="inline-flex items-center gap-2 border border-[#0A2540] text-[#0A2540] px-8 py-3 rounded-md font-semibold hover:bg-[#0A2540] hover:text-white transition-colors">
                   Download Template <FaDownload />
@@ -49,11 +51,11 @@ export default function FullPaperSubmission() {
             </div>
 
             {/* Right Image (Laptop) */}
-            <div className="hidden md:block relative w-full h-[500px] z-0">
+            <div className="hidden md:block relative w-full h-125 z-0">
                 <img 
                     src="/images/laptop2.png" 
                     alt="Laptop Submission" 
-                    className="absolute right-[-90px] top-1/2 -translate-y-1/2 w-[700px] max-w-none h-auto object-contain pointer-events-none z-5" 
+                    className="absolute -right-22.5 top-1/2 -translate-y-1/2 w-175 max-w-none h-auto object-contain pointer-events-none z-5" 
                 />
             </div>
           </div>
@@ -71,15 +73,15 @@ export default function FullPaperSubmission() {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
             {[
               { icon: <FaUser />, num: "1", title: "Create an Account", desc: "Register or log in to your account to get started." },
-              { icon: <FaFileAlt />, num: "2", title: "Start Submission", desc: "Fill in the paper details and upload your full paper." },
+              { icon: <FaFileAlt />, num: "2", title: "Start Submission", desc: "Fill in the abstract details and upload your abstract." },
               { icon: <FaCheckCircle />, num: "3", title: "Review & Confirm", desc: "Review all information and confirm your submission." },
-              { icon: <FaRegPaperPlane />, num: "4", title: "Submit", desc: "Submit your paper and receive a confirmation." },
-              { icon: <FaTachometerAlt />, num: "5", title: "Track Status", desc: "Monitor your paper status through your dashboard." },
+              { icon: <FaRegPaperPlane />, num: "4", title: "Submit", desc: "Submit your abstract and receive a confirmation." },
+              { icon: <FaTachometerAlt />, num: "5", title: "Track Status", desc: "Monitor your abstract status through your dashboard." },
             ].map((item, idx) => (
               <div key={idx} className="flex flex-col items-center text-center relative">
                 {/* Connector Line */}
                 {idx !== 4 && (
-                  <div className="absolute top-8 left-[60%] w-[80%] h-[1px] bg-zinc-200 hidden md:block"></div>
+                  <div className="absolute top-8 left-[60%] w-[80%] h-px bg-zinc-200 hidden md:block"></div>
                 )}
                 
                 <div className="w-16 h-16 bg-white border border-zinc-100 rounded-full flex items-center justify-center text-2xl text-[#0A2540] mb-4 shadow-sm relative z-10">
@@ -104,7 +106,7 @@ export default function FullPaperSubmission() {
           <div>
             <h2 className="text-2xl font-bold text-[#0A2540] mb-2">SUBMISSION GUIDELINES</h2>
             <div className="w-12 h-1 bg-[#F5A623] mb-6"></div>
-            <p className="text-zinc-600 mb-8">Please read the guidelines carefully before submitting your full paper.</p>
+            <p className="text-zinc-600 mb-8">Please read the guidelines carefully before submitting your abstract.</p>
 
             <div className="space-y-6">
               {/* Eligibility */}
@@ -114,7 +116,7 @@ export default function FullPaperSubmission() {
                 </div>
                 <div>
                   <h4 className="font-bold text-[#0A2540] mb-1">Eligibility</h4>
-                  <p className="text-sm text-zinc-600">The paper must be original, unpublished, and not currently under review or consideration elsewhere.</p>
+                  <p className="text-sm text-zinc-600">The abstract must be original, unpublished, and not currently under review or consideration elsewhere.</p>
                 </div>
               </div>
 
@@ -125,7 +127,7 @@ export default function FullPaperSubmission() {
                 </div>
                 <div>
                   <h4 className="font-bold text-[#0A2540] mb-1">Language</h4>
-                  <p className="text-sm text-zinc-600">All papers must be written in English.</p>
+                  <p className="text-sm text-zinc-600">All abstracts must be written in English.</p>
                 </div>
               </div>
 
@@ -136,7 +138,7 @@ export default function FullPaperSubmission() {
                 </div>
                 <div>
                   <h4 className="font-bold text-[#0A2540] mb-1">File Format</h4>
-                  <p className="text-sm text-zinc-600">Submit your paper in Microsoft Word (.docx) or PDF (.pdf) format.</p>
+                  <p className="text-sm text-zinc-600">Submit your abstract in Microsoft Word (.docx) or PDF (.pdf) format.</p>
                 </div>
               </div>
 
@@ -147,7 +149,7 @@ export default function FullPaperSubmission() {
                 </div>
                 <div>
                   <h4 className="font-bold text-[#0A2540] mb-1">Template</h4>
-                  <p className="text-sm text-zinc-600">Use the official conference template for formatting your paper.</p>
+                  <p className="text-sm text-zinc-600">Use the official conference template for formatting your abstract.</p>
                   <button className="mt-2 text-[#0A2540] font-semibold flex items-center gap-2 hover:gap-3 transition-all text-sm">
                     Download Template <FaArrowRight />
                   </button>
@@ -161,7 +163,7 @@ export default function FullPaperSubmission() {
                 </div>
                 <div>
                   <h4 className="font-bold text-[#0A2540] mb-1">Length</h4>
-                  <p className="text-sm text-zinc-600">The full paper must be between 4,000 and 8,000 words, including references and appendices.</p>
+                  <p className="text-sm text-zinc-600">The abstract must be between 4,000 and 8,000 words, including references and appendices.</p>
                 </div>
               </div>
 
@@ -184,11 +186,11 @@ export default function FullPaperSubmission() {
                 <div className="flex-1">
                   <h4 className="font-bold text-[#0A2540] mb-2">Important Dates</h4>
                   <div className="flex flex-wrap gap-4">
-                    <div className="border border-zinc-200 rounded-lg p-4 flex-1 min-w-[140px]">
+                    <div className="border border-zinc-200 rounded-lg p-4 flex-1 min-w-35">
                       <p className="text-xs font-semibold text-[#0A2540] uppercase mb-1">Submission Deadline</p>
                       <p className="font-bold text-[#0A2540]">June 15, 2025</p>
                     </div>
-                    <div className="border border-zinc-200 rounded-lg p-4 flex-1 min-w-[140px]">
+                    <div className="border border-zinc-200 rounded-lg p-4 flex-1 min-w-35">
                       <p className="text-xs font-semibold text-[#0A2540] uppercase mb-1">Notification of Acceptance</p>
                       <p className="font-bold text-[#0A2540]">July 15, 2025</p>
                     </div>
@@ -201,14 +203,14 @@ export default function FullPaperSubmission() {
             <div className="mt-10 bg-[#F0F6FF] border border-blue-100 rounded-lg p-4 flex gap-4 items-start">
               <FaInfoCircle className="text-[#0A2540] text-xl mt-0.5 shrink-0" />
               <p className="text-sm text-zinc-600">
-                <span className="font-bold text-[#0A2540]">Incomplete or non-compliant submissions</span> may be desk rejected. Please ensure your paper follows all guidelines.
+                <span className="font-bold text-[#0A2540]">Incomplete or non-compliant submissions</span> may be desk rejected. Please ensure your abstract follows all guidelines.
               </p>
             </div>
           </div>
 
           {/* Right: Submit Section */}
           <div>
-            <h2 className="text-2xl font-bold text-[#0A2540] mb-2">SUBMIT YOUR PAPER</h2>
+            <h2 className="text-2xl font-bold text-[#0A2540] mb-2">SUBMIT YOUR abstract</h2>
             <div className="w-12 h-1 bg-[#F5A623] mb-6"></div>
             <p className="text-zinc-600 mb-6">Ready to submit? Log in to your account and complete the submission form.</p>
 
@@ -234,11 +236,11 @@ export default function FullPaperSubmission() {
               <h3 className="font-bold text-[#0A2540] uppercase mb-4">What You Will Need</h3>
               <ul className="space-y-3">
                 {[
-                  "Paper Title",
+                  "abstract Title",
                   "Abstract (150 - 250 words)",
                   "Keywords (3-5)",
                   "Author Information",
-                  "Full Paper File",
+                  "Abstract File",
                   "Supplementary Files (if any)"
                 ].map((item, idx) => (
                   <li key={idx} className="flex items-center gap-3 text-sm text-zinc-600">
@@ -279,11 +281,11 @@ export default function FullPaperSubmission() {
           
           <div className="grid md:grid-cols-2 gap-6">
             {[
-              "Who can submit a paper?",
+              "Who can submit a abstract?",
               "What topics are suitable for submission?",
               "Is there a submission fee?",
-              "Can I submit more than one paper?",
-              "How will I know if my paper is accepted?",
+              "Can I submit more than one abstract?",
+              "How will I know if my abstract is accepted?",
               "Can I make changes after submission?"
             ].map((q, idx) => (
               <div key={idx} className="bg-[#F9FAFC] border border-zinc-200 rounded-lg p-5 flex items-center justify-between cursor-pointer hover:border-[#0A2540] transition-colors">
@@ -302,34 +304,17 @@ export default function FullPaperSubmission() {
             <div className="flex items-center gap-4">
               <FaBullhorn className="text-[#0A2540] text-5xl" />
               <div>
-                <h3 className="text-xl font-bold text-[#0A2540]">Have a great paper to share?</h3>
+                <h3 className="text-xl font-bold text-[#0A2540]">Have a great abstract to share?</h3>
                 <p className="text-zinc-500">Join researchers, academics, and professionals from around the world.</p>
               </div>
             </div>
             <button className="bg-[#0A2540] text-white px-8 py-3 rounded-md font-semibold hover:bg-[#143b66] transition-colors flex items-center gap-2">
-              Submit Your Paper Now <FaArrowRight />
+              Submit Your abstract Now <FaArrowRight />
             </button>
           </div>
         </div>
       </section>
-
-      {/* ================= FOOTER ================= */}
-      <footer className="bg-[#0A2540] text-white py-8">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-3">
-             {/* Replace with footer globe image */}
-             <img src="/footer-globe.png" alt="Footer Globe" className="w-12 h-12 object-contain" />
-             <span className="text-sm font-bold tracking-wider">INTERNATIONAL COLLOQUIUM 2025</span>
-          </div>
-          <p className="text-sm text-zinc-400">Innovation, Collaboration, Research for a Sustainable Future.</p>
-          <div className="flex gap-4">
-            <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#F5A623] transition-colors"><FaFacebookF /></a>
-            <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#F5A623] transition-colors"><FaTwitter /></a>
-            <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#F5A623] transition-colors"><FaLinkedinIn /></a>
-            <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#F5A623] transition-colors"><FaYoutube /></a>
-          </div>
-        </div>
-      </footer>
+    <Footer/>
     </div>
   );
 }
