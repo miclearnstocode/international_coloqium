@@ -14,7 +14,7 @@ export default function Header() {
     { label: "Presentation Guidelines", href: "#" },
     { label: "Abstract Submission", href: "/abstract-submission" },
     { label: "Registration", href: "/registration" },
-    { label: "Committee", href: "#" },
+    { label: "Committee", href: "/comittee" },
     { label: "Partner Institutions", href: "/partner-institutions" },
     { label: "Hotel & Mapping", href: "/hotel-mapping" },
     { label: "About Us", href: "/about-us" },
