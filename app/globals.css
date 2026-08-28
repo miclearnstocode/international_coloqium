@@ -75,3 +75,17 @@ body {
   background: #0A2540; 
   border-radius: 4px;
 }
+
+/* ---------- Countdown Tick Animation ---------- */
+/* One pulse, played once each time a digit's real value changes
+   (triggered by React remounting the span via its `key`). */
+@keyframes tickPulse {
+  0% { transform: scale(1); color: #0B2A4A; }
+  50% { transform: scale(1.15); color: #D5A54D; }
+  100% { transform: scale(1); color: #0B2A4A; }
+}
+
+.clock-tick {
+  display: inline-block;
+  animation: tickPulse 0.4s ease-out;
+}

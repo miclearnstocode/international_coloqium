@@ -15,9 +15,9 @@ export default function Header() {
     { label: "Abstract Submission", href: "/full-paper-submission" },
     { label: "Registration", href: "/registration" },
     { label: "Committee", href: "#" },
-    { label: "Partner Institutions", href: "#" },
-    { label: "Hotel & Mapping", href: "#" },
-    { label: "About Us", href: "#" },
+    { label: "Partner Institutions", href: "/partner-institutions" },
+    { label: "Hotel & Mapping", href: "/hotel-mapping" },
+    { label: "About Us", href: "/about-us" },
   ];
 
   return (

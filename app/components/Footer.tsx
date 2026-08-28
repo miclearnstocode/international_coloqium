@@ -15,8 +15,9 @@ export default function Footer() {
             </div>
           </div>
           <div className="flex flex-col leading-tight">
-            <span className="text-sm font-bold tracking-wider">INTERNATIONAL</span>
-            <span className="text-sm font-bold tracking-wider">COLLOQUIUM 2025</span>
+            <span className="text-sm font-bold tracking-wider">3RD INTERNATIONAL AGRI-</span>
+            <span className="text-sm font-bold tracking-wider">LIFE & BIORESOURCE</span>
+            <span className="text-sm tracking-wider">SCIENCE SYMPOSIUM</span>
           </div>
         </div>
 

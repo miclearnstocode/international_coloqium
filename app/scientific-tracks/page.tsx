@@ -228,7 +228,7 @@ export default function ScientificTracks() {
               </div>
             </div>
             <button className="bg-[#1D3D6D] text-white px-8 py-4 rounded-lg font-bold hover:bg-[#143b66] transition-colors flex items-center gap-2 shrink-0">
-              Submit Full Paper <FaRegPaperPlane className="rotate-[-20deg]" />
+              Submit Abstract <FaRegPaperPlane className="rotate-[-20deg]" />
             </button>
           </div>
         </div>
