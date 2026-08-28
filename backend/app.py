@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from google_drive import upload_file_to_drive
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
 from reportlab.lib.units import inch
 from reportlab.lib import colors
 
@@ -38,17 +38,46 @@ CORS(app,
      max_age=3600
 )
 
-# Ensure CORS headers are always added
 @app.after_request
 def after_request(response):
     origin = request.headers.get('Origin')
     if origin in ['http://localhost:3000', 'http://127.0.0.1:3000']:
+        # Remove existing headers first to avoid duplicates
+        response.headers.remove('Access-Control-Allow-Origin')
         response.headers.add('Access-Control-Allow-Origin', origin)
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, X-Requested-With')
     response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
     response.headers.add('Access-Control-Allow-Credentials', 'true')
     return response
+@jwt.unauthorized_loader
+def missing_token_callback(reason):
+    return jsonify({
+        "detail": "Missing authorization token",
+        "error": "unauthorized"
+    }), 401
 
+@jwt.invalid_token_loader
+def invalid_token_callback(reason):
+    return jsonify({
+        "detail": "Invalid authorization token",
+        "error": "invalid_token"
+    }), 422
+
+@jwt.expired_token_loader
+def expired_token_callback(jwt_header, jwt_payload):
+    return jsonify({
+        "detail": "Token has expired. Please login again.",
+        "error": "token_expired"
+    }), 401
+
+@jwt.revoked_token_loader
+def revoked_token_callback(jwt_header, jwt_payload):
+    return jsonify({
+        "detail": "Token has been revoked",
+        "error": "token_revoked"
+    }), 401
+    
+    
 # Models
 class User(db.Model):
     __tablename__ = 'users'
@@ -62,6 +91,7 @@ class User(db.Model):
 class AbstractSubmission(db.Model):
     __tablename__ = 'abstract_submissions'
     id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, nullable=False)
     selected_track = db.Column(db.String(255), nullable=False)
     specific_track = db.Column(db.String(255), nullable=False)
@@ -75,6 +105,7 @@ class AbstractSubmission(db.Model):
     keywords = db.Column(db.String(255), nullable=False)
     abstract_drive_view_url = db.Column(db.String(500), nullable=True)
     abstract_drive_download_url = db.Column(db.String(500), nullable=True)
+    status = db.Column(db.String(50), nullable=False, default='pending')
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     
 class SUC(db.Model):
@@ -108,7 +139,6 @@ def test_cors():
         return jsonify({})
     return jsonify({"message": "CORS is working!"})
 
-# ================= AUTHENTICATION =================
 @app.route('/api/register', methods=['POST', 'OPTIONS'])
 def register():
     if request.method == 'OPTIONS':
@@ -165,7 +195,6 @@ def login():
         return jsonify({"detail": str(e)}), 500
 
 # ================= USER'S PAPER SUBMISSION =================
-# Updated route name to /api/papers/submit to avoid front-page conflicts
 @app.route('/api/papers/submit', methods=['POST', 'OPTIONS'])
 @jwt_required()
 def submit_paper():
@@ -301,14 +330,12 @@ def add_suc():
         return jsonify({"detail": str(e)}), 500
 
 @app.route('/api/abstracts/submit', methods=['POST', 'OPTIONS'])
-@jwt_required()
 def submit_abstract():
     if request.method == 'OPTIONS':
         return jsonify({})
     
     temp_file_path = None
     try:
-        user_id = get_jwt_identity()
         data = request.get_json()
         
         # Validate required fields
@@ -350,9 +377,27 @@ def submit_abstract():
             project_title=data['selected_track']
         )
         
-        # Save to database
+        # Get sender_id from the data
+        sender_id = data.get('sender_id')
+        
+        # Validate sender_id
+        if not sender_id or sender_id == 0:
+            # Try to get from JWT if available (optional fallback)
+            try:
+                from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
+                verify_jwt_in_request(optional=True)
+                sender_id = get_jwt_identity()
+            except:
+                sender_id = None
+        
+        # If still no sender_id, use a default or return error
+        if not sender_id:
+            return jsonify({"detail": "User authentication required"}), 401
+        
+        # Save to database with status='pending'
         new_sub = AbstractSubmission(
-            user_id=user_id,
+            sender_id=sender_id,
+            user_id=sender_id,
             selected_track=data['selected_track'],
             specific_track=data['specific_track'],
             research_title=data['research_title'],
@@ -364,7 +409,8 @@ def submit_abstract():
             abstract=data['abstract'],
             keywords=data['keywords'],
             abstract_drive_view_url=view_url,
-            abstract_drive_download_url=download_url
+            abstract_drive_download_url=download_url,
+            status='pending'  # Set status to pending
         )
         
         db.session.add(new_sub)
@@ -377,8 +423,10 @@ def submit_abstract():
         return jsonify({
             "message": "Abstract submitted successfully",
             "submission_id": new_sub.id,
+            "sender_id": new_sub.sender_id,
             "view_url": view_url,
-            "download_url": download_url
+            "download_url": download_url,
+            "status": "pending"
         }), 201
         
     except Exception as e:
@@ -387,8 +435,7 @@ def submit_abstract():
         db.session.rollback()
         traceback.print_exc()
         return jsonify({"detail": str(e)}), 500
-    
-# ================= STAFF ONLY: VIEW & MANAGE SUBMISSIONS =================
+
 @app.route('/api/staff/submissions', methods=['GET', 'OPTIONS'])
 @jwt_required()
 def get_all_submissions():
@@ -403,17 +450,21 @@ def get_all_submissions():
         submissions = AbstractSubmission.query.order_by(AbstractSubmission.created_at.desc()).all()
         result = [{
             'id': s.id,
+            'sender_id': s.sender_id,  # Add sender_id
             'user_id': s.user_id,
-            'extension_project_title': s.extension_project_title,
-            'thematic_area': s.thematic_area,
-            'paper_category': s.paper_category,
+            'selected_track': s.selected_track,
+            'specific_track': s.specific_track,
+            'research_title': s.research_title,
             'author': s.author,
+            'co_author': s.co_author,
             'presenter': s.presenter,
+            'email_address': s.email_address,
+            'university_agency': s.university_agency,
+            'abstract': s.abstract,
+            'keywords': s.keywords,
+            'abstract_view_url': s.abstract_drive_view_url,
+            'abstract_download_url': s.abstract_drive_download_url,
             'status': s.status,
-            'abstract_view_url': s.abstract_view_url,
-            'abstract_download_url': s.abstract_download_url,
-            'endorsement_view_url': s.endorsement_view_url,
-            'endorsement_download_url': s.endorsement_download_url,
             'created_at': s.created_at.strftime('%Y-%m-%d %H:%M:%S') if s.created_at else None
         } for s in submissions]
         return jsonify(result), 200
@@ -447,7 +498,6 @@ def update_submission_status(submission_id):
         db.session.rollback()
         return jsonify({"detail": str(e)}), 500
 
-# ================= USER'S ABSTRACT SUBMISSION (Generates PDF) =================
 def generate_abstract_pdf(data):
     """Generates a professional PDF for the abstract and returns the file path."""
     buffer = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf')
@@ -462,41 +512,156 @@ def generate_abstract_pdf(data):
     )
     
     styles = getSampleStyleSheet()
+    
+    # Custom styles
     title_style = ParagraphStyle(
-        'TitleStyle', parent=styles['Title'], fontSize=16, spaceAfter=12, textColor=colors.HexColor('#0A2540')
+        'TitleStyle', 
+        parent=styles['Title'], 
+        fontSize=18, 
+        spaceAfter=16, 
+        textColor=colors.HexColor('#0A2540'),
+        alignment=1,  # Center alignment
+        fontName='Helvetica-Bold',
+        leading=22
     )
-    heading_style = ParagraphStyle(
-        'HeadingStyle', parent=styles['Heading2'], fontSize=12, spaceBefore=10, spaceAfter=5, textColor=colors.HexColor('#1D3D6D')
+    
+    author_style = ParagraphStyle(
+        'AuthorStyle', 
+        parent=styles['Normal'], 
+        fontSize=11, 
+        spaceAfter=4, 
+        textColor=colors.HexColor('#333333'),
+        alignment=1,  # Center alignment
+        fontName='Helvetica-Bold',
+        leading=14
     )
-    normal_style = ParagraphStyle(
-        'NormalStyle', parent=styles['Normal'], fontSize=10, leading=14
+    
+    email_style = ParagraphStyle(
+        'EmailStyle', 
+        parent=styles['Normal'], 
+        fontSize=10, 
+        spaceAfter=2, 
+        textColor=colors.HexColor('#555555'),
+        alignment=1,  # Center alignment
+        leading=13
+    )
+    
+    university_style = ParagraphStyle(
+        'UniversityStyle', 
+        parent=styles['Normal'], 
+        fontSize=10, 
+        spaceAfter=16, 
+        textColor=colors.HexColor('#555555'),
+        alignment=1,  # Center alignment
+        leading=13
+    )
+    
+    section_style = ParagraphStyle(
+        'SectionStyle', 
+        parent=styles['Heading2'], 
+        fontSize=13, 
+        spaceBefore=12, 
+        spaceAfter=6, 
+        textColor=colors.HexColor('#0A2540'),
+        fontName='Helvetica-Bold',
+        leading=16,
+        alignment=1  # Center alignment
+    )
+    
+    abstract_style = ParagraphStyle(
+        'AbstractStyle', 
+        parent=styles['Normal'], 
+        fontSize=10, 
+        leading=16, 
+        spaceAfter=12,
+        alignment=4,  # Justified alignment
+        textColor=colors.HexColor('#333333')
+    )
+    
+    keyword_style = ParagraphStyle(
+        'KeywordStyle', 
+        parent=styles['Normal'], 
+        fontSize=10, 
+        leading=14,
+        textColor=colors.HexColor('#333333'),
+        spaceBefore=6,
+        alignment=0  # Left alignment
     )
     
     story = []
+    
+    # Title (Centered)
     story.append(Paragraph(data['research_title'], title_style))
-    story.append(Spacer(1, 0.25 * inch))
-    story.append(Paragraph(f"<b>Track:</b> {data['selected_track']}", normal_style))
-    story.append(Paragraph(f"<b>Sub-Track:</b> {data['specific_track']}", normal_style))
-    story.append(Spacer(1, 0.25 * inch))
     
-    story.append(Paragraph("Author Information", heading_style))
-    story.append(Paragraph(f"<b>Author:</b> {data['author']}", normal_style))
-    if data['co_author']: story.append(Paragraph(f"<b>Co-Author:</b> {data['co_author']}", normal_style))
-    story.append(Paragraph(f"<b>Presenter:</b> {data['presenter']}", normal_style))
-    story.append(Paragraph(f"<b>Email:</b> {data['email_address']}", normal_style))
-    story.append(Paragraph(f"<b>University/Agency:</b> {data['university_agency']}", normal_style))
+    # Author Line (Centered)
+    author_text = data['author']
+    if data.get('co_author'):
+        author_text += f", {data['co_author']}"
+    story.append(Paragraph(author_text, author_style))
     
-    story.append(Spacer(1, 0.25 * inch))
-    story.append(Paragraph("Abstract", heading_style))
-    story.append(Paragraph(data['abstract'].replace('\n', '<br/>'), normal_style))
+    # Email (Centered)
+    story.append(Paragraph(data['email_address'], email_style))
     
-    story.append(Spacer(1, 0.25 * inch))
-    story.append(Paragraph("Keywords", heading_style))
-    story.append(Paragraph(data['keywords'], normal_style))
+    # University/Agency (Centered)
+    story.append(Paragraph(data['university_agency'], university_style))
+    
+    # Horizontal line after header
+    story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#0A2540'), spaceAfter=12))
+    
+    # Abstract Section (Title Centered)
+    story.append(Paragraph("ABSTRACT", section_style))
+    story.append(Paragraph(data['abstract'].replace('\n', '<br/>'), abstract_style))
+    
+    # Keywords Section (Left aligned - on same line: KEYWORDS: value)
+    story.append(Paragraph(f"<b>KEYWORDS:</b> {data['keywords']}", keyword_style))
     
     doc.build(story)
     return file_path
 
+@app.route('/api/abstracts/preview', methods=['POST', 'OPTIONS'])
+def preview_abstract():
+    if request.method == 'OPTIONS':
+        return jsonify({})
+    
+    temp_file_path = None
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        required_fields = [
+            'selected_track', 'specific_track', 'research_title', 'author', 
+            'presenter', 'email_address', 'university_agency', 'abstract', 'keywords'
+        ]
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({"detail": f"{field.replace('_', ' ').title()} is required"}), 400
+        
+        # Generate PDF
+        pdf_path = generate_abstract_pdf(data)
+        temp_file_path = pdf_path
+        
+        # Return the PDF as a response
+        with open(pdf_path, 'rb') as pdf_file:
+            pdf_data = pdf_file.read()
+        
+        # Clean up temp file
+        if os.path.exists(pdf_path):
+            os.remove(pdf_path)
+        
+        # Return PDF with base64 encoding for preview
+        import base64
+        pdf_base64 = base64.b64encode(pdf_data).decode('utf-8')
+        
+        return jsonify({
+            "preview_url": f"data:application/pdf;base64,{pdf_base64}"
+        }), 200
+        
+    except Exception as e:
+        if temp_file_path and os.path.exists(temp_file_path):
+            os.remove(temp_file_path)
+        traceback.print_exc()
+        return jsonify({"detail": str(e)}), 500
+    
 # ================= SUC ENDPOINTS =================
 @app.route('/api/sucs', methods=['GET', 'OPTIONS'])
 def get_sucs():

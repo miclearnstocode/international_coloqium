@@ -2,17 +2,24 @@
 
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { FaPaperPlane, FaSpinner, FaPlus, FaTimes, FaUserPlus, FaUser, FaCheck, FaUniversity, FaSearch, FaChevronDown, FaPlusCircle } from "react-icons/fa";
+import { FaPaperPlane, FaSpinner, FaPlus, FaTimes, FaUserPlus, FaUser, FaCheck, FaUniversity, FaSearch, FaChevronDown, FaPlusCircle, FaFilePdf, FaEye, FaDownload, FaSync } from "react-icons/fa";
 
 export default function AbstractSubmissionPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
   const [sucs, setSucs] = useState<any[]>([]);
   const [newCoAuthor, setNewCoAuthor] = useState("");
   const [showCustomAgency, setShowCustomAgency] = useState(false);
   const [customAgency, setCustomAgency] = useState("");
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [submittedData, setSubmittedData] = useState<any>(null);
+  const [previewGenerated, setPreviewGenerated] = useState(false);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
   
   // Search state for university/agency
   const [agencySearch, setAgencySearch] = useState("");
@@ -99,6 +106,80 @@ export default function AbstractSubmissionPage() {
     fetchSUCs();
   }, []);
 
+  // Generate preview function
+  const generatePreview = useCallback(async (data: any) => {
+    // Check if all required fields are filled
+    const requiredFields = [
+      'selected_track', 'specific_track', 'research_title', 'author', 
+      'presenter', 'email_address', 'university_agency', 'abstract', 'keywords'
+    ];
+    
+    const isComplete = requiredFields.every(field => data[field]?.trim());
+    
+    if (!isComplete) {
+      setPreviewUrl("");
+      setPreviewGenerated(false);
+      return;
+    }
+
+    setPreviewLoading(true);
+
+    try {
+      const token = localStorage.getItem("access_token");
+      if (!token) return;
+
+      // Join co-authors with comma
+      const coAuthorsString = data.co_authors.join(", ");
+
+      const submissionData = {
+        ...data,
+        co_author: coAuthorsString,
+        co_authors: undefined
+      };
+
+      const res = await fetch("http://localhost:5000/api/abstracts/preview", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(submissionData)
+      });
+
+      if (res.ok) {
+        const result = await res.json();
+        setPreviewUrl(result.preview_url);
+        setPreviewGenerated(true);
+      }
+    } catch (error) {
+      console.error("Error generating preview", error);
+    } finally {
+      setPreviewLoading(false);
+    }
+  }, []);
+
+  // Auto-generate preview when keywords are filled
+  useEffect(() => {
+    if (formData.keywords.trim() && 
+        formData.selected_track && 
+        formData.specific_track && 
+        formData.research_title && 
+        formData.author && 
+        formData.presenter && 
+        formData.email_address && 
+        formData.university_agency && 
+        formData.abstract) {
+      
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+      
+      debounceRef.current = setTimeout(() => {
+        generatePreview(formData);
+      }, 1500); // Wait 1.5 seconds after typing stops
+    }
+  }, [formData, generatePreview]);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -124,9 +205,11 @@ export default function AbstractSubmissionPage() {
   const handleChange = (e: any) => {
     const { name, value } = e.target;
     
-    // If selected_track changes, reset specific_track
+    // If selected_track changes, reset specific_track and preview
     if (name === "selected_track") {
       setFormData({ ...formData, selected_track: value, specific_track: "" });
+      setPreviewGenerated(false);
+      setPreviewUrl("");
     } else {
       setFormData({ ...formData, [name]: value });
     }
@@ -188,17 +271,34 @@ export default function AbstractSubmissionPage() {
     setFormData({ ...formData, university_agency: "" });
   };
 
-  // Submit handler
+  // Manual preview generation button handler
+  const handleManualPreview = () => {
+    generatePreview(formData);
+  };
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Get the JWT token from localStorage (stored during login)
+      // Get the JWT token and user from localStorage
       const token = localStorage.getItem("access_token");
+      const userStr = localStorage.getItem("user");
+      
       if (!token) {
         router.push("/login");
         return;
+      }
+      
+      // Parse user data to get the ID
+      let userId = null;
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          userId = user.id;
+        } catch (error) {
+          console.error("Error parsing user data", error);
+        }
       }
 
       // Determine the final university_agency value
@@ -215,22 +315,27 @@ export default function AbstractSubmissionPage() {
         ...formData,
         university_agency: finalAgency,
         co_author: coAuthorsString,
-        co_authors: undefined
+        co_authors: undefined,
+        sender_id: userId  // Add sender_id to the data
       };
 
       const res = await fetch("http://localhost:5000/api/abstracts/submit", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify(submissionData)
       });
 
       if (res.ok) {
         const data = await res.json();
-        alert(`Abstract submitted successfully!\nView here: ${data.view_url}`);
-        router.push("/dashboard");
+        setSubmittedData(data);
+        setShowSuccessModal(true);
+        
+        // Redirect to dashboard after 3 seconds
+        setTimeout(() => {
+          router.push("/dashboard");
+        }, 3000);
       } else {
         const errorData = await res.json();
         alert(errorData.detail || "Submission failed.");
@@ -246,7 +351,72 @@ export default function AbstractSubmissionPage() {
   return (
     <div className="min-h-screen bg-[#F4F7FB] font-sans text-[#0A2540] flex flex-col">
       <Header />
-      
+
+      {/* Preview Modal */}
+      {showPreviewModal && previewUrl && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowPreviewModal(false)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-[#0A2540] flex items-center gap-2">
+                <FaFilePdf className="text-red-500" /> PDF Preview
+              </h3>
+              <button
+                onClick={() => setShowPreviewModal(false)}
+                className="text-zinc-400 hover:text-zinc-600"
+              >
+                <FaTimes className="text-xl" />
+              </button>
+            </div>
+            <div className="bg-zinc-100 rounded-lg p-4 max-h-[70vh] overflow-y-auto">
+              <iframe
+                src={previewUrl}
+                className="w-full h-[600px] border-0"
+                title="PDF Preview"
+              />
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <a
+                href={previewUrl}
+                download
+                className="inline-flex items-center gap-2 px-4 py-2 bg-[#0A2540] text-white rounded-lg hover:bg-[#143b66]"
+              >
+                <FaDownload /> Download PDF
+              </a>
+              <button
+                onClick={() => setShowPreviewModal(false)}
+                className="px-4 py-2 bg-zinc-200 text-zinc-700 rounded-lg hover:bg-zinc-300"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Modal */}
+      {showSuccessModal && submittedData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 text-center">
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <FaCheck className="text-green-500 text-4xl" />
+            </div>
+            <h2 className="text-2xl font-bold text-[#0A2540] mb-3">Submission Successful!</h2>
+            <p className="text-zinc-600 mb-4">Your abstract has been submitted successfully.</p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <p className="text-sm text-blue-800">
+                <span className="font-semibold">Status:</span> {submittedData.status}
+              </p>
+            </div>
+            <div className="flex items-center justify-center gap-2 text-zinc-500 text-sm">
+              <FaSpinner className="animate-spin" />
+              Redirecting to dashboard...
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-4xl mx-auto w-full px-6 py-16">
         <div className="text-center mb-10">
           <h1 className="text-4xl font-bold text-[#0A2540] mb-4">Submit Abstract</h1>
@@ -528,6 +698,53 @@ export default function AbstractSubmissionPage() {
             <input type="text" name="keywords" value={formData.keywords} onChange={handleChange} required
               placeholder="e.g., Agriculture, Sustainability, Biotechnology"
               className="w-full px-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#0A2540] focus:ring-1 focus:ring-[#0A2540]" />
+          </div>
+
+          {/* Preview Section */}
+          <div className="border border-zinc-200 rounded-lg p-4 bg-zinc-50/50">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FaFilePdf className="text-red-500" />
+                <span className="text-sm font-semibold text-[#0A2540]">PDF Preview</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleManualPreview}
+                disabled={previewLoading}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#0A2540] hover:bg-[#143b66] rounded-lg transition-colors disabled:bg-zinc-300 disabled:cursor-not-allowed"
+              >
+                {previewLoading ? (
+                  <>
+                    <FaSpinner className="animate-spin" /> Generating...
+                  </>
+                ) : (
+                  <>
+                    <FaSync /> Generate Preview
+                  </>
+                )}
+              </button>
+            </div>
+            
+            {previewGenerated && previewUrl && (
+              <div className="mt-3 flex items-center gap-3">
+                <span className="text-xs text-green-600 flex items-center gap-1">
+                  <FaCheck /> Preview ready
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowPreviewModal(true)}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold text-[#0A2540] border border-[#0A2540] hover:bg-[#0A2540] hover:text-white rounded-lg transition-colors"
+                >
+                  <FaEye /> View Preview
+                </button>
+              </div>
+            )}
+            
+            {previewLoading && (
+              <div className="flex items-center gap-2 mt-2 text-xs text-zinc-500">
+                <FaSpinner className="animate-spin" /> Generating PDF preview...
+              </div>
+            )}
           </div>
 
           {/* Submit Button */}
