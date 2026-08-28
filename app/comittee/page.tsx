@@ -198,7 +198,7 @@ export default function CommitteePage() {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-[#0B2A4A] via-[#1D3D6D] to-[#2A5A8C] py-16 overflow-hidden">
+      <section className="relative bg-linear-to-br from-[#0B2A4A] via-[#1D3D6D] to-[#2A5A8C] py-16 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
@@ -225,7 +225,7 @@ export default function CommitteePage() {
             {committeeData.chairpersons.map((person, index) => (
               <div key={index} className="bg-white rounded-2xl shadow-lg shadow-gray-100 border border-gray-100 p-6 text-center hover:shadow-xl transition-shadow">
                 <div className="relative w-24 h-24 mx-auto mb-4">
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#1D3D6D] to-[#2A5A8C] opacity-10"></div>
+                  <div className="absolute inset-0 rounded-full bg-linear-to-br from-[#1D3D6D] to-[#2A5A8C] opacity-10"></div>
                   <div className="relative w-24 h-24 rounded-full bg-[#1D3D6D] text-white flex items-center justify-center text-4xl font-bold overflow-hidden border-4 border-[#D5A54D]/30">
                     {person.name.split(" ").slice(0, 2).map(n => n[0]).join("")}
                   </div>
@@ -300,7 +300,7 @@ export default function CommitteePage() {
       {/* CTA Section */}
       <section className="pb-16 px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="bg-gradient-to-r from-[#0B2A4A] to-[#1D3D6D] rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="bg-linear-to-r from-[#0B2A4A] to-[#1D3D6D] rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 rounded-xl bg-[#D5A54D] text-[#0B2A4A] flex items-center justify-center text-xl shrink-0">
                 <FaUsers />

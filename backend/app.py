@@ -662,6 +662,34 @@ def preview_abstract():
         traceback.print_exc()
         return jsonify({"detail": str(e)}), 500
     
+@app.route('/api/my-submissions/<int:user_id>', methods=['GET', 'OPTIONS'])
+def get_my_submissions(user_id):
+    if request.method == 'OPTIONS':
+        return jsonify({})
+    try:
+        submissions = AbstractSubmission.query.filter_by(sender_id=user_id).order_by(AbstractSubmission.created_at.desc()).all()
+        result = [{
+            'id': s.id,
+            'sender_id': s.sender_id,
+            'selected_track': s.selected_track,
+            'specific_track': s.specific_track,
+            'research_title': s.research_title,
+            'author': s.author,
+            'co_author': s.co_author,
+            'presenter': s.presenter,
+            'email_address': s.email_address,
+            'university_agency': s.university_agency,
+            'abstract': s.abstract,
+            'keywords': s.keywords,
+            'abstract_view_url': s.abstract_drive_view_url,
+            'abstract_download_url': s.abstract_drive_download_url,
+            'status': s.status,
+            'created_at': s.created_at.strftime('%Y-%m-%d %H:%M:%S') if s.created_at else None
+        } for s in submissions]
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"detail": str(e)}), 500
+
 # ================= SUC ENDPOINTS =================
 @app.route('/api/sucs', methods=['GET', 'OPTIONS'])
 def get_sucs():
