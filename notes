@@ -1,1 +1,5 @@
 npm run dev -- -H 127.0.0.1 -p 3000 start this server
+
+virtual env creation
+.\.venv\Scripts\Activate.ps1
+venv\Scripts\activate

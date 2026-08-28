@@ -6,9 +6,8 @@ import Footer from "../components/Footer";
 import { 
   FaUser, FaFileAlt, FaCheckCircle, FaRegPaperPlane, FaTachometerAlt, 
   FaLanguage, FaDownload, FaPencilAlt, FaSearch, FaRegCalendarAlt, 
-  FaRegClock, FaInfoCircle, FaEnvelope, FaQuestionCircle, FaUserPlus,
-  FaSignInAlt, FaChevronDown, FaArrowRight, FaFacebookF,
-  FaTwitter, FaLinkedinIn, FaYoutube,  FaBullhorn
+  FaInfoCircle, FaEnvelope, FaQuestionCircle, FaUserPlus,
+  FaSignInAlt, FaChevronDown, FaArrowRight, FaBullhorn
 } from "react-icons/fa";
 
 export default function FullabstractSubmission() {
@@ -16,12 +15,9 @@ export default function FullabstractSubmission() {
     <div className="min-h-screen bg-[#F4F7FB] font-sans text-[#0A2540]">
       
       {/* ================= HEADER ================= */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <Header />
-      </header>
+      <Header />
 
       {/* ================= PAGE HERO ================= */}
-      {/* Removed absolute positioned globe image from here */}
       <section className="relative bg-white overflow-hidden border-b border-zinc-100">
         <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
           <div className="flex items-center gap-2 text-sm text-zinc-500 mb-8">
@@ -37,16 +33,13 @@ export default function FullabstractSubmission() {
               <div className="w-16 h-1 bg-[#F5A623] mb-6"></div>
               
               <p className="text-zinc-600 mb-8 leading-relaxed">
-                We welcome original, unpublished abstract that contribute to the advancement of knowledge and practice aligned with the conference themes. All submissions will undergo a rigorous peer-review process.
+                We welcome original, unpublished abstracts that contribute to the advancement of knowledge and practice aligned with the conference themes. All submissions will undergo a rigorous peer-review process.
               </p>
 
               <div className="flex flex-wrap gap-4">
-                <button className="inline-flex items-center gap-2 bg-[#0A2540] text-white px-8 py-3 rounded-md font-semibold hover:bg-[#143b66] transition-colors shadow-md">
-                  Submit Your abstract <FaRegPaperPlane className="rotate-[-20deg]" />
-                </button>
-                <button className="inline-flex items-center gap-2 border border-[#0A2540] text-[#0A2540] px-8 py-3 rounded-md font-semibold hover:bg-[#0A2540] hover:text-white transition-colors">
-                  Download Template <FaDownload />
-                </button>
+                <Link href="/login" className="inline-flex items-center gap-2 bg-[#0A2540] text-white px-8 py-3 rounded-md font-semibold hover:bg-[#143b66] transition-colors shadow-md">
+                  Submit Your Abstract <FaRegPaperPlane className="rotate-[-20deg]" />
+                </Link>
               </div>
             </div>
 
@@ -79,7 +72,6 @@ export default function FullabstractSubmission() {
               { icon: <FaTachometerAlt />, num: "5", title: "Track Status", desc: "Monitor your abstract status through your dashboard." },
             ].map((item, idx) => (
               <div key={idx} className="flex flex-col items-center text-center relative">
-                {/* Connector Line */}
                 {idx !== 4 && (
                   <div className="absolute top-8 left-[60%] w-[80%] h-px bg-zinc-200 hidden md:block"></div>
                 )}
@@ -163,7 +155,7 @@ export default function FullabstractSubmission() {
                 </div>
                 <div>
                   <h4 className="font-bold text-[#0A2540] mb-1">Length</h4>
-                  <p className="text-sm text-zinc-600">The abstract must be between 4,000 and 8,000 words, including references and appendices.</p>
+                  <p className="text-sm text-zinc-600">The abstract must be between 200 and 300 words, including references and appendices.</p>
                 </div>
               </div>
 
@@ -210,14 +202,14 @@ export default function FullabstractSubmission() {
 
           {/* Right: Submit Section */}
           <div>
-            <h2 className="text-2xl font-bold text-[#0A2540] mb-2">SUBMIT YOUR abstract</h2>
+            <h2 className="text-2xl font-bold text-[#0A2540] mb-2">SUBMIT YOUR ABSTRACT</h2>
             <div className="w-12 h-1 bg-[#F5A623] mb-6"></div>
             <p className="text-zinc-600 mb-6">Ready to submit? Log in to your account and complete the submission form.</p>
 
             <div className="space-y-4 mb-10">
-              <button className="w-full bg-[#0A2540] text-white py-4 rounded-md font-semibold flex items-center justify-center gap-2 hover:bg-[#143b66] transition-colors">
+              <Link href="/login" className="w-full bg-[#0A2540] text-white py-4 rounded-md font-semibold flex items-center justify-center gap-2 hover:bg-[#143b66] transition-colors">
                 <FaSignInAlt /> Login to Your Account
-              </button>
+              </Link>
               
               <div className="relative flex py-2 items-center justify-center">
                 <div className="absolute inset-0 flex items-center">
@@ -226,9 +218,9 @@ export default function FullabstractSubmission() {
                 <div className="relative bg-white px-4 text-xs font-bold text-zinc-400 uppercase">or</div>
               </div>
 
-              <button className="w-full border border-[#0A2540] text-[#0A2540] py-4 rounded-md font-semibold flex items-center justify-center gap-2 hover:bg-[#0A2540] hover:text-white transition-colors">
+              <Link href="/register" className="w-full border border-[#0A2540] text-[#0A2540] py-4 rounded-md font-semibold flex items-center justify-center gap-2 hover:bg-[#0A2540] hover:text-white transition-colors">
                 <FaUserPlus /> Create a New Account
-              </button>
+              </Link>
             </div>
 
             {/* What You Will Need */}
@@ -236,7 +228,7 @@ export default function FullabstractSubmission() {
               <h3 className="font-bold text-[#0A2540] uppercase mb-4">What You Will Need</h3>
               <ul className="space-y-3">
                 {[
-                  "abstract Title",
+                  "Abstract Title",
                   "Abstract (150 - 250 words)",
                   "Keywords (3-5)",
                   "Author Information",
@@ -281,7 +273,7 @@ export default function FullabstractSubmission() {
           
           <div className="grid md:grid-cols-2 gap-6">
             {[
-              "Who can submit a abstract?",
+              "Who can submit an abstract?",
               "What topics are suitable for submission?",
               "Is there a submission fee?",
               "Can I submit more than one abstract?",
@@ -308,13 +300,13 @@ export default function FullabstractSubmission() {
                 <p className="text-zinc-500">Join researchers, academics, and professionals from around the world.</p>
               </div>
             </div>
-            <button className="bg-[#0A2540] text-white px-8 py-3 rounded-md font-semibold hover:bg-[#143b66] transition-colors flex items-center gap-2">
-              Submit Your abstract Now <FaArrowRight />
-            </button>
+            <Link href="/login" className="bg-[#0A2540] text-white px-8 py-3 rounded-md font-semibold hover:bg-[#143b66] transition-colors flex items-center gap-2">
+              Submit Your Abstract Now <FaArrowRight />
+            </Link>
           </div>
         </div>
       </section>
-    <Footer/>
+      <Footer/>
     </div>
   );
 }
