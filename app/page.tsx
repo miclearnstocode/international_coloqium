@@ -230,7 +230,7 @@ export default function Home() {
             </div>
             <h3 className="text-xl font-bold text-[#0B2A4A] mb-4">ABOUT THE CONFERENCE</h3>
             <div className="w-10 h-1 bg-[#D5A54D] mb-6"></div>
-            <p className="text-gray-600 mb-6">
+            <p className="text-red-600 mb-6">
               The 3rd International Agri-Life & Bioresource Science Symposium brings together scholars, practitioners, industry leaders, and students from around the world to explore innovative ideas, share research findings, and foster collaborations that drive sustainable development.
             </p>
             <a href="#" className="font-semibold text-[#0B2A4A] inline-flex items-center gap-2 hover:gap-3 transition-all">Read More <span>→</span></a>

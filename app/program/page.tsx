@@ -89,7 +89,8 @@ export default function ProgramPage() {
           <h1 className="text-5xl font-bold text-[#0A2540] mb-4">Program</h1>
           <div className="w-16 h-1 bg-[#F5A623] mb-6"></div>
           
-          <p className="text-lg text-zinc-600 max-w-lg leading-relaxed">
+          {/* RED: Change this paragraph text */}
+          <p className="text-lg text-red-600 max-w-lg leading-relaxed">
             Explore the conference program featuring keynote speeches, technical sessions, panel discussions, and special events.
           </p>
         </div>
@@ -130,8 +131,10 @@ export default function ProgramPage() {
                 className="bg-white rounded-xl border border-zinc-100 shadow-sm p-8 flex flex-col items-center text-center hover:shadow-md transition-shadow"
               >
                 <div className="text-4xl text-[#0A2540] mb-4">{item.icon}</div>
-                <span className="text-4xl font-bold text-[#0A2540] mb-2">{item.value}</span>
-                <span className="text-sm font-semibold text-[#0A2540] uppercase tracking-wide">{item.label}</span>
+                {/* RED: Change the stats (numbers) */}
+                <span className="text-4xl font-bold text-red-600 mb-2">{item.value}</span>
+                {/* RED: Change the labels */}
+                <span className="text-sm font-semibold text-red-600 uppercase tracking-wide">{item.label}</span>
               </div>
             ))}
           </div>
@@ -147,22 +150,28 @@ export default function ProgramPage() {
             <div className="bg-[#0A2540] text-white p-6 flex items-center justify-center gap-4 cursor-pointer">
               <FaCalendarAlt className="text-3xl" />
               <div>
+                {/* RED: Change Day 1 Label */}
                 <p className="font-bold text-lg leading-tight">DAY 1</p>
-                <p className="text-sm text-zinc-300">October 20, 2025</p>
+                {/* RED: Change Day 1 Date */}
+                <p className="text-sm text-red-400">October 20, 2025</p>
               </div>
             </div>
             <div className="bg-white text-[#0A2540] p-6 flex items-center justify-center gap-4 border-r border-zinc-100 cursor-pointer hover:bg-zinc-50">
               <FaCalendarAlt className="text-3xl" />
               <div>
-                <p className="font-bold text-lg leading-tight">DAY 2</p>
-                <p className="text-sm text-zinc-500">October 21, 2025</p>
+                {/* RED: Change Day 2 Label */}
+                <p className="font-bold text-red-600 text-lg leading-tight">DAY 2</p>
+                {/* RED: Change Day 2 Date */}
+                <p className="text-sm text-red-600">October 21, 2025</p>
               </div>
             </div>
             <div className="bg-white text-[#0A2540] p-6 flex items-center justify-center gap-4 cursor-pointer hover:bg-zinc-50">
               <FaCalendarAlt className="text-3xl" />
               <div>
-                <p className="font-bold text-lg leading-tight">DAY 3</p>
-                <p className="text-sm text-zinc-500">October 22, 2025</p>
+                {/* RED: Change Day 3 Label */}
+                <p className="font-bold text-red-600 text-lg leading-tight">DAY 3</p>
+                {/* RED: Change Day 3 Date */}
+                <p className="text-sm text-red-600">October 22, 2025</p>
               </div>
             </div>
           </div>
@@ -181,15 +190,18 @@ export default function ProgramPage() {
                 key={idx} 
                 className={`grid grid-cols-12 px-6 py-5 items-start border-b border-zinc-100 last:border-b-0 ${idx % 2 === 0 ? 'bg-white' : 'bg-zinc-50/50'}`}
               >
-                <div className="col-span-3 text-sm font-semibold text-[#0A2540] pt-1">{row.time}</div>
+                {/* RED: Change Time */}
+                <div className="col-span-3 text-sm font-semibold text-red-600 pt-1">{row.time}</div>
                 <div className="col-span-9 flex gap-4">
                   <div className="w-10 h-10 rounded-full bg-[#e8f0fe] text-[#0A2540] flex items-center justify-center text-lg shrink-0">
                     {row.icon}
                   </div>
                   <div>
-                    <p className="font-bold text-[#0A2540] uppercase text-sm mb-1">{row.title}</p>
+                    {/* RED: Change Session Title */}
+                    <p className="font-bold text-red-600 uppercase text-sm mb-1">{row.title}</p>
+                    {/* RED: Change Session Subtitle */}
                     {row.subtitle && (
-                      <p className="text-sm text-zinc-500 whitespace-pre-line">{row.subtitle}</p>
+                      <p className="text-sm text-red-600 whitespace-pre-line">{row.subtitle}</p>
                     )}
                   </div>
                 </div>
@@ -208,18 +220,21 @@ export default function ProgramPage() {
             <div className="flex-1">
               <h3 className="text-xl font-bold text-[#0A2540] mb-2 uppercase">Download Program</h3>
               <div className="w-12 h-1 bg-[#F5A623] mb-4"></div>
-              <p className="text-zinc-600 mb-6">
+              {/* RED: Change Description */}
+              <p className="text-red-600 mb-6">
                 Get the complete program schedule in PDF format.
               </p>
+              {/* RED: Change Button Text */}
               <button className="inline-flex items-center gap-2 border-2 border-[#0A2540] text-[#0A2540] px-6 py-3 rounded-md font-bold hover:bg-[#0A2540] hover:text-white transition-colors">
-                <FaDownload /> DOWNLOAD FULL PROGRAM (PDF)
+                <FaDownload /> <span className="text-red-600">DOWNLOAD FULL PROGRAM (PDF)</span>
               </button>
             </div>
             <div className="w-40 shrink-0 bg-white shadow-lg border border-zinc-200 p-4 rounded-lg flex flex-col items-center text-center">
                <div className="w-24 h-36 bg-blue-100 mb-2 relative overflow-hidden rounded">
                  <Image src="/program-cover.png" alt="Program Cover" fill className="object-cover" />
                </div>
-               <p className="text-[10px] font-bold text-[#0A2540] mt-2 leading-tight">INTERNATIONAL<br/>COLLOQUIUM<br/>2025</p>
+               {/* RED: Change Program Cover Text */}
+               <p className="text-[10px] font-bold text-red-600 mt-2 leading-tight">INTERNATIONAL<br/>COLLOQUIUM<br/>2025</p>
             </div>
           </div>
 
@@ -236,7 +251,7 @@ export default function ProgramPage() {
                   "Networking opportunities with global experts",
                   "Cultural and social events"
                 ].map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-3 text-sm text-zinc-600">
+                  <li key={idx} className="flex items-start gap-3 text-sm text-red-600">
                     <FaCheckCircle className="text-[#F5A623] mt-0.5" /> {item}
                   </li>
                 ))}

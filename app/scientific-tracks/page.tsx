@@ -124,7 +124,7 @@ export default function ScientificTracks() {
           <div className="w-16 h-1 bg-[#D5A54D] mb-6"></div>
           
           <p className="text-lg text-zinc-600 max-w-2xl leading-relaxed">
-            The International Colloquium 2025 welcomes original research and innovative ideas across a wide range of scientific disciplines.
+            The 3rd International Agri-Life & Bioresource Science Symposium welcomes original research and innovative ideas across a wide range of scientific disciplines.
           </p>
         </div>
       </section>

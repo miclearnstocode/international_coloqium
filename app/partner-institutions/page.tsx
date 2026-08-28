@@ -10,7 +10,7 @@ import {
 export default function PartnerInstitutions() {
   
   const globalPartners = [
-    { name: "Universiti Putra Malaysia", country: "Malaysia", flag: "🇲🇾", logo: "/images/partners/upm.png" },
+    { name: "Capiz State University", country: "Philippines", flag: "🇲🇾", logo: "/images/partners/upm.png" },
     { name: "Kasetsart University", country: "Thailand", flag: "🇹🇭", logo: "/images/partners/ku.png" },
     { name: "Tokyo University of Agriculture", country: "Japan", flag: "🇯🇵", logo: "/images/partners/tua.png" },
     { name: "University of the Philippines Los Baños", country: "Philippines", flag: "🇵🇭", logo: "/images/partners/uplb.png" },
