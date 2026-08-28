@@ -6,45 +6,54 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 
 export default function Home() {
-  // Countdown state
+  // Single state object for the whole timer
   const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0
+    days: 82,
+    hours: 14,
+    minutes: 36,
+    seconds: 48
   });
 
   useEffect(() => {
-    // Set the target date (October 20, 2026)
-    const targetDate = new Date("2026-10-20T00:00:00");
+    const id = setInterval(() => {
+      setTimeLeft(prev => {
+        // Destructure current values
+        let { days, hours, minutes, seconds } = prev;
 
-    const updateCountdown = () => {
-      const now = new Date();
-      const difference = targetDate.getTime() - now.getTime();
+        // Decrement seconds
+        seconds--;
 
-      if (difference > 0) {
-        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+        // If seconds go below 0, reset to 59 and subtract 1 minute
+        if (seconds < 0) {
+          seconds = 59;
+          minutes--;
+        }
 
-        setTimeLeft({
-          days,
-          hours,
-          minutes,
-          seconds
-        });
-      }
-    };
+        // If minutes go below 0, reset to 59 and subtract 1 hour
+        if (minutes < 0) {
+          minutes = 59;
+          hours--;
+        }
 
-    // Update immediately
-    updateCountdown();
+        // If hours go below 0, reset to 23 and subtract 1 day
+        if (hours < 0) {
+          hours = 23;
+          days--;
+        }
 
-    // Update every second
-    const interval = setInterval(updateCountdown, 1000);
+        // Don't go below 0 days
+        if (days < 0) {
+          days = 0;
+          hours = 0;
+          minutes = 0;
+          seconds = 0;
+        }
 
-    // Cleanup interval on component unmount
-    return () => clearInterval(interval);
+        return { days, hours, minutes, seconds };
+      });
+    }, 1000);
+
+    return () => clearInterval(id);
   }, []);
 
   // Format numbers with leading zeros
@@ -62,7 +71,7 @@ export default function Home() {
         <div className="absolute top-0 right-0 w-150 h-150 bg-[#E3EAF5] rounded-full opacity-60 -translate-y-1/2 translate-x-1/3"></div>
         <div className="absolute bottom-0 left-0 w-100 h-100 bg-[#E3EAF5] rounded-full opacity-40 translate-y-1/2 -translate-x-1/4"></div>
         
-        {/* Video Globe positioned behind and to the right - following the image positioning */}
+        {/* Video Globe */}
         <div className="absolute -right-57.5 top-1/2 -translate-y-1/2 w-307.5 h-307.5 opacity-40 lg:opacity-70 pointer-events-none z-0">
           <video 
             autoPlay 
@@ -97,7 +106,7 @@ export default function Home() {
               </a>
             </div>
 
-            {/* Modal Card Positioned to the Right */}
+            {/* Modal Card */}
             <div className="absolute top-0 right-0 lg:right-8 xl:right-16 hidden md:block">
               <div className="bg-white rounded-xl shadow-2xl p-8 w-105 border border-gray-100 z-20 relative">
                 <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors">
@@ -111,7 +120,6 @@ export default function Home() {
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#D5A54D" className="w-14 h-14">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 1 1 0-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 0 1-1.44-4.282m3.102.069a18.03 18.03 0 0 1-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 0 1 8.835 2.535M10.34 6.66a23.847 23.847 0 0 0 8.835-2.535m0 0A23.74 23.74 0 0 0 18.795 3m.38 1.125a23.91 23.91 0 0 1 1.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 0 0 1.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 0 1 0 3.46" />
                   </svg>
-                  {/* Decorative sparkles */}
                   <div className="absolute -left-6 top-2 text-[#D5A54D] text-xs">✦</div>
                   <div className="absolute -right-4 top-4 text-[#1D3D6D] text-xs">✦</div>
                   <div className="absolute left-2 bottom-0 text-[#1D3D6D] text-[8px]">✦</div>
@@ -128,14 +136,14 @@ export default function Home() {
                     <svg className="w-4 h-4 text-[#1D3D6D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
-                    <span>October 20–22, 2026</span>
+                    <span>March 15-18, 2027</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-gray-600">
                     <svg className="w-4 h-4 text-[#1D3D6D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     </svg>
-                    <span>Roxas City, Philippines</span>
+                    <span>Roxas City, Capiz Philippines</span>
                   </div>
                 </div>
 
@@ -154,7 +162,7 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Countdown Section with Animation */}
+      {/* Countdown Section */}
       <section className="bg-white py-16 border-b border-gray-200">
         <div className="mx-auto max-w-7xl px-6">
           <div className="text-center mb-12">
@@ -168,9 +176,7 @@ export default function Home() {
               <svg className="w-10 h-10 text-[#1D3D6D] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
               </svg>
-              <span className="text-5xl font-bold text-[#0B2A4A] tabular-nums animate-pulse">
-                {formatNumber(timeLeft.days)}
-              </span>
+              <span className="text-5xl font-bold text-[#0B2A4A] tabular-nums">{formatNumber(timeLeft.days)}</span>
               <span className="text-sm font-semibold text-gray-500 mt-2 uppercase">Days</span>
             </div>
             
@@ -179,9 +185,7 @@ export default function Home() {
               <svg className="w-10 h-10 text-[#1D3D6D] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
-              <span className="text-5xl font-bold text-[#0B2A4A] tabular-nums animate-pulse" style={{ animationDelay: "0.1s" }}>
-                {formatNumber(timeLeft.hours)}
-              </span>
+              <span className="text-5xl font-bold text-[#0B2A4A] tabular-nums">{formatNumber(timeLeft.hours)}</span>
               <span className="text-sm font-semibold text-gray-500 mt-2 uppercase">Hours</span>
             </div>
             
@@ -190,9 +194,7 @@ export default function Home() {
               <svg className="w-10 h-10 text-[#1D3D6D] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
-              <span className="text-5xl font-bold text-[#0B2A4A] tabular-nums animate-pulse" style={{ animationDelay: "0.2s" }}>
-                {formatNumber(timeLeft.minutes)}
-              </span>
+              <span className="text-5xl font-bold text-[#0B2A4A] tabular-nums">{formatNumber(timeLeft.minutes)}</span>
               <span className="text-sm font-semibold text-gray-500 mt-2 uppercase">Minutes</span>
             </div>
             
@@ -201,7 +203,10 @@ export default function Home() {
               <svg className="w-10 h-10 text-[#1D3D6D] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 6v6l4 2m-4-8a9 9 0 100 18 9 9 0 000-18z"></path>
               </svg>
-              <span className="text-5xl font-bold text-[#0B2A4A] tabular-nums animate-pulse" style={{ animationDelay: "0.3s" }}>
+              <span 
+                key={timeLeft.seconds} 
+                className="clock-tick text-5xl font-bold text-[#0B2A4A] tabular-nums"
+              >
                 {formatNumber(timeLeft.seconds)}
               </span>
               <span className="text-sm font-semibold text-gray-500 mt-2 uppercase">Seconds</span>
@@ -209,7 +214,7 @@ export default function Home() {
           </div>
 
           <p className="text-center font-semibold text-gray-700">
-            October 20–22, 2026 <span className="mx-2 text-gray-300">|</span> Roxas City, Philippines
+            March 15-18, 2027 <span className="mx-2 text-gray-300">|</span> Roxas City, Capiz Philippines
           </p>
         </div>
       </section>
@@ -240,7 +245,7 @@ export default function Home() {
               {/* Item 1 */}
               <div className="flex gap-4 border-b border-gray-200 pb-4">
                 <div className="flex flex-col items-center">
-                  <span className="text-xl font-bold text-[#1D3D6D]">MAY</span>
+                  <span className="text-xl font-bold text-[#1D3D6D]">Oct</span>
                   <span className="text-2xl font-bold text-[#0B2A4A]">24</span>
                 </div>
                 <div className="flex-1">
@@ -252,7 +257,7 @@ export default function Home() {
               {/* Item 2 */}
               <div className="flex gap-4 border-b border-gray-200 pb-4">
                 <div className="flex flex-col items-center">
-                  <span className="text-xl font-bold text-[#1D3D6D]">MAY</span>
+                  <span className="text-xl font-bold text-[#1D3D6D]">Oct</span>
                   <span className="text-2xl font-bold text-[#0B2A4A]">18</span>
                 </div>
                 <div className="flex-1">
@@ -264,7 +269,7 @@ export default function Home() {
               {/* Item 3 */}
               <div className="flex gap-4">
                 <div className="flex flex-col items-center">
-                  <span className="text-xl font-bold text-[#1D3D6D]">MAY</span>
+                  <span className="text-xl font-bold text-[#1D3D6D]">Oct</span>
                   <span className="text-2xl font-bold text-[#0B2A4A]">10</span>
                 </div>
                 <div className="flex-1">
@@ -285,7 +290,7 @@ export default function Home() {
             </div>
             <h3 className="text-xl font-bold text-[#0B2A4A] mb-4">ABOUT US</h3>
             <div className="w-10 h-1 bg-[#D5A54D] mb-6"></div>
-            <p className="text-gray-600 mb-6">
+            <p className="text-red-600 mb-6">
               We are a dedicated team committed to organizing meaningful academic events that promote research excellence, knowledge exchange, and global partnerships.
             </p>
             <a href="#" className="font-semibold text-[#0B2A4A] inline-flex items-center gap-2 hover:gap-3 transition-all">More About Us <span>→</span></a>
