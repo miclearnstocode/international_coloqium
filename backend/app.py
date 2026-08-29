@@ -101,6 +101,10 @@ class AbstractSubmission(db.Model):
     presenter = db.Column(db.String(255), nullable=False)
     email_address = db.Column(db.String(100), nullable=False)
     university_agency = db.Column(db.String(255), nullable=False)
+    address = db.Column(db.String(255), nullable=True)
+    phone_number = db.Column(db.String(20), nullable=True) 
+    presentation_type = db.Column(db.String(50), nullable=True)
+    city_tour_option = db.Column(db.String(50), nullable=True) 
     abstract = db.Column(db.Text, nullable=False)
     keywords = db.Column(db.String(255), nullable=False)
     abstract_drive_view_url = db.Column(db.String(500), nullable=True)
@@ -290,6 +294,7 @@ def submit_paper():
             except: pass
         return jsonify({"detail": str(e)}), 500
 
+
 @app.route('/api/sucs/add', methods=['POST', 'OPTIONS'])
 def add_suc():
     if request.method == 'OPTIONS':
@@ -338,10 +343,11 @@ def submit_abstract():
     try:
         data = request.get_json()
         
-        # Validate required fields
+        # Validate required fields (including new fields)
         required_fields = [
             'selected_track', 'specific_track', 'research_title', 'author', 
-            'presenter', 'email_address', 'university_agency', 'abstract', 'keywords'
+            'presenter', 'email_address', 'university_agency', 'address',
+            'phone_number', 'presentation_type', 'city_tour_option', 'abstract', 'keywords'
         ]
         for field in required_fields:
             if not data.get(field):
@@ -382,7 +388,6 @@ def submit_abstract():
         
         # Validate sender_id
         if not sender_id or sender_id == 0:
-            # Try to get from JWT if available (optional fallback)
             try:
                 from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
                 verify_jwt_in_request(optional=True)
@@ -390,11 +395,10 @@ def submit_abstract():
             except:
                 sender_id = None
         
-        # If still no sender_id, use a default or return error
         if not sender_id:
             return jsonify({"detail": "User authentication required"}), 401
         
-        # Save to database with status='pending'
+        # Save to database with new fields
         new_sub = AbstractSubmission(
             sender_id=sender_id,
             user_id=sender_id,
@@ -406,11 +410,15 @@ def submit_abstract():
             presenter=data['presenter'],
             email_address=data['email_address'],
             university_agency=agency_name,
+            address=data.get('address'),
+            phone_number=data.get('phone_number'),
+            presentation_type=data.get('presentation_type'),
+            city_tour_option=data.get('city_tour_option'),
             abstract=data['abstract'],
             keywords=data['keywords'],
             abstract_drive_view_url=view_url,
             abstract_drive_download_url=download_url,
-            status='pending'  # Set status to pending
+            status='pending'
         )
         
         db.session.add(new_sub)
@@ -499,121 +507,338 @@ def update_submission_status(submission_id):
         return jsonify({"detail": str(e)}), 500
 
 def generate_abstract_pdf(data):
-    """Generates a professional PDF for the abstract and returns the file path."""
+    """Generates a professional PDF for the abstract matching the symposium template."""
     buffer = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf')
     file_path = buffer.name
     buffer.close()
     
+    # Page dimensions
     doc = SimpleDocTemplate(
         file_path, 
         pagesize=letter,
-        rightMargin=72, leftMargin=72,
-        topMargin=72, bottomMargin=72
+        rightMargin=54, leftMargin=54,
+        topMargin=54, bottomMargin=54
     )
     
     styles = getSampleStyleSheet()
     
+    # Color scheme - Forest Green theme
+    FOREST_GREEN = colors.HexColor('#2E5E2E')
+    DARK_GREEN = colors.HexColor('#1F3F1F')
+    LIGHT_GREEN = colors.HexColor('#E8F5E8')
+    BORDER_GREEN = colors.HexColor('#2E5E2E')
+    TEXT_COLOR = colors.HexColor('#333333')
+    WHITE = colors.white
+    
     # Custom styles
-    title_style = ParagraphStyle(
-        'TitleStyle', 
-        parent=styles['Title'], 
-        fontSize=18, 
-        spaceAfter=16, 
-        textColor=colors.HexColor('#0A2540'),
-        alignment=1,  # Center alignment
+    event_title_style = ParagraphStyle(
+        'EventTitleStyle',
+        parent=styles['Title'],
+        fontSize=12,
+        spaceAfter=4,
+        textColor=WHITE,
+        alignment=1,
         fontName='Helvetica-Bold',
-        leading=22
+        leading=16
     )
     
-    author_style = ParagraphStyle(
-        'AuthorStyle', 
-        parent=styles['Normal'], 
-        fontSize=11, 
-        spaceAfter=4, 
-        textColor=colors.HexColor('#333333'),
-        alignment=1,  # Center alignment
-        fontName='Helvetica-Bold',
-        leading=14
-    )
-    
-    email_style = ParagraphStyle(
-        'EmailStyle', 
-        parent=styles['Normal'], 
-        fontSize=10, 
-        spaceAfter=2, 
-        textColor=colors.HexColor('#555555'),
-        alignment=1,  # Center alignment
+    event_subtitle_style = ParagraphStyle(
+        'EventSubtitleStyle',
+        parent=styles['Normal'],
+        fontSize=12,
+        spaceAfter=2,
+        textColor=WHITE,
+        alignment=1,
+        fontName='Helvetica-Oblique',
         leading=13
     )
     
-    university_style = ParagraphStyle(
-        'UniversityStyle', 
-        parent=styles['Normal'], 
-        fontSize=10, 
-        spaceAfter=16, 
-        textColor=colors.HexColor('#555555'),
-        alignment=1,  # Center alignment
-        leading=13
+    # Updated Event Details Style - Font 12, Line Spacing 1.0
+    event_details_style = ParagraphStyle(
+        'EventDetailsStyle',
+        parent=styles['Normal'],
+        fontSize=12,
+        spaceAfter=0,  # No extra space after
+        spaceBefore=0,  # No extra space before
+        textColor=WHITE,
+        alignment=1,
+        fontName='Helvetica',  # Using Helvetica
+        leading=12,  # Line spacing 1.0 (same as font size)
     )
     
-    section_style = ParagraphStyle(
-        'SectionStyle', 
-        parent=styles['Heading2'], 
-        fontSize=13, 
-        spaceBefore=12, 
-        spaceAfter=6, 
-        textColor=colors.HexColor('#0A2540'),
+    # Updated Form Title Style with Century Gothic font, size 20
+    form_title_style = ParagraphStyle(
+        'FormTitleStyle',
+        parent=styles['Title'],
+        fontSize=20,
+        spaceAfter=12,
+        textColor=WHITE,
+        alignment=1,
+        fontName='Helvetica-Bold',  # Fallback to Helvetica-Bold
+        leading=24
+    )
+    
+    section_label_style = ParagraphStyle(
+        'SectionLabelStyle',
+        parent=styles['Normal'],
+        fontSize=10,
+        leading=14,
+        textColor=TEXT_COLOR,
         fontName='Helvetica-Bold',
-        leading=16,
-        alignment=1  # Center alignment
+        spaceAfter=4
+    )
+    
+    value_style = ParagraphStyle(
+        'ValueStyle',
+        parent=styles['Normal'],
+        fontSize=10,
+        leading=14,
+        textColor=TEXT_COLOR,
+        spaceAfter=2
     )
     
     abstract_style = ParagraphStyle(
-        'AbstractStyle', 
-        parent=styles['Normal'], 
-        fontSize=10, 
-        leading=16, 
-        spaceAfter=12,
-        alignment=4,  # Justified alignment
-        textColor=colors.HexColor('#333333')
+        'AbstractStyle',
+        parent=styles['Normal'],
+        fontSize=10,
+        leading=15,
+        spaceAfter=8,
+        alignment=4,
+        textColor=TEXT_COLOR
     )
     
-    keyword_style = ParagraphStyle(
-        'KeywordStyle', 
-        parent=styles['Normal'], 
-        fontSize=10, 
-        leading=14,
-        textColor=colors.HexColor('#333333'),
-        spaceBefore=6,
-        alignment=0  # Left alignment
-    )
+    from reportlab.platypus import Table, TableStyle
     
     story = []
     
-    # Title (Centered)
-    story.append(Paragraph(data['research_title'], title_style))
+    # ===== HEADER SECTION (Dark Green Background) =====
+    # Combine event details into single paragraph with line break
+    event_details_text = (
+        "10-13 March 2027 | Roxas City, Campus, Philippines<br/>"
+        "THE SEAFOOD CAPITAL OF THE PHILIPPINES"
+    )
     
-    # Author Line (Centered)
+    header_data = [
+        [Paragraph("3RD INTERNATIONAL AGRI-LIFE &amp; BIORESOURCE SCIENCES SYMPOSIUM", event_title_style)],
+        [Paragraph('"Converging Frontiers in Agri-Life and Bioresource Sciences: Science, Innovation, and Collaboration for a Resilient and Sustainable Future"', event_subtitle_style)],
+        [Paragraph(event_details_text, event_details_style)],
+        [Paragraph("Abstract Submission Form", form_title_style)]
+    ]
+    
+    header_table = Table(header_data, colWidths=[7*inch])
+    header_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), FOREST_GREEN),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        # Reduce padding for tight header
+        ('TOPPADDING', (0, 0), (-1, 0), 6),   # Event title top padding
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 2),  # Event title bottom padding
+        ('TOPPADDING', (0, 1), (-1, 1), 4),   # Event subtitle top padding
+        ('BOTTOMPADDING', (0, 1), (-1, 1), 4),  # Event subtitle bottom padding
+        ('TOPPADDING', (0, 2), (-1, 2), 6),   # Event details top padding
+        ('BOTTOMPADDING', (0, 2), (-1, 2), 2),  # Event details bottom padding
+        ('TOPPADDING', (0, 3), (-1, 3), 8),   # Form title top padding
+        ('BOTTOMPADDING', (0, 3), (-1, 3), 8),  # Form title bottom padding
+        ('LEFTPADDING', (0, 0), (-1, -1), 10),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+        ('BOX', (0, 0), (-1, -1), 1.5, FOREST_GREEN),
+    ]))
+    story.append(header_table)
+    story.append(Spacer(1, 12))
+    
+    # ===== MAIN FORM TABLE =====
+    # Determine selected preferences
+    presentation_type = data.get('presentation_type', '')
+    is_oral = 'X' if presentation_type == 'oral' else '&nbsp;&nbsp;'
+    is_poster = 'X' if presentation_type == 'poster' else '&nbsp;&nbsp;'
+    
+    # Make selected option bold for presentation type
+    if presentation_type == 'oral':
+        oral_text = f"<b>{is_oral}&nbsp;&nbsp; Oral Presentation</b>"
+        poster_text = f"{is_poster}&nbsp;&nbsp; Poster presentation"
+    else:
+        oral_text = f"{is_oral}&nbsp;&nbsp; Oral Presentation"
+        poster_text = f"<b>{is_poster}&nbsp;&nbsp; Poster presentation</b>"
+    
+    city_tour_option = data.get('city_tour_option', '')
+    is_option1 = 'X' if city_tour_option == 'option1' else '&nbsp;&nbsp;'
+    is_option2 = 'X' if city_tour_option == 'option2' else '&nbsp;&nbsp;'
+    
+    # Make selected option bold for city tour
+    if city_tour_option == 'option1':
+        option1_text = f"<b>{is_option1}&nbsp;&nbsp; Option 1 (City Tour Only)</b>"
+        option2_text = f"{is_option2}&nbsp;&nbsp; Option 2 (City tour, and Boracay Transfer)"
+    else:
+        option1_text = f"{is_option1}&nbsp;&nbsp; Option 1 (City Tour Only)"
+        option2_text = f"<b>{is_option2}&nbsp;&nbsp; Option 2 (City tour, and Boracay Transfer)</b>"
+    
+    # Define form rows
+    form_data = []
+    
+    # Row 1: Presentation Preference
+    form_data.append([
+        Paragraph("Please indicate preference", section_label_style),
+        Paragraph(
+            f"{oral_text} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {poster_text}",
+            value_style
+        )
+    ])
+    
+    # Row 2: Presentation Title
+    form_data.append([
+        Paragraph("PRESENTATION TITLE", section_label_style),
+        Paragraph(data['research_title'], value_style)
+    ])
+    
+    # Row 3: Author(s)
     author_text = data['author']
     if data.get('co_author'):
         author_text += f", {data['co_author']}"
-    story.append(Paragraph(author_text, author_style))
+    form_data.append([
+        Paragraph("AUTHOR (S)", section_label_style),
+        Paragraph(author_text, value_style)
+    ])
     
-    # Email (Centered)
-    story.append(Paragraph(data['email_address'], email_style))
+    # Row 4: Presenting Author
+    form_data.append([
+        Paragraph("PRESENTING AUTHOR", section_label_style),
+        Paragraph(data['presenter'], value_style)
+    ])
     
-    # University/Agency (Centered)
-    story.append(Paragraph(data['university_agency'], university_style))
+    # Row 5: Affiliation
+    form_data.append([
+        Paragraph("AFFILIATION/S (Institution/ Office)", section_label_style),
+        Paragraph(data['university_agency'], value_style)
+    ])
     
-    # Horizontal line after header
-    story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#0A2540'), spaceAfter=12))
+    # Row 6: Address
+    form_data.append([
+        Paragraph("Address", section_label_style),
+        Paragraph(data.get('address', ''), value_style)
+    ])
     
-    # Abstract Section (Title Centered)
-    story.append(Paragraph("ABSTRACT", section_style))
-    story.append(Paragraph(data['abstract'].replace('\n', '<br/>'), abstract_style))
+    # Row 7: Phone Number (Telephone/Fax/Cellphone)
+    form_data.append([
+        Paragraph("Telephone/ Fax. No./ Cellphone No.", section_label_style),
+        Paragraph(data.get('phone_number', ''), value_style)
+    ])
     
-    # Keywords Section (Left aligned - on same line: KEYWORDS: value)
-    story.append(Paragraph(f"<b>KEYWORDS:</b> {data['keywords']}", keyword_style))
+    # Row 8: Email
+    form_data.append([
+        Paragraph("Email address", section_label_style),
+        Paragraph(data['email_address'], value_style)
+    ])
+    
+    # Row 9: City Tour/Boracay Transfer (Multi-line with bold selection)
+    city_tour_text = (
+        f"{option1_text}<br/><br/>"
+        f"{option2_text}<br/><br/>"
+        f"<font size='8'><i>Participants proceeding to Boracay shall be responsible for arranging their own "
+        f"accommodation and return/onward travel. Delegates may arrange their departure at their convenience through "
+        f"Caticlan or Kalibo, depending on their preferred flight or onward travel arrangements. The Organizing "
+        f"Committee may provide general travel information and coordination assistance but shall not be responsible "
+        f"for individual bookings or personal travel expenses.</i></font>"
+    )
+    
+    form_data.append([
+        Paragraph("City Tour/Boracay Transfer", section_label_style),
+        Paragraph(city_tour_text, value_style)
+    ])
+    
+    # Create form table
+    form_table = Table(form_data, colWidths=[2.5*inch, 4.5*inch])
+    form_table.setStyle(TableStyle([
+        # Borders
+        ('GRID', (0, 0), (-1, -1), 0.75, BORDER_GREEN),
+        ('BOX', (0, 0), (-1, -1), 1.5, BORDER_GREEN),
+        
+        # Cell backgrounds - alternating
+        ('BACKGROUND', (0, 0), (0, -1), LIGHT_GREEN),
+        ('BACKGROUND', (1, 0), (1, -1), WHITE),
+        
+        # Text alignment
+        ('ALIGN', (0, 0), (0, -1), 'LEFT'),
+        ('ALIGN', (1, 0), (1, -1), 'LEFT'),
+        
+        # Vertical alignment
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        
+        # Padding
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('LEFTPADDING', (0, 0), (-1, -1), 10),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+    ]))
+    story.append(form_table)
+    story.append(Spacer(1, 12))
+    
+    # ===== ABSTRACT SECTION =====
+    abstract_data = [
+        [Paragraph("Abstract <i>(not more than 300 words)</i>", section_label_style)],
+        [Paragraph(data['abstract'].replace('\n', '<br/>'), abstract_style)]
+    ]
+    
+    abstract_table = Table(abstract_data, colWidths=[7*inch])
+    abstract_table.setStyle(TableStyle([
+        ('GRID', (0, 0), (-1, -1), 0.75, BORDER_GREEN),
+        ('BOX', (0, 0), (-1, -1), 1.5, BORDER_GREEN),
+        ('BACKGROUND', (0, 0), (-1, -1), WHITE),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('LEFTPADDING', (0, 0), (-1, -1), 10),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+    ]))
+    story.append(abstract_table)
+    
+    # ===== KEYWORDS SECTION =====
+    story.append(Spacer(1, 12))
+    keywords_data = [
+        [Paragraph("<b>KEYWORDS:</b>", section_label_style)],
+        [Paragraph(data['keywords'], value_style)]
+    ]
+    
+    keywords_table = Table(keywords_data, colWidths=[7*inch])
+    keywords_table.setStyle(TableStyle([
+        ('GRID', (0, 0), (-1, -1), 0.75, BORDER_GREEN),
+        ('BOX', (0, 0), (-1, -1), 1.5, BORDER_GREEN),
+        ('BACKGROUND', (0, 0), (0, 0), LIGHT_GREEN),
+        ('BACKGROUND', (0, 1), (-1, 1), WHITE),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('LEFTPADDING', (0, 0), (-1, -1), 10),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+    ]))
+    story.append(keywords_table)
+    
+    # ===== APPLICATION INFO =====
+    story.append(Spacer(1, 16))
+    application_text = Paragraph(
+        "<b>Application for oral/poster presentation shall be submitted to the official symposium portal on or before January 10, 2027.</b>",
+        ParagraphStyle(
+            'ApplicationStyle',
+            parent=styles['Normal'],
+            fontSize=9,
+            leading=13,
+            textColor=colors.HexColor('#333333'),
+            alignment=1
+        )
+    )
+    story.append(application_text)
+    story.append(Spacer(1, 6))
+    
+    story.append(Paragraph(
+        "<i>For additional concerns, please contact us through: (insert RDE contact details)</i>",
+        ParagraphStyle(
+            'ContactStyle',
+            parent=styles['Normal'],
+            fontSize=8,
+            leading=12,
+            textColor=colors.HexColor('#666666'),
+            alignment=1
+        )
+    ))
     
     doc.build(story)
     return file_path

@@ -4,7 +4,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { FaPaperPlane, FaSpinner, FaPlus, FaTimes, FaUserPlus, FaUser, FaCheck, FaUniversity, FaSearch, FaChevronDown, FaPlusCircle, FaFilePdf, FaEye, FaDownload, FaSync, FaList, FaExclamationTriangle, FaFolderOpen, FaFileAlt } from "react-icons/fa";
+import { FaPaperPlane, FaPhone, FaSpinner, FaPlus, FaTimes, FaUserPlus, FaUser, FaCheck, FaUniversity, FaSearch, FaChevronDown, FaPlusCircle, FaFilePdf, FaEye, FaDownload, FaSync, FaList, FaExclamationTriangle, FaFolderOpen, FaFileAlt, FaMapMarkerAlt, FaMicrophone, FaImage, FaCity } from "react-icons/fa";
 
 export default function AbstractSubmissionPage() {
   const router = useRouter();
@@ -43,6 +43,10 @@ export default function AbstractSubmissionPage() {
     presenter: "",
     email_address: "",
     university_agency: "",
+    address: "",
+    phone_number: "",
+    presentation_type: "",
+    city_tour_option: "",
     abstract: "",
     keywords: ""
   });
@@ -146,7 +150,8 @@ export default function AbstractSubmissionPage() {
     // Check if all required fields are filled
     const requiredFields = [
       'selected_track', 'specific_track', 'research_title', 'author', 
-      'presenter', 'email_address', 'university_agency', 'abstract', 'keywords'
+      'presenter', 'email_address', 'university_agency', 'address',
+      'presentation_type', 'city_tour_option', 'abstract', 'keywords'
     ];
     
     const isComplete = requiredFields.every(field => data[field]?.trim());
@@ -202,7 +207,10 @@ export default function AbstractSubmissionPage() {
         formData.author && 
         formData.presenter && 
         formData.email_address && 
-        formData.university_agency && 
+        formData.university_agency &&
+        formData.address &&
+        formData.presentation_type &&
+        formData.city_tour_option &&
         formData.abstract) {
       
       if (debounceRef.current) {
@@ -499,6 +507,40 @@ export default function AbstractSubmissionPage() {
                 </div>
                 
                 <div>
+                  <h4 className="text-sm font-semibold text-zinc-500">Address</h4>
+                  <p className="text-[#0A2540] flex items-center gap-2">
+                    <FaMapMarkerAlt className="text-zinc-400 text-xs" />
+                    {viewingSubmission.address}
+                  </p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-zinc-500">Phone Number</h4>
+                  <p className="text-[#0A2540] flex items-center gap-2">
+                    <FaPhone className="text-zinc-400 text-xs" />
+                    {viewingSubmission.phone_number}
+                  </p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-zinc-500">Presentation Type</h4>
+                  <p className="text-[#0A2540] flex items-center gap-2">
+                    {viewingSubmission.presentation_type === 'oral' ? (
+                      <FaMicrophone className="text-[#0A2540] text-xs" />
+                    ) : (
+                      <FaImage className="text-[#0A2540] text-xs" />
+                    )}
+                    {viewingSubmission.presentation_type === 'oral' ? 'Oral Presentation' : 'Poster Presentation'}
+                  </p>
+                </div>
+                
+                <div>
+                  <h4 className="text-sm font-semibold text-zinc-500">City Tour/Boracay Transfer</h4>
+                  <p className="text-[#0A2540] flex items-center gap-2">
+                    <FaCity className="text-zinc-400 text-xs" />
+                    {viewingSubmission.city_tour_option === 'option1' ? 'Option 1 (City Tour Only)' : 'Option 2 (City tour, and Boracay Transfer)'}
+                  </p>
+                </div>
+                
+                <div>
                   <h4 className="text-sm font-semibold text-zinc-500">Track</h4>
                   <p className="text-[#0A2540]">{viewingSubmission.selected_track}</p>
                 </div>
@@ -678,6 +720,43 @@ export default function AbstractSubmissionPage() {
               </div>
             </div>
 
+            {/* Presentation Type */}
+            <div>
+              <label className="block text-sm font-semibold text-[#0A2540] mb-2">Presentation Preference *</label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, presentation_type: "oral" })}
+                  className={`flex items-center gap-3 p-4 border rounded-lg transition-all ${
+                    formData.presentation_type === "oral"
+                      ? "border-[#0A2540] bg-[#0A2540]/5"
+                      : "border-zinc-200 hover:border-[#0A2540]/50"
+                  }`}
+                >
+                  <FaMicrophone className={`text-2xl ${formData.presentation_type === "oral" ? "text-[#0A2540]" : "text-zinc-400"}`} />
+                  <div>
+                    <p className="text-sm font-semibold text-[#0A2540]">Oral Presentation</p>
+                    <p className="text-xs text-zinc-500">Present your research through a live presentation</p>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, presentation_type: "poster" })}
+                  className={`flex items-center gap-3 p-4 border rounded-lg transition-all ${
+                    formData.presentation_type === "poster"
+                      ? "border-[#0A2540] bg-[#0A2540]/5"
+                      : "border-zinc-200 hover:border-[#0A2540]/50"
+                  }`}
+                >
+                  <FaImage className={`text-2xl ${formData.presentation_type === "poster" ? "text-[#0A2540]" : "text-zinc-400"}`} />
+                  <div>
+                    <p className="text-sm font-semibold text-[#0A2540]">Poster Presentation</p>
+                    <p className="text-xs text-zinc-500">Present your research through a poster</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+
             {/* Research Title */}
             <div>
               <label className="block text-sm font-semibold text-[#0A2540] mb-2">Research Title *</label>
@@ -749,7 +828,7 @@ export default function AbstractSubmissionPage() {
                       <button
                         type="button"
                         onClick={() => removeCoAuthor(index)}
-                        className="shrink-0 w-5 h-5 flex items-center justify-center text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                        className="flex-shrink-0 w-5 h-5 flex items-center justify-center text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
                         title="Remove co-author"
                       >
                         <FaTimes className="text-xs" />
@@ -902,9 +981,105 @@ export default function AbstractSubmissionPage() {
               </div>
             </div>
 
+            {/* Address & Phone Number - Side by Side */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Address */}
+              <div>
+                <label className="block text-sm font-semibold text-[#0A2540] mb-2">Address *</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FaMapMarkerAlt className="text-zinc-400 text-sm" />
+                  </div>
+                  <input
+                    type="text"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    required
+                    placeholder="Enter your complete address"
+                    className="w-full pl-10 pr-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#0A2540] focus:ring-1 focus:ring-[#0A2540]"
+                  />
+                </div>
+              </div>
+
+              {/* Phone Number */}
+              <div>
+                <label className="block text-sm font-semibold text-[#0A2540] mb-2">Phone Number *</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FaPhone className="text-zinc-400 text-sm" />
+                  </div>
+                  <input
+                    type="tel"
+                    name="phone_number"
+                    value={formData.phone_number}
+                    onChange={(e) => {
+                      // Only allow numbers, spaces, and basic phone characters
+                      const cleaned = e.target.value.replace(/[^\d+\-()\s]/g, '');
+                      setFormData({ ...formData, phone_number: cleaned });
+                    }}
+                    required
+                    placeholder="e.g., 0917-123-4567"
+                    pattern="[0-9+\-()\s]*"
+                    title="Please enter a valid phone number"
+                    className="w-full pl-10 pr-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#0A2540] focus:ring-1 focus:ring-[#0A2540]"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* City Tour/Boracay Transfer */}
+            <div className="border border-zinc-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <FaCity className="text-[#0A2540] text-sm" />
+                <label className="text-sm font-semibold text-[#0A2540]">City Tour/Boracay Transfer *</label>
+              </div>
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, city_tour_option: "option1" })}
+                  className={`w-full text-left p-3 border rounded-lg transition-all ${
+                    formData.city_tour_option === "option1"
+                      ? "border-[#0A2540] bg-[#0A2540]/5"
+                      : "border-zinc-200 hover:border-[#0A2540]/50"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-4 h-4 rounded-full border-2 ${formData.city_tour_option === "option1" ? "border-[#0A2540] bg-[#0A2540]" : "border-zinc-300"}`} />
+                    <div>
+                      <p className="text-sm font-semibold text-[#0A2540]">Option 1: City Tour Only</p>
+                      <p className="text-xs text-zinc-500">Includes city tour of Roxas City</p>
+                    </div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, city_tour_option: "option2" })}
+                  className={`w-full text-left p-3 border rounded-lg transition-all ${
+                    formData.city_tour_option === "option2"
+                      ? "border-[#0A2540] bg-[#0A2540]/5"
+                      : "border-zinc-200 hover:border-[#0A2540]/50"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-4 h-4 rounded-full border-2 ${formData.city_tour_option === "option2" ? "border-[#0A2540] bg-[#0A2540]" : "border-zinc-300"}`} />
+                    <div>
+                      <p className="text-sm font-semibold text-[#0A2540]">Option 2: City Tour & Boracay Transfer</p>
+                      <p className="text-xs text-zinc-500">Includes city tour and Boracay transfer</p>
+                    </div>
+                  </div>
+                </button>
+              </div>
+              <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-xs text-yellow-800">
+                  Participants proceeding to Boracay shall be responsible for arranging their own accommodation and return/onward travel. Delegates may arrange their departure at their convenience through Caticlan or Kalibo, depending on their preferred flight or onward travel arrangements. The Organizing Committee may provide general travel information and coordination assistance but shall not be responsible for individual bookings or personal travel expenses.
+                </p>
+              </div>
+            </div>
+
             {/* Abstract */}
             <div>
-              <label className="block text-sm font-semibold text-[#0A2540] mb-2">Abstract (200-500 words) *</label>
+              <label className="block text-sm font-semibold text-[#0A2540] mb-2">Abstract (not more than 300 words) *</label>
               <textarea name="abstract" value={formData.abstract} onChange={handleChange} required rows={8}
                 placeholder="Enter your abstract here..."
                 className="w-full px-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#0A2540] focus:ring-1 focus:ring-[#0A2540]"></textarea>
@@ -1008,7 +1183,7 @@ export default function AbstractSubmissionPage() {
                   <thead>
                     <tr className="border-b border-zinc-200">
                       <th className="py-3 px-4 text-sm font-semibold text-zinc-500">Title</th>
-                      <th className="py-3 px-4 text-sm font-semibold text-zinc-500">Track</th>
+                      <th className="py-3 px-4 text-sm font-semibold text-zinc-500">Type</th>
                       <th className="py-3 px-4 text-sm font-semibold text-zinc-500">Status</th>
                       <th className="py-3 px-4 text-sm font-semibold text-zinc-500">Date</th>
                       <th className="py-3 px-4 text-sm font-semibold text-zinc-500">Actions</th>
@@ -1021,7 +1196,10 @@ export default function AbstractSubmissionPage() {
                           <p className="text-sm font-medium text-[#0A2540] line-clamp-1">{submission.research_title}</p>
                         </td>
                         <td className="py-3 px-4">
-                          <p className="text-sm text-zinc-500">{submission.selected_track}</p>
+                          <span className="inline-flex items-center gap-1 text-xs text-zinc-500">
+                            {submission.presentation_type === 'oral' ? <FaMicrophone /> : <FaImage />}
+                            {submission.presentation_type === 'oral' ? 'Oral' : 'Poster'}
+                          </span>
                         </td>
                         <td className="py-3 px-4">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(submission.status)}`}>
