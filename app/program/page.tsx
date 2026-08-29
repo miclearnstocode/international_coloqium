@@ -5,73 +5,264 @@ import Footer from "../components/Footer";
 import { 
   FaCoffee, FaBullhorn, FaMicrophoneAlt, FaGraduationCap, FaUtensils, 
   FaComments, FaUsers, FaGlassCheers, FaCalendarAlt, FaDownload, 
-  FaCheckCircle, FaBell
+  FaCheckCircle, FaRegEdit, FaLightbulb, FaMarker, FaRegCircle, FaMugHot, FaBookOpen, FaLeaf, FaReact, FaMortarPestle,
+  FaPastafarianism, FaViadeoSquare, FaFileAlt, FaBell, FaCalendarCheck, FaEdit, FaClock, FaPenFancy, FaRocket, FaPrint, FaEnvelope     
 } from "react-icons/fa";
 
 export default function ProgramPage() {
   const scheduleData = [
     {
       time: "07:30 – 08:30",
-      title: "REGISTRATION AND WELCOME COFFEE",
-      icon: <FaCoffee />,
+      title: "Arrival and Registration of Participants",
+      icon: <FaRegEdit />,
     },
     {
-      time: "08:30 – 09:15",
+      time: "08:30 – 09:30",
       title: "OPENING CEREMONY",
-      subtitle: "National Anthem • Opening Remarks • Message from the Organizing Chair • Message from the Guest of Honor",
       icon: <FaBullhorn />,
     },
     {
-      time: "09:15 – 10:15",
-      title: "KEYNOTE SPEECH 1",
-      subtitle: "Innovation for a Sustainable Future\nProf. Maria Santos, University of Philippines, Philippines",
+      time: "08:30 – 08:35",
+      subtitle: "Call to Order / Opening of the Symposium",
+      icon: <FaRegCircle />,
+    },
+    {
+      time: "08:35 – 08:45",
+      subtitle: "Invocation and Philippine National Anthem",
+      icon: <FaRegCircle />,
+    },
+    {
+      time: "08:45 – 08:50",
+      subtitle: "Recognition of Dignitaries, International Delegates, and Partner Institutions",
+      icon: <FaRegCircle />,
+    },
+    {
+      time: "08:50 – 08:58",
+      title: "WELCOME AND OPENING REMARKS",
+      subtitle: "Dr. Efren L. Linan\nCapiz State University, Philippines",
       icon: <FaMicrophoneAlt />,
     },
     {
-      time: "10:15 – 10:30",
-      title: "COFFEE BREAK & NETWORKING",
-      icon: <FaCoffee />,
+      time: "08:58 – 09:06",
+      title: "MESSAGE - HIROSHIMA UNIVERSITY",
+      subtitle: "Representative\nHiroshima University, Japan",
+      icon: <FaMicrophoneAlt />,
     },
     {
-      time: "10:30 – 12:00",
-      title: "TECHNICAL SESSIONS 1 (PARALLEL)",
-      subtitle: "Track A: Environment & Sustainability  |  Track B: Technology & Innovation  |  Track C: Social Sciences & Education",
+      time: "09:06 – 09:14",
+      title: "MESSAGE - UNIVERSITY OF SAN CARLOS",
+      subtitle: "Representative\nUniversity of San Carlos, Philippines",
+      icon: <FaMicrophoneAlt />,
+    },
+    {
+      time: "09:14 – 09:22",
+      title: "MESSAGE - VISAYAS STATE UNIVERSITY",
+      subtitle: "Representative\nVisayas State University, Philippines",
+      icon: <FaMicrophoneAlt />,
+    },
+    {
+      time: "09:22 – 09:27",
+      title: "SYMPOSIUM OVERVIEW, RATIONALE, AND OBJECTIVES",
+      subtitle: "Dr. John King N. Layos\nChair, Organizing Committee\nCapiz State University, Philippines",
       icon: <FaGraduationCap />,
     },
     {
-      time: "12:00 – 13:30",
+      time: "09:27 – 09:30",
+      title: "OFFICIAL OPENING OF THE SYMPOSIUM",
+      subtitle: "Dr. Efren L. Linan\nCapiz State University, Philippines",
+      icon: <FaLightbulb />,
+    },
+    {
+      time: "09:30 – 10:15",
+      title: "MOU SIGNING CEREMONY",
+      subtitle: "University Presidents/Authorized Signatories of Partner Institutions",
+      icon: <FaMarker />,
+    },
+    {
+      subtitle: "Introduction of Partner Institutions and Signatories\nMaster of Ceremonies",
+      icon: <FaRegCircle />,
+    },
+    {
+      subtitle: "Presentation of the MOU\nDr. Leo Andrew B. Biclar\nCapiz State University, Philippines",
+      icon: <FaRegCircle />,
+    },
+    {
+      subtitle: "Ceremonial Signing of MOU\nUniversity Presidents / Authorized Signatories",
+      icon: <FaRegCircle />,
+    },
+    {
+      subtitle: "Exchange of Signed Documents\n Signatories",
+      icon: <FaRegCircle />,
+    },
+    {
+      subtitle: "Official Photo Session\nSignatories and Institutional Representatives",
+      icon: <FaRegCircle />,
+    },
+    {
+      time: "10:15 – 10:30",
+      title: "HEALTH AND COFFEE BREAK",
+      icon: <FaMugHot />,
+    },
+    {
+      time: "10:30 – 11:10",
+      title: "PLENARY TALK 1 - BIODIVERSITY",
+      subtitle: "Safeguarding Animal Genetic Resources in the Genomic Era: Perspectives from the ISAG–FAO Advisory Group on Animal Genetic Diversity\nDr. Licia Colli\nISAG–FAO Advisory Group on Animal Genetic Diversity Universita Cattolica del Sacro Coure, Piacenza, Italy",
+      icon: <FaGraduationCap />,
+    },
+    {
+      time: "11:10 – 11:50",
+      title: "PLENARY TALK 2 - MARINE/AQUATIC SCIENCES",
+      subtitle: "Nominated HU Speaker; Preferably Dr. Koike",
+      icon: <FaGraduationCap />,
+    },
+    {
+      time: "11:50 – 12:05",
+      title: "OPEN FORUM/DISCUSSION - PLENARY TALKS 1 & 2",
+      subtitle: "Session Moderator (CAPSU)",
+      icon: <FaComments />,
+    },
+    {
+      time: "12:05 – 13:05",
       title: "LUNCH BREAK",
       icon: <FaUtensils />,
     },
     {
-      time: "13:30 – 15:00",
-      title: "TECHNICAL SESSIONS 2 (PARALLEL)",
-      subtitle: "Track A: Environment & Sustainability  |  Track B: Technology & Innovation  |  Track C: Social Sciences & Education",
+      time: "13:05 – 13:45",
+      title: "PLENARY TALK 3 - PLANT SCIENCE",
+      subtitle: "Invited Speaker (nominated by CAPSU), University of Zagreb, Croatia",
       icon: <FaGraduationCap />,
     },
     {
-      time: "15:00 – 15:15",
-      title: "COFFEE BREAK",
-      icon: <FaCoffee />,
+      time: "14:25 – 15:05",
+      title: "PLENARY TALK 5 - LIVESTOCK SCIENCE",
+      subtitle: "Invited Speaker (nominated by CAPSU), University of Zagreb, Croatia",
+      icon: <FaGraduationCap />,
     },
     {
-      time: "15:15 – 16:45",
-      title: "PANEL DISCUSSION 1",
-      subtitle: "Global Research Collaboration: Opportunities and Challenges",
+      time: "13:45 – 14:25",
+      title: "PLENARY TALK 4 - FOOD SCIENCE/NUTRITION",
+      subtitle: "Invited Speaker (nominated by CAPSU), University of Zagreb, Croatia",
+      icon: <FaGraduationCap />,
+    },
+    {
+      time: "15:05 – 15:20",
+      title: "OPEN FORUM/DISCUSSION - PLENARY TALKS 3,4 & 5",
+      subtitle: "Session Moderator (CAPSU)",
       icon: <FaComments />,
     },
     {
-      time: "16:45 – 17:15",
-      title: "DAY 1 WRAP-UP",
-      subtitle: "Highlights and Announcements",
+      time: "15:20 – 15:30",
+      title: "HEALTH AND COFFEE BREAK",
+      icon: <FaMugHot />,
+    },
+    {
+      time: "15:30 – 17:00",
+      title: "TECHNICAL PRESENTATIONS – BREAKOUT SESSION 1",
+      subtitle: "Scientific & Technical Committee",
+      icon: <FaBookOpen />,
+    },
+    {
+      subtitle: "Track 1 – Agricultural and Animal Sciences\nPresentations (Entry 1–5)\nTrack Chair / Session Moderator / Evaluators",
+      icon: <FaLeaf />
+,
+    },
+    {
+      subtitle: "Track 2 – Life, Biological, and Biotechnology Sciences\nPresentations (Entry 1–5)\nTrack Chair / Session Moderator / Evaluators",
+      icon: <FaReact />,
+    },
+    {
+      subtitle: "Track 3 – Fisheries, Marine, Bioresource, and Environmental Sciences\nPresentations (Entry 1–5)\nTrack Chair / Session Moderator / Evaluators",
+      icon: <FaPastafarianism />,
+    },
+    {
+      subtitle: "Track 4 – Food, Nutrition, and One Health\nPresentations (Entry 1–5)\nTrack Chair / Session Moderator / Evaluators",
+      icon: <FaMortarPestle />,
+    },
+    {
+      subtitle: "Track 5 – Innovation, Economics, and Sustainable Development\nPresentations (Entry 1–5)\nTrack Chair / Session Moderator / Evaluators",
+      icon: <FaViadeoSquare />,
+    },
+    {
+      time: "17:00 – 17:15",
+      title: "DAY 1 SYNTHESIS / ANNOUNCEMENTS",
+      subtitle: "Scientific Committee / Secretariat",
       icon: <FaUsers />,
     },
     {
-      time: "18:30 – 21:00",
-      title: "WELCOME RECEPTION (By Invitation)",
+      time: "17:15",
+      title: "END OF DAY 1 SCIENTIFIC PROGRAM",
+      icon: <FaUsers />,
+    },
+    {
+      time: "18:00 – 21:00",
+      title: "FELLOWSHIP/GOVERNOR'S NIGHT",
       subtitle: "Networking Dinner",
       icon: <FaGlassCheers />,
     },
+  ];
+
+
+  const keyDatesData = [
+    {
+      date: "October 5, 2026",
+      event: "Opening of Abstract Submission and Registration",
+      description: "Official launching and dissemination of the Call for Abstracts and Registration through partner institutions, networks, and online platforms.",
+      icon: <FaRocket />
+    },
+    {
+      date: "January 10, 2027",
+      event: "Abstract Submission Deadline",
+      description: "Final date for authors to submit abstracts for consideration in the scientific program.",
+      icon: <FaFileAlt />
+    },
+    {
+      date: "Rolling (until Jan. 25, 2027)",
+      event: "Notification of Acceptance",
+      description: "Rolling notification of acceptance. Final notices to be issued by January 25, 2027.",
+      icon: <FaBell />
+    },
+    {
+      date: "December 18, 2027",
+      event: "Early Bird Registration Deadline",
+      description: "Period during which accepted presenters and other participants may avail of the applicable early registration rate.",
+      icon: <FaCalendarCheck />
+    },
+    {
+      date: "January 10, 2027",
+      event: "Final Registration Deadline",
+      description: "Final date for presenters and participants to confirm their participation. Only registered presenters shall be included in the final scientific program.",
+      icon: <FaEnvelope />
+    },
+    {
+      date: "January 29, 2027",
+      event: "Finalization of Scientific Program",
+      description: "Final scientific program will be finalized.",
+      icon: <FaEdit />
+    },
+    {
+      date: "February 6 – March 5, 2027",
+      event: "Preparation of Book of Abstracts",
+      description: "Compilation and preparation of the Book of Abstracts.",
+      icon: <FaBookOpen />
+    },
+    {
+      date: "Subject to Journal Partner",
+      event: "Submission of Full Papers",
+      description: "Authors of selected papers may be invited to submit full manuscripts for possible publication or inclusion in symposium proceedings.",
+      icon: <FaPenFancy />
+    },
+    {
+      date: "February 26, 2027",
+      event: "Release of Final Program",
+      description: "Final program will be sent via email to all committee and focal persons.",
+      icon: <FaPrint />
+    },
+    {
+      date: "March 11–13, 2027",
+      event: "3rd International Agri-Life & Bioresource Science Symposium 2027",
+      description: "Main conference program and activities.",
+      icon: <FaCalendarAlt />
+    }
   ];
 
   return (
@@ -89,8 +280,7 @@ export default function ProgramPage() {
           <h1 className="text-5xl font-bold text-[#0A2540] mb-4">Program</h1>
           <div className="w-16 h-1 bg-[#F5A623] mb-6"></div>
           
-          {/* RED: Change this paragraph text */}
-          <p className="text-lg text-red-600 max-w-lg leading-relaxed">
+          <p className="text-lg text-gray-600 max-w-lg leading-relaxed">
             Explore the conference program featuring keynote speeches, technical sessions, panel discussions, and special events.
           </p>
         </div>
@@ -107,6 +297,65 @@ export default function ProgramPage() {
           <div className="absolute top-1/4 right-1/4 w-4 h-4 bg-[#F5A623] rounded-full shadow-lg"></div>
           <div className="absolute top-1/2 right-1/2 w-4 h-4 bg-[#F5A623] rounded-full shadow-lg"></div>
           <div className="absolute top-1/3 right-1/3 w-4 h-4 bg-[#F5A623] rounded-full shadow-lg"></div>
+        </div>
+      </section>
+
+       {/* ================= KEY DATES TABLE ================= */}
+      <section className="py-16 bg-gradient-to-r from-[#0A2540] to-[#1a3a5c]">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-10">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <FaClock className="text-[#F5A623] text-3xl" />
+              <h2 className="text-3xl font-bold text-white uppercase">Key Dates</h2>
+            </div>
+            <div className="w-16 h-1 bg-[#F5A623] mx-auto"></div>
+            <p className="text-gray-300 mt-4">
+              Mark your calendars with these important deadlines for the 3rd International Agri-Life & Bioresource Science Symposium
+            </p>
+          </div>
+
+          <div className="bg-white rounded-xl overflow-hidden shadow-xl">
+            {/* Table Header */}
+            <div className="grid grid-cols-12 bg-[#0A2540] text-white px-6 py-4">
+              <div className="col-span-1 flex items-center justify-center">
+                <FaCalendarAlt className="text-[#F5A623]" />
+              </div>
+              <div className="col-span-3 font-bold uppercase text-sm">Date</div>
+              <div className="col-span-4 font-bold uppercase text-sm">Event</div>
+              <div className="col-span-4 font-bold uppercase text-sm">Description</div>
+            </div>
+
+            {/* Table Rows */}
+            {keyDatesData.map((item, idx) => (
+              <div 
+                key={idx}
+                className={`grid grid-cols-12 px-6 py-4 items-center border-b border-zinc-100 last:border-b-0 ${
+                  idx % 2 === 0 ? 'bg-white' : 'bg-zinc-50/50'
+                } hover:bg-blue-50 transition-colors duration-200`}
+              >
+                <div className="col-span-1 flex items-center justify-center text-[#F5A623] text-xl">
+                  {item.icon}
+                </div>
+                <div className="col-span-3">
+                  <span className="font-bold text-[#0A2540]">{item.date}</span>
+                </div>
+                <div className="col-span-4">
+                  <span className="font-semibold text-gray-700">{item.event}</span>
+                </div>
+                <div className="col-span-4">
+                  <span className="text-sm text-gray-600">{item.description}</span>
+                </div>
+              </div>
+            ))}
+
+            {/* Table Footer with Action */}
+            <div className="bg-gray-50 px-6 py-4 border-t border-zinc-200 flex justify-between items-center">
+              <span className="text-sm text-gray-500">All deadlines are at 11:59 PM (UTC+8)</span>
+              <button className="inline-flex items-center gap-2 bg-[#F5A623] text-[#0A2540] px-4 py-2 rounded-md font-semibold hover:bg-[#e0950f] transition-colors text-sm">
+                <FaCalendarCheck /> Add to Calendar
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -131,10 +380,8 @@ export default function ProgramPage() {
                 className="bg-white rounded-xl border border-zinc-100 shadow-sm p-8 flex flex-col items-center text-center hover:shadow-md transition-shadow"
               >
                 <div className="text-4xl text-[#0A2540] mb-4">{item.icon}</div>
-                {/* RED: Change the stats (numbers) */}
-                <span className="text-4xl font-bold text-red-600 mb-2">{item.value}</span>
-                {/* RED: Change the labels */}
-                <span className="text-sm font-semibold text-red-600 uppercase tracking-wide">{item.label}</span>
+                <span className="text-4xl font-bold text-gray-700 mb-2">{item.value}</span>
+                <span className="text-sm font-semibold text-gray-600 uppercase tracking-wide">{item.label}</span>
               </div>
             ))}
           </div>
@@ -150,28 +397,22 @@ export default function ProgramPage() {
             <div className="bg-[#0A2540] text-white p-6 flex items-center justify-center gap-4 cursor-pointer">
               <FaCalendarAlt className="text-3xl" />
               <div>
-                {/* RED: Change Day 1 Label */}
                 <p className="font-bold text-lg leading-tight">DAY 1</p>
-                {/* RED: Change Day 1 Date */}
-                <p className="text-sm text-red-400">October 20, 2025</p>
+                <p className="text-sm text-gray-400">March 11, 2026</p>
               </div>
             </div>
             <div className="bg-white text-[#0A2540] p-6 flex items-center justify-center gap-4 border-r border-zinc-100 cursor-pointer hover:bg-zinc-50">
               <FaCalendarAlt className="text-3xl" />
               <div>
-                {/* RED: Change Day 2 Label */}
-                <p className="font-bold text-red-600 text-lg leading-tight">DAY 2</p>
-                {/* RED: Change Day 2 Date */}
-                <p className="text-sm text-red-600">October 21, 2025</p>
+                <p className="font-bold text-gray-700 text-lg leading-tight">DAY 2</p>
+                <p className="text-sm text-gray-600">March 12, 2026</p>
               </div>
             </div>
             <div className="bg-white text-[#0A2540] p-6 flex items-center justify-center gap-4 cursor-pointer hover:bg-zinc-50">
               <FaCalendarAlt className="text-3xl" />
               <div>
-                {/* RED: Change Day 3 Label */}
-                <p className="font-bold text-red-600 text-lg leading-tight">DAY 3</p>
-                {/* RED: Change Day 3 Date */}
-                <p className="text-sm text-red-600">October 22, 2025</p>
+                <p className="font-bold text-gray-700 text-lg leading-tight">DAY 3</p>
+                <p className="text-sm text-gray-600">March 13, 2026</p>
               </div>
             </div>
           </div>
@@ -190,18 +431,15 @@ export default function ProgramPage() {
                 key={idx} 
                 className={`grid grid-cols-12 px-6 py-5 items-start border-b border-zinc-100 last:border-b-0 ${idx % 2 === 0 ? 'bg-white' : 'bg-zinc-50/50'}`}
               >
-                {/* RED: Change Time */}
-                <div className="col-span-3 text-sm font-semibold text-red-600 pt-1">{row.time}</div>
+                <div className="col-span-3 text-sm font-semibold text-gray-600 pt-1">{row.time}</div>
                 <div className="col-span-9 flex gap-4">
                   <div className="w-10 h-10 rounded-full bg-[#e8f0fe] text-[#0A2540] flex items-center justify-center text-lg shrink-0">
                     {row.icon}
                   </div>
                   <div>
-                    {/* RED: Change Session Title */}
-                    <p className="font-bold text-red-600 uppercase text-sm mb-1">{row.title}</p>
-                    {/* RED: Change Session Subtitle */}
+                    <p className="font-bold text-gray-700 uppercase text-sm mb-1">{row.title}</p>
                     {row.subtitle && (
-                      <p className="text-sm text-red-600 whitespace-pre-line">{row.subtitle}</p>
+                      <p className="text-sm text-gray-600 whitespace-pre-line">{row.subtitle}</p>
                     )}
                   </div>
                 </div>
@@ -220,21 +458,18 @@ export default function ProgramPage() {
             <div className="flex-1">
               <h3 className="text-xl font-bold text-[#0A2540] mb-2 uppercase">Download Program</h3>
               <div className="w-12 h-1 bg-[#F5A623] mb-4"></div>
-              {/* RED: Change Description */}
-              <p className="text-red-600 mb-6">
+              <p className="text-gray-600 mb-6">
                 Get the complete program schedule in PDF format.
               </p>
-              {/* RED: Change Button Text */}
               <button className="inline-flex items-center gap-2 border-2 border-[#0A2540] text-[#0A2540] px-6 py-3 rounded-md font-bold hover:bg-[#0A2540] hover:text-white transition-colors">
-                <FaDownload /> <span className="text-red-600">DOWNLOAD FULL PROGRAM (PDF)</span>
+                <FaDownload /> <span className="text-gray-700">DOWNLOAD FULL PROGRAM (PDF)</span>
               </button>
             </div>
             <div className="w-40 shrink-0 bg-white shadow-lg border border-zinc-200 p-4 rounded-lg flex flex-col items-center text-center">
                <div className="w-24 h-36 bg-blue-100 mb-2 relative overflow-hidden rounded">
                  <Image src="/program-cover.png" alt="Program Cover" fill className="object-cover" />
                </div>
-               {/* RED: Change Program Cover Text */}
-               <p className="text-[10px] font-bold text-red-600 mt-2 leading-tight">INTERNATIONAL<br/>COLLOQUIUM<br/>2025</p>
+               <p className="text-[10px] font-bold text-gray-700 mt-2 leading-tight">INTERNATIONAL<br/>COLLOQUIUM<br/>2025</p>
             </div>
           </div>
 
@@ -251,7 +486,7 @@ export default function ProgramPage() {
                   "Networking opportunities with global experts",
                   "Cultural and social events"
                 ].map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-3 text-sm text-red-600">
+                  <li key={idx} className="flex items-start gap-3 text-sm text-gray-700">
                     <FaCheckCircle className="text-[#F5A623] mt-0.5" /> {item}
                   </li>
                 ))}
