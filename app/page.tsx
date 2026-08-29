@@ -246,24 +246,24 @@ export default function Home() {
               <div className="flex gap-4 border-b border-gray-200 pb-4">
                 <div className="flex flex-col items-center">
                   <span className="text-xl font-bold text-[#1D3D6D]">Oct</span>
-                  <span className="text-2xl font-bold text-[#0B2A4A]">24</span>
+                  <span className="text-2xl font-bold text-[#0B2A4A]">05</span>
                 </div>
                 <div className="flex-1">
                   <p className="text-xs font-bold text-[#D5A54D] uppercase mb-1">Important</p>
-                  <p className="font-semibold text-[#0B2A4A] mb-1">Call for Full Papers Extended!</p>
-                  <p className="text-sm text-gray-500">The submission deadline has been extended to June 15, 2026.</p>
+                  <p className="font-semibold text-[#0B2A4A] mb-1">Call for Abstracts</p>
+                  <p className="text-sm text-gray-500">The official launching and dissemination of the Call for Abstracts and Registration  will be on Octber 5, 2026.</p>
                 </div>
               </div>
               {/* Item 2 */}
               <div className="flex gap-4 border-b border-gray-200 pb-4">
                 <div className="flex flex-col items-center">
-                  <span className="text-xl font-bold text-[#1D3D6D]">Oct</span>
+                  <span className="text-xl font-bold text-[#1D3D6D]">Dec</span>
                   <span className="text-2xl font-bold text-[#0B2A4A]">18</span>
                 </div>
                 <div className="flex-1">
                   <p className="text-xs font-bold text-[#D5A54D] uppercase mb-1">Update</p>
                   <p className="font-semibold text-[#0B2A4A] mb-1">Registration is Now Open</p>
-                  <p className="text-sm text-gray-500">Early bird registration is available until July 31, 2026.</p>
+                  <p className="text-sm text-gray-500">Early bird registration is available until December 18, 2026.</p>
                 </div>
               </div>
               {/* Item 3 */}
