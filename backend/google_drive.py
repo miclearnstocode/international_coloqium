@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 SCOPES = ['https://www.googleapis.com/auth/drive']
-SERVICE_ACCOUNT_FILE = 'rdesystem-secret.json'
+CREDENTIALS_PATH = os.getenv('GOOGLE_APPLICATION_CREDENTIALS', 'rdesystem-secret.json')
 
 ROOT_FOLDER_ID = '1pXuQFbe5yvBU0CECkgFNrfXySMDNWPC0'
 
@@ -17,7 +17,7 @@ ROOT_FOLDER_ID = '1pXuQFbe5yvBU0CECkgFNrfXySMDNWPC0'
 EVENT_NAME = "International Colloquium 2025"
 
 def get_drive_service():
-    creds = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+    creds = service_account.Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=SCOPES)
     return build('drive', 'v3', credentials=creds)
 
 def sanitize_folder_name(name):

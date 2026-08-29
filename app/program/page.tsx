@@ -1,5 +1,7 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { 
@@ -10,7 +12,10 @@ import {
 } from "react-icons/fa";
 
 export default function ProgramPage() {
-  const scheduleData = [
+  const [activeDay, setActiveDay] = useState(1);
+
+  // DAY 1 SCHEDULE
+  const day1Schedule = [
     {
       time: "07:30 – 08:30",
       title: "Arrival and Registration of Participants",
@@ -164,7 +169,6 @@ export default function ProgramPage() {
     {
       subtitle: "Track 1 – Agricultural and Animal Sciences\nPresentations (Entry 1–5)\nTrack Chair / Session Moderator / Evaluators",
       icon: <FaLeaf />
-,
     },
     {
       subtitle: "Track 2 – Life, Biological, and Biotechnology Sciences\nPresentations (Entry 1–5)\nTrack Chair / Session Moderator / Evaluators",
@@ -201,6 +205,165 @@ export default function ProgramPage() {
     },
   ];
 
+  // DAY 2 SCHEDULE
+  const day2Schedule = [
+    {
+      time: "08:30 – 09:00",
+      title: "REGISTRATION AND MORNING COFFEE",
+      icon: <FaCoffee />,
+    },
+    {
+      time: "09:00 – 10:00",
+      title: "PLENARY TALK 6 - CLIMATE CHANGE AND ADAPTATION",
+      subtitle: "Invited Speaker\nInternational Expert on Climate Change",
+      icon: <FaGraduationCap />,
+    },
+    {
+      time: "10:00 – 11:00",
+      title: "PLENARY TALK 7 - SUSTAINABLE AGRICULTURE",
+      subtitle: "Invited Speaker\nLeading Researcher in Sustainable Farming",
+      icon: <FaGraduationCap />,
+    },
+    {
+      time: "11:00 – 11:15",
+      title: "HEALTH AND COFFEE BREAK",
+      icon: <FaMugHot />,
+    },
+    {
+      time: "11:15 – 12:15",
+      title: "PANEL DISCUSSION",
+      subtitle: "Theme: 'Future of Agri-Life Sciences'\nPanelists from Partner Institutions",
+      icon: <FaComments />,
+    },
+    {
+      time: "12:15 – 13:15",
+      title: "LUNCH BREAK",
+      icon: <FaUtensils />,
+    },
+    {
+      time: "13:15 – 15:15",
+      title: "TECHNICAL PRESENTATIONS – BREAKOUT SESSION 2",
+      subtitle: "Scientific & Technical Committee",
+      icon: <FaBookOpen />,
+    },
+    {
+      subtitle: "Track 1 – Agricultural and Animal Sciences\nPresentations (Entry 6–10)\nTrack Chair / Session Moderator / Evaluators",
+      icon: <FaLeaf />
+    },
+    {
+      subtitle: "Track 2 – Life, Biological, and Biotechnology Sciences\nPresentations (Entry 6–10)\nTrack Chair / Session Moderator / Evaluators",
+      icon: <FaReact />,
+    },
+    {
+      subtitle: "Track 3 – Fisheries, Marine, Bioresource, and Environmental Sciences\nPresentations (Entry 6–10)\nTrack Chair / Session Moderator / Evaluators",
+      icon: <FaPastafarianism />,
+    },
+    {
+      subtitle: "Track 4 – Food, Nutrition, and One Health\nPresentations (Entry 6–10)\nTrack Chair / Session Moderator / Evaluators",
+      icon: <FaMortarPestle />,
+    },
+    {
+      subtitle: "Track 5 – Innovation, Economics, and Sustainable Development\nPresentations (Entry 6–10)\nTrack Chair / Session Moderator / Evaluators",
+      icon: <FaViadeoSquare />,
+    },
+    {
+      time: "15:15 – 15:30",
+      title: "HEALTH AND COFFEE BREAK",
+      icon: <FaMugHot />,
+    },
+    {
+      time: "15:30 – 17:00",
+      title: "WORKSHOP AND TRAINING SESSION",
+      subtitle: "Hands-on Workshop on Research Methodologies\nFacilitated by International Experts",
+      icon: <FaGraduationCap />,
+    },
+    {
+      time: "17:00 – 17:15",
+      title: "DAY 2 SYNTHESIS / ANNOUNCEMENTS",
+      subtitle: "Scientific Committee / Secretariat",
+      icon: <FaUsers />,
+    },
+    {
+      time: "17:15",
+      title: "END OF DAY 2 SCIENTIFIC PROGRAM",
+      icon: <FaUsers />,
+    },
+  ];
+
+  // DAY 3 SCHEDULE
+  const day3Schedule = [
+    {
+      time: "08:30 – 09:00",
+      title: "REGISTRATION AND MORNING COFFEE",
+      icon: <FaCoffee />,
+    },
+    {
+      time: "09:00 – 10:00",
+      title: "PLENARY TALK 8 - BIOTECHNOLOGY AND GENOMICS",
+      subtitle: "Invited Speaker\nBiotechnology Expert",
+      icon: <FaGraduationCap />,
+    },
+    {
+      time: "10:00 – 11:00",
+      title: "PLENARY TALK 9 - FOOD SECURITY AND NUTRITION",
+      subtitle: "Invited Speaker\nFood Security Specialist",
+      icon: <FaGraduationCap />,
+    },
+    {
+      time: "11:00 – 11:15",
+      title: "HEALTH AND COFFEE BREAK",
+      icon: <FaMugHot />,
+    },
+    {
+      time: "11:15 – 12:15",
+      title: "CLOSING PLENARY TALK",
+      subtitle: "Keynote Speaker\nTopic: 'Future Directions in Agri-Life Sciences'",
+      icon: <FaMicrophoneAlt />,
+    },
+    {
+      time: "12:15 – 13:15",
+      title: "LUNCH BREAK",
+      icon: <FaUtensils />,
+    },
+    {
+      time: "13:15 – 14:15",
+      title: "BEST PRESENTATION AWARDS",
+      subtitle: "Recognition of Outstanding Presentations\nAwarding Ceremony",
+      icon: <FaBullhorn />,
+    },
+    {
+      time: "14:15 – 15:15",
+      title: "CLOSING CEREMONY",
+      subtitle: "Closing Remarks\nDr. Efren L. Linan\nCapiz State University, Philippines",
+      icon: <FaMicrophoneAlt />,
+    },
+    {
+      time: "15:15 – 15:30",
+      title: "FAREWELL COFFEE AND SOCIAL GATHERING",
+      icon: <FaMugHot />,
+    },
+    {
+      time: "15:30",
+      title: "END OF THE SYMPOSIUM",
+      icon: <FaUsers />,
+    },
+  ];
+
+  // Get the schedule based on active day
+  const getScheduleData = () => {
+    switch(activeDay) {
+      case 1:
+        return day1Schedule;
+      case 2:
+        return day2Schedule;
+      case 3:
+        return day3Schedule;
+      default:
+        return day1Schedule;
+    }
+  };
+
+  const scheduleData = getScheduleData();
 
   const keyDatesData = [
     {
@@ -209,6 +372,7 @@ export default function ProgramPage() {
       description: "Official launching and dissemination of the Call for Abstracts and Registration through partner institutions, networks, and online platforms.",
       icon: <FaRocket />
     },
+
     {
       date: "January 10, 2027",
       event: "Abstract Submission Deadline",
@@ -216,13 +380,20 @@ export default function ProgramPage() {
       icon: <FaFileAlt />
     },
     {
+      date: "October 2026 - January 20, 2027",
+      event: "Review and Evaluation Period",
+      description: "Scientific evaluation of submitted abstracts by designated reviewers based on established criteria.",
+      icon: <FaFileAlt />
+    },
+
+    {
       date: "Rolling (until Jan. 25, 2027)",
       event: "Notification of Acceptance",
       description: "Rolling notification of acceptance. Final notices to be issued by January 25, 2027.",
       icon: <FaBell />
     },
     {
-      date: "December 18, 2027",
+      date: "December 18, 2026",
       event: "Early Bird Registration Deadline",
       description: "Period during which accepted presenters and other participants may avail of the applicable early registration rate.",
       icon: <FaCalendarCheck />
@@ -236,7 +407,7 @@ export default function ProgramPage() {
     {
       date: "January 29, 2027",
       event: "Finalization of Scientific Program",
-      description: "Final scientific program will be finalized.",
+      description: "Scientific program will be finalized.",
       icon: <FaEdit />
     },
     {
@@ -248,13 +419,13 @@ export default function ProgramPage() {
     {
       date: "Subject to Journal Partner",
       event: "Submission of Full Papers",
-      description: "Authors of selected papers may be invited to submit full manuscripts for possible publication or inclusion in symposium proceedings.",
+      description: "Authors of selected papers may be invited to submit full manuscripts for possible publication or inclusion in symposium proceedings, subject to applicable review and publication requirements.",
       icon: <FaPenFancy />
     },
     {
       date: "February 26, 2027",
       event: "Release of Final Program",
-      description: "Final program will be sent via email to all committee and focal persons.",
+      description: "Final program will be sent via email to all committee and focal persons and can be access through this portal.",
       icon: <FaPrint />
     },
     {
@@ -272,12 +443,14 @@ export default function ProgramPage() {
       <section className="relative bg-white overflow-hidden border-b border-zinc-100">
         <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
           <div className="flex items-center gap-2 text-sm text-zinc-500 mb-6">
-            <span>Home</span>
+            <Link href="/" className="hover:text-[#F5A623] transition-colors">
+              Home
+            </Link>
             <span className="text-zinc-300">›</span>
             <span className="text-[#0A2540] font-medium">Program</span>
           </div>
 
-          <h1 className="text-5xl font-bold text-[#0A2540] mb-4">Program</h1>
+          <h1 className="text-5xl font-bold text-[#0A2540] mb-4">Symposium Program</h1>
           <div className="w-16 h-1 bg-[#F5A623] mb-6"></div>
           
           <p className="text-lg text-gray-600 max-w-lg leading-relaxed">
@@ -288,7 +461,7 @@ export default function ProgramPage() {
         {/* Abstract Map Background (Right Side) */}
         <div className="absolute right-0 top-0 bottom-0 w-1/2 opacity-60 pointer-events-none">
           <Image 
-            src="/map.png" 
+            src="/images/globe.jpg" 
             alt="World Map" 
             fill 
             className="object-cover object-right opacity-20"
@@ -331,7 +504,7 @@ export default function ProgramPage() {
                 key={idx}
                 className={`grid grid-cols-12 px-6 py-4 items-center border-b border-zinc-100 last:border-b-0 ${
                   idx % 2 === 0 ? 'bg-white' : 'bg-zinc-50/50'
-                } hover:bg-blue-50 transition-colors duration-200`}
+                } hover:bg-blue-100 transition-colors duration-200`}
               >
                 <div className="col-span-1 flex items-center justify-center text-[#F5A623] text-xl">
                   {item.icon}
@@ -351,9 +524,6 @@ export default function ProgramPage() {
             {/* Table Footer with Action */}
             <div className="bg-gray-50 px-6 py-4 border-t border-zinc-200 flex justify-between items-center">
               <span className="text-sm text-gray-500">All deadlines are at 11:59 PM (UTC+8)</span>
-              <button className="inline-flex items-center gap-2 bg-[#F5A623] text-[#0A2540] px-4 py-2 rounded-md font-semibold hover:bg-[#e0950f] transition-colors text-sm">
-                <FaCalendarCheck /> Add to Calendar
-              </button>
             </div>
           </div>
         </div>
@@ -380,7 +550,7 @@ export default function ProgramPage() {
                 className="bg-white rounded-xl border border-zinc-100 shadow-sm p-8 flex flex-col items-center text-center hover:shadow-md transition-shadow"
               >
                 <div className="text-4xl text-[#0A2540] mb-4">{item.icon}</div>
-                <span className="text-4xl font-bold text-gray-700 mb-2">{item.value}</span>
+                <span className="text-6xl font-bold text-green-700 mb-2">{item.value}</span>
                 <span className="text-sm font-semibold text-gray-600 uppercase tracking-wide">{item.label}</span>
               </div>
             ))}
@@ -392,29 +562,64 @@ export default function ProgramPage() {
       <section className="pb-16">
         <div className="max-w-7xl mx-auto px-6">
           
-          {/* Day Tabs */}
+          {/* Day Tabs - Interactive */}
           <div className="grid grid-cols-1 md:grid-cols-3 rounded-t-xl overflow-hidden border border-zinc-200">
-            <div className="bg-[#0A2540] text-white p-6 flex items-center justify-center gap-4 cursor-pointer">
-              <FaCalendarAlt className="text-3xl" />
+            <button
+              onClick={() => setActiveDay(1)}
+              className={`p-6 flex items-center justify-center gap-4 transition-all duration-300 ${
+                activeDay === 1 
+                  ? 'bg-[#0A2540] text-white shadow-lg' 
+                  : 'bg-white text-[#0A2540] hover:bg-zinc-50'
+              }`}
+            >
+              <FaCalendarAlt className={`text-3xl ${activeDay === 1 ? 'text-[#F5A623]' : 'text-[#0A2540]'}`} />
               <div>
-                <p className="font-bold text-lg leading-tight">DAY 1</p>
-                <p className="text-sm text-gray-400">March 11, 2026</p>
+                <p className={`font-bold text-lg leading-tight ${activeDay === 1 ? 'text-white' : 'text-gray-700'}`}>
+                  DAY 1
+                </p>
+                <p className={`text-sm ${activeDay === 1 ? 'text-gray-400' : 'text-gray-600'}`}>
+                  March 11, 2026
+                </p>
               </div>
-            </div>
-            <div className="bg-white text-[#0A2540] p-6 flex items-center justify-center gap-4 border-r border-zinc-100 cursor-pointer hover:bg-zinc-50">
-              <FaCalendarAlt className="text-3xl" />
+            </button>
+
+            <button
+              onClick={() => setActiveDay(2)}
+              className={`p-6 flex items-center justify-center gap-4 transition-all duration-300 ${
+                activeDay === 2 
+                  ? 'bg-[#0A2540] text-white shadow-lg' 
+                  : 'bg-white text-[#0A2540] hover:bg-zinc-50'
+              } border-x border-zinc-200`}
+            >
+              <FaCalendarAlt className={`text-3xl ${activeDay === 2 ? 'text-[#F5A623]' : 'text-[#0A2540]'}`} />
               <div>
-                <p className="font-bold text-gray-700 text-lg leading-tight">DAY 2</p>
-                <p className="text-sm text-gray-600">March 12, 2026</p>
+                <p className={`font-bold text-lg leading-tight ${activeDay === 2 ? 'text-white' : 'text-gray-700'}`}>
+                  DAY 2
+                </p>
+                <p className={`text-sm ${activeDay === 2 ? 'text-gray-400' : 'text-gray-600'}`}>
+                  March 12, 2026
+                </p>
               </div>
-            </div>
-            <div className="bg-white text-[#0A2540] p-6 flex items-center justify-center gap-4 cursor-pointer hover:bg-zinc-50">
-              <FaCalendarAlt className="text-3xl" />
+            </button>
+
+            <button
+              onClick={() => setActiveDay(3)}
+              className={`p-6 flex items-center justify-center gap-4 transition-all duration-300 ${
+                activeDay === 3 
+                  ? 'bg-[#0A2540] text-white shadow-lg' 
+                  : 'bg-white text-[#0A2540] hover:bg-zinc-50'
+              }`}
+            >
+              <FaCalendarAlt className={`text-3xl ${activeDay === 3 ? 'text-[#F5A623]' : 'text-[#0A2540]'}`} />
               <div>
-                <p className="font-bold text-gray-700 text-lg leading-tight">DAY 3</p>
-                <p className="text-sm text-gray-600">March 13, 2026</p>
+                <p className={`font-bold text-lg leading-tight ${activeDay === 3 ? 'text-white' : 'text-gray-700'}`}>
+                  DAY 3
+                </p>
+                <p className={`text-sm ${activeDay === 3 ? 'text-gray-400' : 'text-gray-600'}`}>
+                  March 13, 2026
+                </p>
               </div>
-            </div>
+            </button>
           </div>
 
           {/* Schedule Table */}
@@ -469,7 +674,7 @@ export default function ProgramPage() {
                <div className="w-24 h-36 bg-blue-100 mb-2 relative overflow-hidden rounded">
                  <Image src="/program-cover.png" alt="Program Cover" fill className="object-cover" />
                </div>
-               <p className="text-[10px] font-bold text-gray-700 mt-2 leading-tight">INTERNATIONAL<br/>COLLOQUIUM<br/>2025</p>
+               <p className="text-[10px] font-bold text-gray-700 mt-2 leading-tight">INTERNATIONAL<br/>SCIENCE<br/>SYMPOSIUM<br/>2026</p>
             </div>
           </div>
 
