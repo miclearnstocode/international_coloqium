@@ -1,147 +1,349 @@
-import Header from "../components/Header";
-import Footer from "../components/Header";
+"use client";
+import Image from "next/image";
 import Link from "next/link";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 import { 
-  FaUsers, FaChevronRight, FaChevronLeft, FaUniversity, 
-  FaHandshake, FaGlobe, FaMapMarkerAlt, FaPhoneAlt, FaEnvelope, 
-  FaFacebookF, FaTwitter, FaLinkedinIn, FaInstagram 
+  FaUniversity, FaHandshake, FaUsers, FaGlobe, 
+  FaCheckCircle, FaArrowRight, FaEnvelope, FaBuilding,
+  FaRegBuilding, FaUserFriends, FaMicroscope, FaFlask,
+  FaLeaf, FaFish, FaUtensils, FaChartLine, FaAward,
+  FaTrophy, FaMedal, FaStar, FaUserTie
 } from "react-icons/fa";
 
-export default function PartnerInstitutions() {
-  
-  const globalPartners = [
-    { name: "Capiz State University", country: "Philippines", flag: "🇲🇾", logo: "/images/partners/upm.png" },
-    { name: "Kasetsart University", country: "Thailand", flag: "🇹🇭", logo: "/images/partners/ku.png" },
-    { name: "Tokyo University of Agriculture", country: "Japan", flag: "🇯🇵", logo: "/images/partners/tua.png" },
-    { name: "University of the Philippines Los Baños", country: "Philippines", flag: "🇵🇭", logo: "/images/partners/uplb.png" },
-    { name: "Bogor Agricultural University (IPB)", country: "Indonesia", flag: "🇮🇩", logo: "/images/partners/ipb.png" },
-    { name: "University of Guelph", country: "Canada", flag: "🇨🇦", logo: "/images/partners/uog.png" },
+export default function PartnerInstitutionsPage() {
+  // ================= CONFIRMED PARTNERS DATA =================
+  // Add confirmed partners here with their logo path and name
+  const hostInstitution = {
+    name: "Capiz State University",
+    logo: "/images/capsu-logo.png",
+    role: "Implementing Institution",
+    location: "Capiz, Philippines"
+  };
+
+  const coHosts = [
+    {
+      name: "Hiroshima University",
+      logo: "/images/hiroshima_logo.webp",
+      location: "Japan"
+    },
+    {
+      name: "Visayas State University",
+      logo: "/images/vsu-logo.png",
+      location: "Philippines"
+    },
+    {
+      name: "University of San Carlos",
+      logo: "/images/usc-logo.svg",
+      location: "Philippines"
+    }
   ];
 
-  const nationalPartners = [
-    { name: "Central Luzon State University", logo: "/images/partners/clsu.png" },
-    { name: "Visayas State University", logo: "/images/partners/vsu.png" },
-    { name: "Mindanao State University - Iligan Institute of Technology", logo: "/images/partners/msuiit.png" },
-    { name: "Capiz State University", logo: "/images/partners/capsu.png" },
-    { name: "Benguet State University", logo: "/images/partners/bsu.png" },
+  // Add confirmed institutional partners here
+  const institutionalPartners = [
+    // Example:
+    // { name: "Partner Name", logo: "/images/partners/partner-logo.png" },
   ];
 
-  const orgPartners = [
-    { name: "SEAMEO SEARCA", logo: "/images/partners/searca.png" },
-    { name: "Philippine Council for Agriculture, Aquatic and Natural Resources Research and Development (PCARRD-PCAARRD)", logo: "/images/partners/pcaarrd.png" },
-    { name: "International Rice Research Institute (IRRI)", logo: "/images/partners/irri.png" },
-    { name: "World Wide Fund For Nature (WWF-Philippines)", logo: "/images/partners/wwf.png" },
-    { name: "Food and Agriculture Organization of the United Nations (FAO)", logo: "/images/partners/fao.png" },
+  // Add confirmed sponsors here - all on the same level
+  const sponsors = [
+    // Example:
+    // { name: "Sponsor Name", logo: "/images/partners/sponsor-logo.png" },
   ];
+
+  // Placeholder for empty sections
+  const placeholderCount = 6;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans text-[#0B2A4A] flex flex-col">
+    <div className="min-h-screen bg-[#F8FAFC] font-sans text-[#0A2540]">
       <Header />
 
       {/* ================= PAGE HERO ================= */}
       <section className="relative bg-white overflow-hidden border-b border-zinc-100">
-        <div className="absolute right-0 top-0 bottom-0 w-1/2 pointer-events-none opacity-60">
-          <img src="/images/partners-hero-globe.png" alt="Globe" className="w-full h-full object-cover object-right opacity-20" />
-        </div>
-
-        <div className="max-w-350 mx-auto px-8 py-16 relative z-10">
-          <div className="flex items-center gap-2 text-sm text-zinc-500 mb-8">
-            <span>Home</span>
+        <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
+          <div className="flex items-center gap-2 text-sm text-zinc-500 mb-6">
+            <Link href="/" className="hover:text-[#F5A623] transition-colors">
+              Home
+            </Link>
             <span className="text-zinc-300">›</span>
-            <span className="text-[#0B2A4A] font-medium">Partners</span>
+            <span className="text-[#0A2540] font-medium">Partners</span>
           </div>
 
-          <div className="max-w-2xl">
-            <h1 className="text-5xl font-bold text-[#0B2A4A] mb-4">Partner Institutions</h1>
-            <div className="w-16 h-1 bg-[#D5A54D] mb-6"></div>
-            <p className="text-lg text-zinc-600 leading-relaxed">
-              We collaborate with leading universities, research institutions, and organizations worldwide to advance research, innovation, and sustainable development.
-            </p>
-          </div>
+          <h1 className="text-5xl font-bold text-[#0A2540] mb-4">Partners & Collaborating Institutions</h1>
+          <div className="w-16 h-1 bg-[#F5A623] mb-6"></div>
+          <p className="text-xl text-gray-600 max-w-2xl leading-relaxed font-semibold">
+            Advancing science through institutional partnership and international collaboration.
+          </p>
         </div>
       </section>
 
-      {/* ================= OUR GLOBAL PARTNERS ================= */}
-      <section className="py-16">
-        <div className="max-w-350uto px-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <FaUsers className="text-[#1D3D6D] text-2xl" />
-              <h2 className="text-2xl font-bold text-[#0B2A4A] uppercase">Our Global Partners</h2>
-            </div>
-            
-            {/* Slider Controls (Visual) */}
-            <div className="flex gap-2">
-              <button className="w-8 h-8 rounded-full bg-[#F0F6FF] text-[#1D3D6D] flex items-center justify-center hover:bg-[#1D3D6D] hover:text-white transition-colors"><FaChevronLeft size={12} /></button>
-              <button className="w-8 h-8 rounded-full bg-[#F0F6FF] text-[#1D3D6D] flex items-center justify-center hover:bg-[#1D3D6D] hover:text-white transition-colors"><FaChevronRight size={12} /></button>
-            </div>
+      {/* ================= HOST INSTITUTION ================= */}
+      <section className="py-12">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-[#0A2540] uppercase">Organized by</h2>
+            <div className="w-12 h-1 bg-[#F5A623] mx-auto mt-3"></div>
           </div>
 
-          <p className="text-sm text-zinc-500 mb-8">These institutions share our commitment to research excellence, knowledge exchange, and creating a better future together.</p>
+          <div className="flex justify-center">
+            <div className="bg-white rounded-2xl border border-zinc-200 p-8 shadow-sm w-full max-w-md">
+              <div className="flex flex-col items-center">
+                <div className="relative w-32 h-32 mb-4">
+                  <Image 
+                    src={hostInstitution.logo}
+                    alt={hostInstitution.name}
+                    fill
+                    className="object-contain"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const parent = target.parentElement;
+                      if (parent) {
+                        parent.innerHTML = `
+                          <div class="w-32 h-32 bg-[#1D3D6D] rounded-xl flex items-center justify-center">
+                            <span class="text-white text-2xl font-bold">${hostInstitution.name.split(' ').map(w => w[0]).join('')}</span>
+                          </div>
+                        `;
+                      }
+                    }}
+                  />
+                </div>
+                <h3 className="font-bold text-[#0A2540] text-xl">{hostInstitution.name}</h3>
+                <p className="text-sm text-gray-500">{hostInstitution.role}</p>
+                <p className="text-sm text-gray-400">{hostInstitution.location}</p>
+              </div>
+            </div>
+          </div>
+          <p className="text-sm text-gray-600 text-center mt-4 max-w-2xl mx-auto">
+            Capiz State University serves as the implementing institution of the 3rd International Agri-Life & Bioresource Sciences Symposium.
+          </p>
+        </div>
+      </section>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
-            {globalPartners.map((partner, idx) => (
-              <div key={idx} className="bg-white border border-zinc-100 rounded-xl p-6 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-shadow">
-                <div className="w-24 h-24 mb-4 flex items-center justify-center">
-                  <img src={partner.logo} alt={partner.name} className="object-contain max-h-24" />
+      {/* ================= CO-HOST INSTITUTIONS ================= */}
+      <section className="py-12 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-[#0A2540] uppercase">Co-host Institutions</h2>
+            <div className="w-12 h-1 bg-[#F5A623] mx-auto mt-3"></div>
+            <p className="text-sm text-gray-500 mt-2">
+              The symposium proposal identifies these institutions as co-hosts with CAPSU.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {coHosts.map((institution, idx) => (
+              <div key={idx} className="bg-[#F8FAFC] rounded-xl border border-zinc-200 p-6 text-center hover:shadow-lg transition-all hover:-translate-y-1">
+                <div className="relative w-24 h-24 mx-auto mb-4">
+                  <Image 
+                    src={institution.logo}
+                    alt={institution.name}
+                    fill
+                    className="object-contain"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const parent = target.parentElement;
+                      if (parent) {
+                        parent.innerHTML = `
+                          <div class="w-24 h-24 bg-[#1D3D6D] rounded-xl flex items-center justify-center mx-auto">
+                            <span class="text-white text-xl font-bold">${institution.name.split(' ').map(w => w[0]).join('')}</span>
+                          </div>
+                        `;
+                      }
+                    }}
+                  />
                 </div>
-                <p className="font-bold text-[#0B2A4A] text-sm mb-2 leading-tight">{partner.name}</p>
-                <div className="flex items-center gap-2 text-xs text-zinc-500">
-                  <span className="text-lg">{partner.flag}</span> {partner.country}
-                </div>
+                <h3 className="font-bold text-[#0A2540]">{institution.name}</h3>
+                <p className="text-sm text-gray-500">{institution.location}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ================= NATIONAL & INDUSTRY PARTNERS ================= */}
-      <section className="bg-white py-16 border-t border-zinc-100">
-        <div className="max-w-350 mx-auto px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            
-            {/* National Partners */}
-            <div>
-              <div className="flex items-center gap-4 mb-8">
-                <FaUniversity className="text-[#1D3D6D] text-2xl" />
-                <h2 className="text-2xl font-bold text-[#0B2A4A] uppercase">National Partners</h2>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
-                {nationalPartners.map((partner, idx) => (
-                  <div key={idx} className="flex flex-col items-center text-center p-4">
-                    <div className="w-20 h-20 mb-3 flex items-center justify-center">
-                      <img src={partner.logo} alt={partner.name} className="object-contain max-h-20" />
-                    </div>
-                    <p className="text-xs font-semibold text-[#0B2A4A] leading-tight">{partner.name}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Industry & Organization Partners */}
-            <div>
-              <div className="flex items-center gap-4 mb-8">
-                <FaHandshake className="text-[#1D3D6D] text-2xl" />
-                <h2 className="text-2xl font-bold text-[#0B2A4A] uppercase">Industry & Organization Partners</h2>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
-                {orgPartners.map((partner, idx) => (
-                  <div key={idx} className="flex flex-col items-center text-center p-4">
-                    <div className="w-20 h-20 mb-3 flex items-center justify-center">
-                      <img src={partner.logo} alt={partner.name} className="object-contain max-h-20" />
-                    </div>
-                    <p className="text-xs font-semibold text-[#0B2A4A] leading-tight">{partner.name}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
+      {/* ================= THE ROLE OF PARTNER INSTITUTIONS ================= */}
+      <section className="py-12 bg-gradient-to-r from-[#0A2540] to-[#1a3a5c]">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-white uppercase">The Role of Partner Institutions</h2>
+            <div className="w-12 h-1 bg-[#F5A623] mx-auto mt-3"></div>
           </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
+            {[
+              "Participation in Organizing and Scientific Committees",
+              "Promotion of the Call for Abstracts",
+              "Nomination of speakers and experts",
+              "Abstract review and evaluation",
+              "Session facilitation and moderation",
+              "Academic networking",
+              "Development of future research collaborations",
+              "Institutional partnerships",
+              "International scientific exchange"
+            ].map((item, idx) => (
+              <div 
+                key={idx}
+                className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/10 hover:bg-white/20 transition-all"
+              >
+                <FaCheckCircle className="text-[#F5A623] text-sm shrink-0" />
+                <span className="text-white text-sm leading-relaxed">{item}</span>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-gray-300 text-sm text-center mt-6 max-w-3xl mx-auto">
+            Partner institutions contribute to the international and scientific character of the symposium through participation in organizing and scientific committees, promotion of the Call for Abstracts, nomination of speakers and experts, abstract review, session facilitation, academic networking, and the development of future research and institutional collaborations.
+          </p>
         </div>
       </section>
-    <Footer/>
+
+      {/* ================= OTHER INSTITUTIONAL PARTNERS ================= */}
+      <section className="py-12 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-[#0A2540] uppercase">Other Institutional Partners</h2>
+            <div className="w-12 h-1 bg-[#F5A623] mx-auto mt-3"></div>
+            <p className="text-sm text-gray-500 mt-2">
+              Only add organizations here after confirmation.
+            </p>
+          </div>
+
+          {institutionalPartners.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {institutionalPartners.map((partner, idx) => (
+                <div 
+                  key={idx}
+                  className="bg-[#F8FAFC] rounded-xl border border-zinc-200 p-6 text-center hover:shadow-lg transition-all hover:-translate-y-1"
+                >
+                  <div className="relative w-24 h-24 mx-auto mb-3">
+                    <Image 
+                      src={partner.logo}
+                      alt={partner.name}
+                      fill
+                      className="object-contain"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = `
+                            <div class="w-24 h-24 bg-[#1D3D6D] rounded-xl flex items-center justify-center mx-auto">
+                              <span class="text-white text-xl font-bold">${partner.name.split(' ').map(w => w[0]).join('')}</span>
+                            </div>
+                          `;
+                        }
+                      }}
+                    />
+                  </div>
+                  <p className="font-semibold text-[#0A2540] text-sm">{partner.name}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {[...Array(4)].map((_, idx) => (
+                <div 
+                  key={idx}
+                  className="bg-[#F8FAFC] rounded-xl border border-dashed border-zinc-300 p-6 text-center hover:shadow-md transition-shadow"
+                >
+                  <div className="w-24 h-24 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <FaBuilding className="text-3xl text-gray-300" />
+                  </div>
+                  <p className="text-sm text-gray-400">Institutional Partner</p>
+                  <p className="text-xs text-gray-400">Logo & Name</p>
+                </div>
+              ))}
+            </div>
+          )}
+          <p className="text-sm text-gray-400 text-center mt-4">
+            {institutionalPartners.length === 0 ? 'Institutional partners will be displayed here once confirmed.' : ''}
+          </p>
+        </div>
+      </section>
+
+      {/* ================= SPONSORS - ALL ON SAME LEVEL ================= */}
+      <section className="py-12 bg-[#F8FAFC]">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-[#0A2540] uppercase">Sponsors</h2>
+            <div className="w-12 h-1 bg-[#F5A623] mx-auto mt-3"></div>
+            <p className="text-sm text-gray-500 mt-2">
+              Sponsorship logos will be displayed once agreements are finalized.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-6 max-w-5xl mx-auto">
+            {sponsors.length > 0 ? (
+              sponsors.map((sponsor, idx) => (
+                <div 
+                  key={idx}
+                  className="bg-white rounded-xl border border-zinc-200 p-6 text-center hover:shadow-lg transition-all hover:-translate-y-1 w-48"
+                >
+                  <div className="relative w-24 h-24 mx-auto mb-3">
+                    <Image 
+                      src={sponsor.logo}
+                      alt={sponsor.name}
+                      fill
+                      className="object-contain"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = `
+                            <div class="w-24 h-24 bg-[#1D3D6D] rounded-xl flex items-center justify-center mx-auto">
+                              <span class="text-white text-xl font-bold">${sponsor.name.split(' ').map(w => w[0]).join('')}</span>
+                            </div>
+                          `;
+                        }
+                      }}
+                    />
+                  </div>
+                  <p className="font-semibold text-[#0A2540] text-sm">{sponsor.name}</p>
+                </div>
+              ))
+            ) : (
+              // Placeholder sponsors
+              [...Array(6)].map((_, idx) => (
+                <div 
+                  key={idx}
+                  className="bg-white rounded-xl border border-dashed border-zinc-300 p-6 text-center hover:shadow-md transition-shadow w-48"
+                >
+                  <div className="w-24 h-24 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <FaStar className="text-3xl text-gray-300" />
+                  </div>
+                  <p className="text-sm text-gray-400">Sponsor</p>
+                  <p className="text-xs text-gray-400">Logo & Name</p>
+                </div>
+              ))
+            )}
+          </div>
+
+          <p className="text-xs text-gray-400 text-center mt-6 max-w-2xl mx-auto">
+            Avoid putting organizations listed merely as possible invitees in your internal proposal on the public page before they formally agree.
+          </p>
+        </div>
+      </section>
+
+      {/* ================= BECOME A PARTNER ================= */}
+      <section className="py-12 bg-gradient-to-r from-[#0A2540] to-[#1a3a5c]">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <h2 className="text-3xl font-bold text-white mb-4">Become a Partner</h2>
+          <div className="w-16 h-1 bg-[#F5A623] mx-auto mb-6"></div>
+          <p className="text-gray-300 text-lg mb-8 max-w-2xl mx-auto">
+            Collaborate with us. Institutions and organizations interested in supporting the symposium through scientific collaboration, institutional participation, sponsorship, or other forms of partnership may contact the Organizing Committee.
+          </p>
+          <Link 
+            href="#" 
+            className="inline-flex items-center gap-3 bg-[#F5A623] text-[#0A2540] px-8 py-4 rounded-lg font-bold hover:bg-[#e0950f] transition-colors hover:scale-105 transform duration-200 shadow-lg"
+          >
+            Contact the Secretariat <FaArrowRight />
+          </Link>
+        </div>
+      </section>
+
+      <Footer />
     </div>
   );
 }

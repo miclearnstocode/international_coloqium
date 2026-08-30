@@ -15,10 +15,9 @@ export default function Header() {
     { label: "Abstract Submission", href: "/full-paper-submission" },
     { label: "Registration", href: "/registration" },
     { label: "Presentation Guidelines", href: "/presentation-guidelines" },
-    { label: "Committee", href: "#" },
     { label: "Partner Institutions", href: "/partner-institutions" },
     { label: "Hotel & Mapping", href: "/hotel-mapping" },
-    
+     { label: "Contact Us", href: "/contact-us" },  
   ];
 
   return (

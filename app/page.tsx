@@ -235,10 +235,10 @@ export default function Home() {
             </div>
             <h3 className="text-xl font-bold text-[#0B2A4A] mb-4">ABOUT THE SYMPOSIUM</h3>
             <div className="w-10 h-1 bg-[#D5A54D] mb-6"></div>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-600 text-justify mb-6">
               The 3rd International Agri-Life & Bioresource Sciences Symposium brings together researchers, faculty members, students, scientists, government representatives, industry partners, and other stakeholders from the Philippines and abroad. <br />
             </p>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-600 text-justify mb-6">
 Through research presentations, scientific discussions, and collaborative activities, the symposium provides a platform for sharing knowledge and advancing innovative and sustainable solutions in agriculture, life sciences, and bioresource sciences.
             </p>
             <a href="about" className="font-semibold text-[#0B2A4A] inline-flex items-center gap-2 hover:gap-3 transition-all">Read More <span>→</span></a>
@@ -259,7 +259,7 @@ Through research presentations, scientific discussions, and collaborative activi
                 <div className="flex-1">
                   <p className="text-xs font-bold text-[#D5A54D] uppercase mb-1">CALL FOR ABSTRACTS</p>
                   <p className="font-semibold text-[#0B2A4A] mb-1">Abstract Submission Opens</p>
-                  <p className="text-sm text-gray-500">The Call for Abstracts and symposium registration officially open on October 5, 2026.</p>
+                  <p className="text-sm text-justify text-gray-500">The Call for Abstracts and symposium registration officially open on October 5, 2026.</p>
                   <a href="/full-paper-submission" className="mt-6 inline-flex items-center gap-2 font-semibold text-[#0B2A4A] hover:gap-3 transition-all">View Call for Abstracts <span>→</span></a>
                 </div>
               </div>
@@ -272,7 +272,7 @@ Through research presentations, scientific discussions, and collaborative activi
                 <div className="flex-1">
                   <p className="text-xs font-bold text-[#D5A54D] uppercase mb-1">REGISTRATION</p>
                   <p className="font-semibold text-[#0B2A4A] mb-1">Early Registration Deadline</p>
-                  <p className="text-sm text-gray-500">Participants may avail themselves of the applicable early registration rate until December 18, 2026.</p>
+                  <p className="text-sm text-justify text-gray-500">Participants may avail themselves of the applicable early registration rate until December 18, 2026.</p>
                   <a href="/registration" className="mt-6 inline-flex items-center gap-2 font-semibold text-[#0B2A4A] hover:gap-3 transition-all">Registration Details <span>→</span></a>
                 </div>
               </div>
@@ -285,7 +285,7 @@ Through research presentations, scientific discussions, and collaborative activi
                 <div className="flex-1">
                   <p className="text-xs font-bold text-[#D5A54D] uppercase mb-1">IMPORTANT</p>
                   <p className="font-semibold text-[#0B2A4A] mb-1">Abstract Submission Deadline</p>
-                  <p className="text-sm text-gray-500">Authors must submit their abstracts through the official symposium portal on or before January 10, 2027.</p>
+                  <p className="text-sm text-justify text-gray-500">Authors must submit their abstracts through the official symposium portal on or before January 10, 2027.</p>
                    <a href="/full-paper-submission" className="mt-6 inline-flex items-center gap-2 font-semibold text-[#0B2A4A] hover:gap-3 transition-all">Submit Abstract <span>→</span></a>
                 </div>
               </div>
@@ -303,7 +303,7 @@ Through research presentations, scientific discussions, and collaborative activi
   </div>
   <h3 className="text-xl font-bold text-[#0B2A4A] mb-4">WHO SHOULD ATTEND</h3>
   <div className="w-10 h-1 bg-[#D5A54D] mb-6"></div>
-  <p className="text-gray-600 mb-4">
+  <p className="text-gray-600 text-justify mb-4">
     The symposium welcomes members of the academic, scientific, government, and industry communities who are interested in advancing research, innovation, and collaboration in agri-life and bioresource sciences.
   </p>
   

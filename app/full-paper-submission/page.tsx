@@ -25,7 +25,9 @@ export default function FullabstractSubmission() {
       <section className="relative bg-white overflow-hidden border-b border-zinc-100">
         <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
           <div className="flex items-center gap-2 text-sm text-zinc-500 mb-8">
-            <span>Home</span>
+            <Link href="/" className="hover:text-[#F5A623] transition-colors">
+              Home
+            </Link>
             <span className="text-zinc-300">›</span>
             <span className="text-[#0A2540] font-medium">Abstract Submission</span>
           </div>
