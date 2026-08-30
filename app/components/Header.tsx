@@ -9,15 +9,16 @@ export default function Header() {
 
   const navItems = [
     { label: "Home", href: "/" },
+    { label: "About", href: "/about" },
     { label: "Program", href: "/program" },
     { label: "Scientific Tracks", href: "/scientific-tracks" },
-    { label: "Presentation Guidelines", href: "presentation-guidelines" },
     { label: "Abstract Submission", href: "/full-paper-submission" },
     { label: "Registration", href: "/registration" },
+    { label: "Presentation Guidelines", href: "/presentation-guidelines" },
     { label: "Committee", href: "#" },
     { label: "Partner Institutions", href: "/partner-institutions" },
     { label: "Hotel & Mapping", href: "/hotel-mapping" },
-    { label: "About Us", href: "/about-us" },
+    
   ];
 
   return (

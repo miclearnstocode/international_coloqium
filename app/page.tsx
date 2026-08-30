@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link"; 
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import { FaCalendarAlt, FaMapMarkerAlt } from "react-icons/fa";
 
 export default function Home() {
   // Single state object for the whole timer
@@ -89,21 +90,44 @@ export default function Home() {
         <div className="relative z-10 mx-auto max-w-350 px-8 py-12 lg:py-16 min-h-150">
           <div className="relative">
             <div className="max-w-2xl">
-              <span className="inline-block bg-[#E3D5C0] text-[#8B6F47] text-xs font-bold uppercase tracking-widest px-5 py-2 rounded-sm mb-8 shadow-sm">
+              <span className="inline-block bg-[#E3D5C0] text-[#8B6F47] text-xs font-bold uppercase tracking-widest px-5 py-2 rounded-sm mb-6 shadow-sm">
                 Welcome to
               </span>
-              <h1 className="text-5xl lg:text-6xl font-bold leading-tight mb-4 text-[#0B2A4A]">
+              
+              <h1 className="text-5xl lg:text-6xl font-bold leading-tight mb-6 text-[#0B2A4A]">
                 3rd International Agri- <br /> Life & Bioresource <br /> Science Symposium
               </h1>
-              <p className="text-[#D5A54D] text-xl lg:text-2xl font-semibold mb-4">
-                Innovation, Collaboration, <br /> for a Sustainable Future
+              
+              <p className="text-[#D5A54D] text-xl lg:text-2xl font-semibold mb-3">
+                Converging Frontiers in Agri-Life <br /> and Bioresource Sciences
               </p>
-              <p className="text-gray-600 text-base lg:text-lg mb-10 max-w-md leading-relaxed">
-                A global platform for researchers, professionals, and thought leaders to share ideas, exchange knowledge, and shape the future.
+              
+              <p className="text-gray-600 text-base lg:text-lg mb-8 max-w-md leading-relaxed">
+                Science, Innovation & Collaboration <br /> for a Resilient and Sustainable Future
               </p>
-              <a href="#" className="inline-flex items-center gap-2 bg-[#1D3D6D] text-white px-6 py-3 rounded-md font-semibold hover:bg-[#16305a] transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5">
+              
+              {/* Date with Icon */}
+              <div className="flex items-center gap-3 mb-3">
+                <FaCalendarAlt className="text-[#D5A54D] text-xl" />
+                <p className="text-gray-600 text-xl lg:text-2xl font-semibold">
+                  March 11-13, 2026
+                </p>
+              </div>
+              
+              {/* Address with Icon */}
+              <div className="flex items-center gap-3 mb-8">
+                <FaMapMarkerAlt className="text-[#D5A54D] text-xl" />
+                <p className="text-gray-600 text-xl lg:text-2xl font-semibold">
+                  Roxas City, Capiz, Philippines
+                </p>
+              </div>
+              
+              <Link 
+                href="about" 
+                className="inline-flex items-center gap-2 bg-[#1D3D6D] text-white px-6 py-3 rounded-md font-semibold hover:bg-[#16305a] transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+              >
                 Learn More <span aria-hidden="true">→</span>
-              </a>
+              </Link>
             </div>
 
             {/* Modal Card */}
@@ -128,27 +152,12 @@ export default function Home() {
 
                 <h2 className="text-center text-xl font-bold mb-2 text-[#0B2A4A]">3rd International Agri-Life & Bioresource Science Symposium</h2>
                 <p className="text-center text-[#D5A54D] font-semibold text-sm mb-6 leading-snug">
-                  Innovation, Collaboration, and Research <br /> for a Sustainable Future
+                  Science, Innovation & Collaboration for a Resilient  <br /> and Sustainable Future
                 </p>
 
-                <div className="flex justify-center gap-6 mb-5">
-                  <div className="flex items-center gap-2 text-xs text-gray-600">
-                    <svg className="w-4 h-4 text-[#1D3D6D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                    <span>March 15-18, 2027</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-gray-600">
-                    <svg className="w-4 h-4 text-[#1D3D6D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                    <span>Roxas City, Capiz Philippines</span>
-                  </div>
-                </div>
 
                 <p className="text-center text-gray-500 text-xs mb-6 leading-relaxed">
-                  Join us for an inspiring exchange of ideas, cutting-edge research, and global collaboration.
+                  Join researchers, scientists, educators, students, industry partners, and institutional leaders from the Philippines and around the world for three days of scientific exchange, interdisciplinary dialogue, and international collaboration.
                 </p>
 
                 <div className="flex justify-center">
@@ -214,7 +223,7 @@ export default function Home() {
           </div>
 
           <p className="text-center font-semibold text-gray-700">
-            March 15-18, 2027 <span className="mx-2 text-gray-300">|</span> Roxas City, Capiz Philippines
+            March 11-13, 2027 <span className="mx-2 text-gray-300">|</span> Roxas City, Capiz Philippines
           </p>
         </div>
       </section>

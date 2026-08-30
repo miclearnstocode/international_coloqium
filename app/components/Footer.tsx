@@ -23,7 +23,7 @@ export default function Footer() {
 
         {/* Center: Text */}
         <p className="text-sm text-gray-300 text-center">
-          Innovation, Collaboration, Research <br className="md:hidden" /> for a Sustainable Future.
+          Science, Innovation & Collaboration <br className="md:hidden" /> for a Resilient and Sustainable Future.
         </p>
 
         {/* Right: Social Icons */}

@@ -459,7 +459,7 @@ export default function ProgramPage() {
         </div>
 
         {/* Abstract Map Background (Right Side) */}
-        <div className="absolute right-0 top-0 bottom-0 w-1/2 opacity-60 pointer-events-none">
+        <div className="absolute right-0 top-0 bottom-0 w-1/2 opacity-80 pointer-events-none">
           <Image 
             src="/images/globe.jpg" 
             alt="World Map" 
