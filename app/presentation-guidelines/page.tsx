@@ -110,24 +110,50 @@ export default function PresentationGuidelinesPage() {
     <div className="min-h-screen bg-[#F8FAFC] font-sans text-[#0A2540]">
       <Header />
       
-      {/* ================= PAGE HERO ================= */}
+      {/* ================= PAGE HERO WITH IMAGE ================= */}
       <section className="relative bg-white overflow-hidden border-b border-zinc-100">
         <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
+          {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-sm text-zinc-500 mb-6">
             <Link href="/" className="hover:text-[#F5A623] transition-colors">
               Home
             </Link>
-           
+            
             <span className="text-zinc-300">›</span>
             <span className="text-[#0A2540] font-medium">Presentation Guidelines</span>
           </div>
 
-          <h1 className="text-5xl font-bold text-[#0A2540] mb-4">Presentation Guidelines</h1>
-          <div className="w-16 h-1 bg-[#F5A623] mb-6"></div>
-          <p className="text-lg text-gray-600 max-w-3xl leading-relaxed">
-            3rd International Agri-Life and Bioresource Sciences Symposium<br />
-            March 10-13, 2027 | Roxas City, Capiz, Philippines – The Seafood Capital of the Philippines
-          </p>
+          {/* Content with Image on Right */}
+          <div className="flex flex-col md:flex-row items-start gap-8">
+            {/* Left Side - Text Content */}
+            <div className="flex-1">
+              <h1 className="text-5xl font-bold text-[#0A2540] mb-4">Presentation Guidelines</h1>
+              <div className="w-16 h-1 bg-[#F5A623] mb-4"></div>
+              <p className="text-lg text-gray-600 max-w-2xl leading-relaxed">
+                3rd International Agri-Life and Bioresource Sciences Symposium
+              </p>
+              <p className="text-sm text-gray-500 mt-1">
+                March 10-13, 2027 | Roxas City, Capiz, Philippines – The Seafood Capital of the Philippines
+              </p>
+            </div>
+
+            {/* Right Side - Image */}
+             <div className="shrink-0 w-full md:w-64 lg:w-72">
+              <div className="relative rounded-xl overflow-hidden shadow-lg border border-gray-200">
+                <Image 
+                  src="/images/guideline.png" 
+                  alt="Presentation Guidelines" 
+                  width={320}
+                  height={200}
+                  className="object-cover w-full h-48 md:h-40 lg:h-48"
+                  priority
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#0A2540]/80 to-transparent p-3">
+                  
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -382,21 +408,28 @@ export default function PresentationGuidelinesPage() {
       </section>
 
       {/* ================= DOWNLOAD GUIDELINES ================= */}
-      <section className="py-16 bg-gradient-to-r from-[#0A2540] to-[#1a3a5c]">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="bg-white rounded-2xl p-8 md:p-12 text-center shadow-xl">
-            <h2 className="text-2xl font-bold text-[#0A2540] mb-4">
-              Download Complete Guidelines
-            </h2>
-            <p className="text-gray-600 mb-6">
-              Get the full presentation guidelines document in PDF format.
-            </p>
-            <button className="inline-flex items-center gap-3 bg-[#F5A623] text-[#0A2540] px-8 py-4 rounded-lg font-bold hover:bg-[#e0950f] transition-colors">
-              <FaDownload /> Download Presentation Guidelines (PDF)
-            </button>
-          </div>
-        </div>
-      </section>
+       <section className="py-16 bg-gradient-to-r from-[#0A2540] to-[#1a3a5c]">
+  <div className="max-w-7xl mx-auto px-6">
+    <div className="bg-white rounded-2xl p-8 md:p-12 text-center shadow-xl">
+      <h2 className="text-2xl font-bold text-[#0A2540] mb-4">
+        Download Complete Guidelines
+      </h2>
+      <p className="text-gray-600 mb-6">
+        Get the full presentation guidelines document in PDF format.
+      </p>
+
+      {/* Download attribute (Forces download) */}
+      <Link 
+        href="/documents/presentation-guidelines.pdf" 
+        download
+        className="inline-flex items-center gap-3 bg-[#F5A623] text-[#0A2540] px-8 py-4 rounded-lg font-bold hover:bg-[#e0950f] transition-colors hover:scale-105 transform duration-200 shadow-md hover:shadow-lg"
+      >
+        <FaDownload className="text-lg" /> 
+        Download Presentation Guidelines (PDF)
+      </Link>
+    </div>
+  </div>
+</section>
 
       <Footer />
     </div>

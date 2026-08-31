@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link"; 
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import { FaCalendarAlt, FaMapMarkerAlt, FaCheckCircle } from "react-icons/fa";
 
 export default function Home() {
   // Single state object for the whole timer
@@ -89,21 +90,44 @@ export default function Home() {
         <div className="relative z-10 mx-auto max-w-350 px-8 py-12 lg:py-16 min-h-150">
           <div className="relative">
             <div className="max-w-2xl">
-              <span className="inline-block bg-[#E3D5C0] text-[#8B6F47] text-xs font-bold uppercase tracking-widest px-5 py-2 rounded-sm mb-8 shadow-sm">
+              <span className="inline-block bg-[#E3D5C0] text-[#8B6F47] text-xs font-bold uppercase tracking-widest px-5 py-2 rounded-sm mb-6 shadow-sm">
                 Welcome to
               </span>
-              <h1 className="text-5xl lg:text-6xl font-bold leading-tight mb-4 text-[#0B2A4A]">
+              
+              <h1 className="text-5xl lg:text-6xl font-bold leading-tight mb-6 text-[#0B2A4A]">
                 3rd International Agri- <br /> Life & Bioresource <br /> Science Symposium
               </h1>
-              <p className="text-[#D5A54D] text-xl lg:text-2xl font-semibold mb-4">
-                Innovation, Collaboration, <br /> for a Sustainable Future
+              
+              <p className="text-[#D5A54D] text-xl lg:text-2xl font-semibold mb-3">
+                Converging Frontiers in Agri-Life <br /> and Bioresource Sciences
               </p>
-              <p className="text-gray-600 text-base lg:text-lg mb-10 max-w-md leading-relaxed">
-                A global platform for researchers, professionals, and thought leaders to share ideas, exchange knowledge, and shape the future.
+              
+              <p className="text-gray-800 text-base lg:text-lg mb-8 max-w-md leading-relaxed">
+                Science, Innovation & Collaboration <br /> for a Resilient and Sustainable Future
               </p>
-              <a href="#" className="inline-flex items-center gap-2 bg-[#1D3D6D] text-white px-6 py-3 rounded-md font-semibold hover:bg-[#16305a] transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5">
+              
+              {/* Date with Icon */}
+              <div className="flex items-center gap-3 mb-3">
+                <FaCalendarAlt className="text-[#D5A54D] text-xl" />
+                <p className="text-gray-800 text-xl lg:text-2xl font-semibold">
+                  March 11-13, 2026
+                </p>
+              </div>
+              
+              {/* Address with Icon */}
+              <div className="flex items-center gap-3 mb-8">
+                <FaMapMarkerAlt className="text-[#D5A54D] text-xl" />
+                <p className="text-gray-800 text-xl lg:text-2xl font-semibold">
+                  Roxas City, Capiz, Philippines
+                </p>
+              </div>
+              
+              <Link 
+                href="/about" 
+                className="inline-flex items-center gap-2 bg-[#1D3D6D] text-white px-6 py-3 rounded-md font-semibold hover:bg-[#16305a] transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+              >
                 Learn More <span aria-hidden="true">→</span>
-              </a>
+              </Link>
             </div>
 
             {/* Modal Card */}
@@ -126,33 +150,14 @@ export default function Home() {
                   <div className="absolute right-0 bottom-2 text-[#D5A54D] text-[8px]">✦</div>
                 </div>
 
-                <h2 className="text-center text-xl font-bold mb-2 text-[#0B2A4A]">3rd International Agri-Life & Bioresource Science Symposium</h2>
-                <p className="text-center text-[#D5A54D] font-semibold text-sm mb-6 leading-snug">
-                  Innovation, Collaboration, and Research <br /> for a Sustainable Future
-                </p>
-
-                <div className="flex justify-center gap-6 mb-5">
-                  <div className="flex items-center gap-2 text-xs text-gray-600">
-                    <svg className="w-4 h-4 text-[#1D3D6D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                    <span>March 15-18, 2027</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-gray-600">
-                    <svg className="w-4 h-4 text-[#1D3D6D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                    <span>Roxas City, Capiz Philippines</span>
-                  </div>
-                </div>
-
-                <p className="text-center text-gray-500 text-xs mb-6 leading-relaxed">
-                  Join us for an inspiring exchange of ideas, cutting-edge research, and global collaboration.
+                <h2 className="text-center text-xl font-bold mb-2 text-[#D5A54D]">3rd International Agri-Life & Bioresource Science Symposium</h2>
+                
+                <p className="text-center text-gray-800 text-xs mb-6 leading-relaxed">
+                  Join researchers, scientists, educators, students, industry partners, and institutional leaders from the Philippines and around the world for three days of scientific exchange, interdisciplinary dialogue, and international collaboration.
                 </p>
 
                 <div className="flex justify-center">
-                  <a href="#" className="bg-[#1D3D6D] text-white px-6 py-2.5 rounded-md font-semibold text-sm hover:bg-[#16305a] transition-colors shadow-md">
+                  <a href="/program" className="bg-[#1D3D6D] text-white px-6 py-2.5 rounded-md font-semibold text-sm hover:bg-[#16305a] transition-colors shadow-md">
                     View Event Details
                   </a>
                 </div>
@@ -214,7 +219,7 @@ export default function Home() {
           </div>
 
           <p className="text-center font-semibold text-gray-700">
-            March 15-18, 2027 <span className="mx-2 text-gray-300">|</span> Roxas City, Capiz Philippines
+            March 11-13, 2027 <span className="mx-2 text-gray-300">|</span> Roxas City, Capiz Philippines
           </p>
         </div>
       </section>
@@ -228,12 +233,15 @@ export default function Home() {
             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm">
               <svg className="w-8 h-8 text-[#1D3D6D]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"></path></svg>
             </div>
-            <h3 className="text-xl font-bold text-[#0B2A4A] mb-4">ABOUT THE CONFERENCE</h3>
+            <h3 className="text-xl font-bold text-[#0B2A4A] mb-4">ABOUT THE SYMPOSIUM</h3>
             <div className="w-10 h-1 bg-[#D5A54D] mb-6"></div>
-            <p className="text-red-600 mb-6">
-              The 3rd International Agri-Life & Bioresource Science Symposium brings together scholars, practitioners, industry leaders, and students from around the world to explore innovative ideas, share research findings, and foster collaborations that drive sustainable development.
+            <p className="text-gray-600 text-justify mb-6">
+              The 3rd International Agri-Life & Bioresource Sciences Symposium brings together researchers, faculty members, students, scientists, government representatives, industry partners, and other stakeholders from the Philippines and abroad. <br />
             </p>
-            <a href="#" className="font-semibold text-[#0B2A4A] inline-flex items-center gap-2 hover:gap-3 transition-all">Read More <span>→</span></a>
+            <p className="text-gray-600 text-justify mb-6">
+Through research presentations, scientific discussions, and collaborative activities, the symposium provides a platform for sharing knowledge and advancing innovative and sustainable solutions in agriculture, life sciences, and bioresource sciences.
+            </p>
+            <a href="about" className="font-semibold text-[#0B2A4A] inline-flex items-center gap-2 hover:gap-3 transition-all">Read More <span>→</span></a>
           </div>
 
           {/* Card 2: Announcements */}
@@ -245,56 +253,88 @@ export default function Home() {
               {/* Item 1 */}
               <div className="flex gap-4 border-b border-gray-200 pb-4">
                 <div className="flex flex-col items-center">
-                  <span className="text-xl font-bold text-[#1D3D6D]">Oct</span>
+                  <span className="text-xl font-bold text-[#1D3D6D]">OCT</span>
                   <span className="text-2xl font-bold text-[#0B2A4A]">05</span>
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs font-bold text-[#D5A54D] uppercase mb-1">Important</p>
-                  <p className="font-semibold text-[#0B2A4A] mb-1">Call for Abstracts</p>
-                  <p className="text-sm text-gray-500">The official launching and dissemination of the Call for Abstracts and Registration  will be on Octber 5, 2026.</p>
+                  <p className="text-xs font-bold text-[#D5A54D] uppercase mb-1">CALL FOR ABSTRACTS</p>
+                  <p className="font-semibold text-[#0B2A4A] mb-1">Abstract Submission Opens</p>
+                  <p className="text-sm text-justify text-gray-500">The Call for Abstracts and symposium registration officially open on October 5, 2026.</p>
+                  <a href="/full-paper-submission" className="mt-6 inline-flex items-center gap-2 font-semibold text-[#0B2A4A] hover:gap-3 transition-all">View Call for Abstracts <span>→</span></a>
                 </div>
               </div>
               {/* Item 2 */}
               <div className="flex gap-4 border-b border-gray-200 pb-4">
                 <div className="flex flex-col items-center">
-                  <span className="text-xl font-bold text-[#1D3D6D]">Dec</span>
+                  <span className="text-xl font-bold text-[#1D3D6D]">DEC</span>
                   <span className="text-2xl font-bold text-[#0B2A4A]">18</span>
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs font-bold text-[#D5A54D] uppercase mb-1">Update</p>
-                  <p className="font-semibold text-[#0B2A4A] mb-1">Registration is Now Open</p>
-                  <p className="text-sm text-gray-500">Early bird registration is available until December 18, 2026.</p>
+                  <p className="text-xs font-bold text-[#D5A54D] uppercase mb-1">REGISTRATION</p>
+                  <p className="font-semibold text-[#0B2A4A] mb-1">Early Registration Deadline</p>
+                  <p className="text-sm text-justify text-gray-500">Participants may avail themselves of the applicable early registration rate until December 18, 2026.</p>
+                  <a href="/registration" className="mt-6 inline-flex items-center gap-2 font-semibold text-[#0B2A4A] hover:gap-3 transition-all">Registration Details <span>→</span></a>
                 </div>
               </div>
-              {/* Item 3 */}
+              {/* Item 3 IMPORTANT */}
               <div className="flex gap-4">
                 <div className="flex flex-col items-center">
-                  <span className="text-xl font-bold text-[#1D3D6D]">Oct</span>
+                  <span className="text-xl font-bold text-[#1D3D6D]">JAN</span>
                   <span className="text-2xl font-bold text-[#0B2A4A]">10</span>
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs font-bold text-[#D5A54D] uppercase mb-1">Announcement</p>
-                  <p className="font-semibold text-[#0B2A4A] mb-1">Conference Program Preview</p>
-                  <p className="text-sm text-gray-500">Check out the preliminary program and keynote speakers.</p>
+                  <p className="text-xs font-bold text-[#D5A54D] uppercase mb-1">IMPORTANT</p>
+                  <p className="font-semibold text-[#0B2A4A] mb-1">Abstract Submission Deadline</p>
+                  <p className="text-sm text-justify text-gray-500">Authors must submit their abstracts through the official symposium portal on or before January 10, 2027.</p>
+                   <a href="/full-paper-submission" className="mt-6 inline-flex items-center gap-2 font-semibold text-[#0B2A4A] hover:gap-3 transition-all">Submit Abstract <span>→</span></a>
                 </div>
               </div>
             </div>
 
-            <a href="#" className="mt-6 inline-flex items-center gap-2 font-semibold text-[#0B2A4A] hover:gap-3 transition-all">View All Announcements <span>→</span></a>
+           
           </div>
 
-          {/* Card 3: About Us */}
-          <div className="bg-[#F5F6FA] p-8 rounded-lg">
-            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm">
-              <svg className="w-8 h-8 text-[#1D3D6D]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-            </div>
-            <h3 className="text-xl font-bold text-[#0B2A4A] mb-4">ABOUT US</h3>
-            <div className="w-10 h-1 bg-[#D5A54D] mb-6"></div>
-            <p className="text-red-600 mb-6">
-              We are a dedicated team committed to organizing meaningful academic events that promote research excellence, knowledge exchange, and global partnerships.
-            </p>
-            <a href="#" className="font-semibold text-[#0B2A4A] inline-flex items-center gap-2 hover:gap-3 transition-all">More About Us <span>→</span></a>
-          </div>
+          {/* Card 3: WHO SHOULD ATTEND */}
+              <div className="bg-[#F5F6FA] p-8 rounded-lg">
+  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm">
+    <svg className="w-8 h-8 text-[#1D3D6D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+    </svg>
+  </div>
+  <h3 className="text-xl font-bold text-[#0B2A4A] mb-4">WHO SHOULD ATTEND</h3>
+  <div className="w-10 h-1 bg-[#D5A54D] mb-6"></div>
+  <p className="text-gray-600 text-justify mb-4">
+    The symposium welcomes members of the academic, scientific, government, and industry communities who are interested in advancing research, innovation, and collaboration in agri-life and bioresource sciences.
+  </p>
+  
+  {/* Bullet List */}
+  <ul className="space-y-2 mb-6">
+  <li className="flex items-center gap-3 text-gray-700 text-sm">
+    <FaCheckCircle className="text-[#D5A54D] text-sm flex-shrink-0" />
+    Researchers & Scientists
+  </li>
+  <li className="flex items-center gap-3 text-gray-700 text-sm">
+    <FaCheckCircle className="text-[#D5A54D] text-sm flex-shrink-0" />
+    Faculty & Educators
+  </li>
+  <li className="flex items-center gap-3 text-gray-700 text-sm">
+    <FaCheckCircle className="text-[#D5A54D] text-sm flex-shrink-0" />
+    Graduate & Undergraduate Students
+  </li>
+  <li className="flex items-center gap-3 text-gray-700 text-sm">
+    <FaCheckCircle className="text-[#D5A54D] text-sm flex-shrink-0" />
+    Government & Research Institutions
+  </li>
+  <li className="flex items-center gap-3 text-gray-700 text-sm">
+    <FaCheckCircle className="text-[#D5A54D] text-sm flex-shrink-0" />
+    Industry & Development Partners
+  </li>
+</ul>
+  
+  <a href="/scientific-tracks" className="font-semibold text-[#0B2A4A] inline-flex items-center gap-2 hover:gap-3 transition-all">
+    See Who Can Participate <span>→</span>
+  </a>
+</div>
         </div>
       </section>
       <Footer/>

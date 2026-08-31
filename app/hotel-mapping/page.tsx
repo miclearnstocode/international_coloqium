@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import "leaflet/dist/leaflet.css"; 
+import Link from "next/link";
 
 import { 
   FaMapMarkerAlt, FaBuilding, FaUsers, FaBed, FaUniversity, 
@@ -90,7 +91,9 @@ export default function HotelMapping() {
       <section className="relative bg-white overflow-hidden border-b border-zinc-100">
         <div className="max-w-350 mx-auto px-8 py-16 relative z-10">
           <div className="flex items-center gap-2 text-sm text-zinc-500 mb-8">
-            <span>Home</span>
+            <Link href="/" className="hover:text-[#F5A623] transition-colors">
+              Home
+            </Link>
             <span className="text-zinc-300">›</span>
             <span className="text-[#0B2A4A] font-medium">Hotel & Mapping</span>
           </div>

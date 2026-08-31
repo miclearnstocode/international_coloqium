@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import Link from "next/link";
 import { 
   FaRegListAlt, FaUsers, FaGlobeAsia, FaUserTie, FaUserGraduate, FaUserCircle,
   FaRegCalendarAlt, FaInfoCircle, FaDollarSign, FaRegUser, FaMobileAlt,
@@ -42,7 +43,9 @@ export default function RegistrationPage() {
       <section className="relative bg-white overflow-hidden border-b border-zinc-100">
         <div className="max-w-350 mx-auto px-8 py-16 relative z-10">
           <div className="flex items-center gap-2 text-sm text-zinc-500 mb-8">
-            <span>Home</span>
+            <Link href="/" className="hover:text-[#F5A623] transition-colors">
+              Home
+            </Link>
             <span className="text-zinc-300">›</span>
             <span className="text-[#0A2540] font-medium">Registration</span>
           </div>

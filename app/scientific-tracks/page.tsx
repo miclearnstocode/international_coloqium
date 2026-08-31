@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import Link from "next/link";
 import { FaRegCheckCircle, FaRegPaperPlane, FaFileAlt } from "react-icons/fa";
 
 export default function ScientificTracks() {
@@ -115,7 +116,9 @@ export default function ScientificTracks() {
 
         <div className="max-w-350 mx-auto px-8 py-16 relative z-10">
           <div className="flex items-center gap-2 text-sm text-zinc-500 mb-8">
-            <span>Home</span>
+            <Link href="/" className="hover:text-[#F5A623] transition-colors">
+              Home
+            </Link>
             <span className="text-zinc-300">›</span>
             <span className="text-[#0A2540] font-medium">Scientific Tracks</span>
           </div>
@@ -227,9 +230,12 @@ export default function ScientificTracks() {
                 <p className="text-zinc-500">Share your innovative research and be part of global discussions that shape the future of science, technology, and society.</p>
               </div>
             </div>
-            <button className="bg-[#1D3D6D] text-white px-8 py-4 rounded-lg font-bold hover:bg-[#143b66] transition-colors flex items-center gap-2 shrink-0">
-              Submit Abstract <FaRegPaperPlane className="rotate-[-20deg]" />
-            </button>
+            <Link 
+  href="/full-paper-submission" 
+  className="bg-[#1D3D6D] text-white px-8 py-4 rounded-lg font-bold hover:bg-[#143b66] transition-colors flex items-center gap-2 shrink-0 hover:text-white transition-all"
+>
+  Submit Abstract <FaRegPaperPlane className="rotate-[-20deg]" />
+</Link>
           </div>
         </div>
       </section>

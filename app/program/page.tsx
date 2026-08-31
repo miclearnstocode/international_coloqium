@@ -372,7 +372,6 @@ export default function ProgramPage() {
       description: "Official launching and dissemination of the Call for Abstracts and Registration through partner institutions, networks, and online platforms.",
       icon: <FaRocket />
     },
-
     {
       date: "January 10, 2027",
       event: "Abstract Submission Deadline",
@@ -385,7 +384,6 @@ export default function ProgramPage() {
       description: "Scientific evaluation of submitted abstracts by designated reviewers based on established criteria.",
       icon: <FaFileAlt />
     },
-
     {
       date: "Rolling (until Jan. 25, 2027)",
       event: "Notification of Acceptance",
@@ -453,13 +451,12 @@ export default function ProgramPage() {
           <h1 className="text-5xl font-bold text-[#0A2540] mb-4">Symposium Program</h1>
           <div className="w-16 h-1 bg-[#F5A623] mb-6"></div>
           
-          <p className="text-lg text-gray-600 max-w-lg leading-relaxed">
-            Explore the conference program featuring keynote speeches, technical sessions, panel discussions, and special events.
+          <p className="text-lg text-gray-600 max-w-lg leading-relaxed">The symposium will be conducted face-to-face and will combine keynote and plenary presentations, technical sessions, panel discussions, oral and poster research presentations, networking opportunities, collaborative activities, and cultural experiences.
           </p>
         </div>
 
         {/* Abstract Map Background (Right Side) */}
-        <div className="absolute right-0 top-0 bottom-0 w-1/2 opacity-60 pointer-events-none">
+        <div className="absolute right-0 top-0 bottom-0 w-1/2 opacity-80 pointer-events-none">
           <Image 
             src="/images/globe.jpg" 
             alt="World Map" 
@@ -473,71 +470,67 @@ export default function ProgramPage() {
         </div>
       </section>
 
-       {/* ================= KEY DATES TABLE ================= */}
-      <section className="py-16 bg-gradient-to-r from-[#0A2540] to-[#1a3a5c]">
+       {/* ================= KEY DATES TABLE - COMPACT ================= */}
+      <section className="py-8 bg-gradient-to-r from-[#0A2540] to-[#1a3a5c]">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-10">
-            <div className="flex items-center justify-center gap-3 mb-4">
+          <div className="text-center mb-6">
+            <div className="flex items-center justify-center gap-3 mb-3">
               <FaClock className="text-[#F5A623] text-3xl" />
               <h2 className="text-3xl font-bold text-white uppercase">Key Dates</h2>
             </div>
             <div className="w-16 h-1 bg-[#F5A623] mx-auto"></div>
-            <p className="text-gray-300 mt-4">
+            <p className="text-gray-300 mt-3 text-sm">
               Mark your calendars with these important deadlines for the 3rd International Agri-Life & Bioresource Science Symposium
             </p>
           </div>
 
           <div className="bg-white rounded-xl overflow-hidden shadow-xl">
             {/* Table Header */}
-            <div className="grid grid-cols-12 bg-[#0A2540] text-white px-6 py-4">
-              <div className="col-span-1 flex items-center justify-center">
-                <FaCalendarAlt className="text-[#F5A623]" />
-              </div>
-              <div className="col-span-3 font-bold uppercase text-sm">Date</div>
-              <div className="col-span-4 font-bold uppercase text-sm">Event</div>
-              <div className="col-span-4 font-bold uppercase text-sm">Description</div>
+            <div className="grid grid-cols-12 bg-[#0A2540] text-white px-4 py-2">
+              <div className="col-span-3 font-bold uppercase text-xs">Date</div>
+              <div className="col-span-4 font-bold uppercase text-xs">Event</div>
+              <div className="col-span-5 font-bold uppercase text-xs">Description</div>
             </div>
 
-            {/* Table Rows */}
-            {keyDatesData.map((item, idx) => (
-              <div 
-                key={idx}
-                className={`grid grid-cols-12 px-6 py-4 items-center border-b border-zinc-100 last:border-b-0 ${
-                  idx % 2 === 0 ? 'bg-white' : 'bg-zinc-50/50'
-                } hover:bg-blue-100 transition-colors duration-200`}
-              >
-                <div className="col-span-1 flex items-center justify-center text-[#F5A623] text-xl">
-                  {item.icon}
+            {/* Table Rows - Compact */}
+            <div className="max-h-80 overflow-y-auto">
+              {keyDatesData.map((item, idx) => (
+                <div 
+                  key={idx}
+                  className={`grid grid-cols-12 px-4 py-2 items-center border-b border-zinc-100 last:border-b-0 ${
+                    idx % 2 === 0 ? 'bg-white' : 'bg-zinc-50/50'
+                  } hover:bg-blue-50 transition-colors duration-200`}
+                >
+                  <div className="col-span-3">
+                    <span className="font-bold text-[#0A2540] text-sm">{item.date}</span>
+                  </div>
+                  <div className="col-span-4">
+                    <span className="font-semibold text-gray-700 text-sm">{item.event}</span>
+                  </div>
+                  <div className="col-span-5">
+                    <span className="text-sm text-gray-600">{item.description}</span>
+                  </div>
                 </div>
-                <div className="col-span-3">
-                  <span className="font-bold text-[#0A2540]">{item.date}</span>
-                </div>
-                <div className="col-span-4">
-                  <span className="font-semibold text-gray-700">{item.event}</span>
-                </div>
-                <div className="col-span-4">
-                  <span className="text-sm text-gray-600">{item.description}</span>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
 
             {/* Table Footer with Action */}
-            <div className="bg-gray-50 px-6 py-4 border-t border-zinc-200 flex justify-between items-center">
-              <span className="text-sm text-gray-500">All deadlines are at 11:59 PM (UTC+8)</span>
+            <div className="bg-gray-50 px-4 py-2 border-t border-zinc-200 flex justify-between items-center">
+              <span className="text-xs text-gray-500">All deadlines are at 11:59 PM (UTC+8)</span>
             </div>
           </div>
         </div>
       </section>
 
       {/* ================= AT A GLANCE ================= */}
-      <section className="py-16">
+      <section className="py-12">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
+          <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-[#0A2540] uppercase">Program At A Glance</h2>
             <div className="w-16 h-1 bg-[#F5A623] mx-auto mt-4"></div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {[
               { icon: <FaUsers />, value: "3", label: "Days" },
               { icon: <FaMicrophoneAlt />, value: "5", label: "Keynote Speeches" },
@@ -547,143 +540,145 @@ export default function ProgramPage() {
             ].map((item, idx) => (
               <div 
                 key={idx} 
-                className="bg-white rounded-xl border border-zinc-100 shadow-sm p-8 flex flex-col items-center text-center hover:shadow-md transition-shadow"
+                className="bg-white rounded-xl border border-zinc-100 shadow-sm p-4 flex flex-col items-center text-center hover:shadow-md transition-shadow"
               >
-                <div className="text-4xl text-[#0A2540] mb-4">{item.icon}</div>
-                <span className="text-6xl font-bold text-green-700 mb-2">{item.value}</span>
-                <span className="text-sm font-semibold text-gray-600 uppercase tracking-wide">{item.label}</span>
+                <div className="text-3xl text-[#0A2540] mb-2">{item.icon}</div>
+                <span className="text-4xl font-bold text-green-700 mb-1">{item.value}</span>
+                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{item.label}</span>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ================= SCHEDULE ================= */}
-      <section className="pb-16">
+      {/* ================= SCHEDULE - COMPACT WITH SCROLL ================= */}
+      <section className="pb-12">
         <div className="max-w-7xl mx-auto px-6">
           
           {/* Day Tabs - Interactive */}
           <div className="grid grid-cols-1 md:grid-cols-3 rounded-t-xl overflow-hidden border border-zinc-200">
             <button
               onClick={() => setActiveDay(1)}
-              className={`p-6 flex items-center justify-center gap-4 transition-all duration-300 ${
+              className={`p-4 flex items-center justify-center gap-3 transition-all duration-300 ${
                 activeDay === 1 
                   ? 'bg-[#0A2540] text-white shadow-lg' 
                   : 'bg-white text-[#0A2540] hover:bg-zinc-50'
               }`}
             >
-              <FaCalendarAlt className={`text-3xl ${activeDay === 1 ? 'text-[#F5A623]' : 'text-[#0A2540]'}`} />
+              <FaCalendarAlt className={`text-2xl ${activeDay === 1 ? 'text-[#F5A623]' : 'text-[#0A2540]'}`} />
               <div>
-                <p className={`font-bold text-lg leading-tight ${activeDay === 1 ? 'text-white' : 'text-gray-700'}`}>
+                <p className={`font-bold text-base leading-tight ${activeDay === 1 ? 'text-white' : 'text-gray-700'}`}>
                   DAY 1
                 </p>
-                <p className={`text-sm ${activeDay === 1 ? 'text-gray-400' : 'text-gray-600'}`}>
-                  March 11, 2026
+                <p className={`text-xs ${activeDay === 1 ? 'text-gray-400' : 'text-gray-600'}`}>
+                  March 11, 2027
                 </p>
               </div>
             </button>
 
             <button
               onClick={() => setActiveDay(2)}
-              className={`p-6 flex items-center justify-center gap-4 transition-all duration-300 ${
+              className={`p-4 flex items-center justify-center gap-3 transition-all duration-300 ${
                 activeDay === 2 
                   ? 'bg-[#0A2540] text-white shadow-lg' 
                   : 'bg-white text-[#0A2540] hover:bg-zinc-50'
               } border-x border-zinc-200`}
             >
-              <FaCalendarAlt className={`text-3xl ${activeDay === 2 ? 'text-[#F5A623]' : 'text-[#0A2540]'}`} />
+              <FaCalendarAlt className={`text-2xl ${activeDay === 2 ? 'text-[#F5A623]' : 'text-[#0A2540]'}`} />
               <div>
-                <p className={`font-bold text-lg leading-tight ${activeDay === 2 ? 'text-white' : 'text-gray-700'}`}>
+                <p className={`font-bold text-base leading-tight ${activeDay === 2 ? 'text-white' : 'text-gray-700'}`}>
                   DAY 2
                 </p>
-                <p className={`text-sm ${activeDay === 2 ? 'text-gray-400' : 'text-gray-600'}`}>
-                  March 12, 2026
+                <p className={`text-xs ${activeDay === 2 ? 'text-gray-400' : 'text-gray-600'}`}>
+                  March 12, 2027
                 </p>
               </div>
             </button>
 
             <button
               onClick={() => setActiveDay(3)}
-              className={`p-6 flex items-center justify-center gap-4 transition-all duration-300 ${
+              className={`p-4 flex items-center justify-center gap-3 transition-all duration-300 ${
                 activeDay === 3 
                   ? 'bg-[#0A2540] text-white shadow-lg' 
                   : 'bg-white text-[#0A2540] hover:bg-zinc-50'
               }`}
             >
-              <FaCalendarAlt className={`text-3xl ${activeDay === 3 ? 'text-[#F5A623]' : 'text-[#0A2540]'}`} />
+              <FaCalendarAlt className={`text-2xl ${activeDay === 3 ? 'text-[#F5A623]' : 'text-[#0A2540]'}`} />
               <div>
-                <p className={`font-bold text-lg leading-tight ${activeDay === 3 ? 'text-white' : 'text-gray-700'}`}>
+                <p className={`font-bold text-base leading-tight ${activeDay === 3 ? 'text-white' : 'text-gray-700'}`}>
                   DAY 3
                 </p>
-                <p className={`text-sm ${activeDay === 3 ? 'text-gray-400' : 'text-gray-600'}`}>
-                  March 13, 2026
+                <p className={`text-xs ${activeDay === 3 ? 'text-gray-400' : 'text-gray-600'}`}>
+                  March 13, 2027
                 </p>
               </div>
             </button>
           </div>
 
-          {/* Schedule Table */}
+          {/* Schedule Table - Scrollable */}
           <div className="border border-t-0 border-zinc-200 bg-white rounded-b-xl overflow-hidden shadow-sm">
             {/* Table Header */}
-            <div className="grid grid-cols-12 bg-[#0A2540] text-white px-6 py-4">
-              <div className="col-span-3 font-bold uppercase text-sm">Time</div>
-              <div className="col-span-9 font-bold uppercase text-sm">Session / Activity</div>
+            <div className="grid grid-cols-12 bg-[#0A2540] text-white px-4 py-2 sticky top-0 z-10">
+              <div className="col-span-3 font-bold uppercase text-xs">Time</div>
+              <div className="col-span-9 font-bold uppercase text-xs">Session / Activity</div>
             </div>
 
-            {/* Table Rows */}
-            {scheduleData.map((row, idx) => (
-              <div 
-                key={idx} 
-                className={`grid grid-cols-12 px-6 py-5 items-start border-b border-zinc-100 last:border-b-0 ${idx % 2 === 0 ? 'bg-white' : 'bg-zinc-50/50'}`}
-              >
-                <div className="col-span-3 text-sm font-semibold text-gray-600 pt-1">{row.time}</div>
-                <div className="col-span-9 flex gap-4">
-                  <div className="w-10 h-10 rounded-full bg-[#e8f0fe] text-[#0A2540] flex items-center justify-center text-lg shrink-0">
-                    {row.icon}
-                  </div>
-                  <div>
-                    <p className="font-bold text-gray-700 uppercase text-sm mb-1">{row.title}</p>
-                    {row.subtitle && (
-                      <p className="text-sm text-gray-600 whitespace-pre-line">{row.subtitle}</p>
-                    )}
+            {/* Scrollable Table Body */}
+            <div className="max-h-96 overflow-y-auto">
+              {scheduleData.map((row, idx) => (
+                <div 
+                  key={idx} 
+                  className={`grid grid-cols-12 px-4 py-2 items-start border-b border-zinc-100 last:border-b-0 ${idx % 2 === 0 ? 'bg-white' : 'bg-zinc-50/50'}`}
+                >
+                  <div className="col-span-3 text-xs font-semibold text-gray-600 pt-1">{row.time}</div>
+                  <div className="col-span-9 flex gap-3">
+                    <div className="w-7 h-7 rounded-full bg-[#e8f0fe] text-[#0A2540] flex items-center justify-center text-sm shrink-0">
+                      {row.icon}
+                    </div>
+                    <div>
+                      <p className="font-bold text-gray-700 text-xs mb-0.5">{row.title}</p>
+                      {row.subtitle && (
+                        <p className="text-xs text-gray-600 whitespace-pre-line">{row.subtitle}</p>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
       {/* ================= DOWNLOAD & HIGHLIGHTS ================= */}
-      <section className="bg-white py-16 border-t border-zinc-100">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-10">
+      <section className="bg-white py-12 border-t border-zinc-100">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-8">
           
           {/* Left: Download */}
-          <div className="bg-white border border-zinc-200 rounded-xl p-8 flex flex-col md:flex-row gap-8 items-center shadow-sm">
+          <div className="bg-white border border-zinc-200 rounded-xl p-6 flex flex-col md:flex-row gap-6 items-center shadow-sm">
             <div className="flex-1">
-              <h3 className="text-xl font-bold text-[#0A2540] mb-2 uppercase">Download Program</h3>
-              <div className="w-12 h-1 bg-[#F5A623] mb-4"></div>
-              <p className="text-gray-600 mb-6">
+              <h3 className="text-lg font-bold text-[#0A2540] mb-2 uppercase">Download Program</h3>
+              <div className="w-10 h-1 bg-[#F5A623] mb-3"></div>
+              <p className="text-gray-600 text-sm mb-4">
                 Get the complete program schedule in PDF format.
               </p>
-              <button className="inline-flex items-center gap-2 border-2 border-[#0A2540] text-[#0A2540] px-6 py-3 rounded-md font-bold hover:bg-[#0A2540] hover:text-white transition-colors">
+              <button className="inline-flex items-center gap-2 border-2 border-[#0A2540] text-[#0A2540] px-4 py-2 rounded-md font-bold text-sm hover:bg-[#0A2540] hover:text-white transition-colors">
                 <FaDownload /> <span className="text-gray-700">DOWNLOAD FULL PROGRAM (PDF)</span>
               </button>
             </div>
-            <div className="w-40 shrink-0 bg-white shadow-lg border border-zinc-200 p-4 rounded-lg flex flex-col items-center text-center">
-               <div className="w-24 h-36 bg-blue-100 mb-2 relative overflow-hidden rounded">
+            <div className="w-32 shrink-0 bg-white shadow-lg border border-zinc-200 p-3 rounded-lg flex flex-col items-center text-center">
+               <div className="w-20 h-28 bg-blue-100 mb-2 relative overflow-hidden rounded">
                  <Image src="/program-cover.png" alt="Program Cover" fill className="object-cover" />
                </div>
-               <p className="text-[10px] font-bold text-gray-700 mt-2 leading-tight">INTERNATIONAL<br/>SCIENCE<br/>SYMPOSIUM<br/>2026</p>
+               <p className="text-[8px] font-bold text-gray-700 mt-1 leading-tight">INTERNATIONAL<br/>SCIENCE<br/>SYMPOSIUM<br/>2027</p>
             </div>
           </div>
 
           {/* Right: Highlights */}
-          <div className="bg-white border border-zinc-200 rounded-xl p-8 flex flex-col md:flex-row gap-8 items-center shadow-sm">
+          <div className="bg-white border border-zinc-200 rounded-xl p-6 flex flex-col md:flex-row gap-6 items-center shadow-sm">
             <div className="flex-1">
-              <h3 className="text-xl font-bold text-[#0A2540] mb-2 uppercase">Program Highlights</h3>
-              <div className="w-12 h-1 bg-[#F5A623] mb-4"></div>
-              <ul className="space-y-3">
+              <h3 className="text-lg font-bold text-[#0A2540] mb-2 uppercase">Program Highlights</h3>
+              <div className="w-10 h-1 bg-[#F5A623] mb-3"></div>
+              <ul className="space-y-2">
                 {[
                   "Renowned international keynote speakers",
                   "High-quality research presentations",
@@ -691,13 +686,13 @@ export default function ProgramPage() {
                   "Networking opportunities with global experts",
                   "Cultural and social events"
                 ].map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-3 text-sm text-gray-700">
-                    <FaCheckCircle className="text-[#F5A623] mt-0.5" /> {item}
+                  <li key={idx} className="flex items-start gap-2 text-xs text-gray-700">
+                    <FaCheckCircle className="text-[#F5A623] mt-0.5 text-sm shrink-0" /> {item}
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="w-56 shrink-0 h-36 rounded-xl overflow-hidden bg-zinc-200 shadow-lg relative">
+            <div className="w-40 shrink-0 h-24 rounded-xl overflow-hidden bg-zinc-200 shadow-lg relative">
                <Image src="/conference-photo.jpg" alt="Conference" fill className="object-cover" />
             </div>
           </div>
