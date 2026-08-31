@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 SCOPES = ['https://www.googleapis.com/auth/drive']
-CREDENTIALS_PATH = os.getenv('GOOGLE_APPLICATION_CREDENTIALS', 'rdesystem-secret.json')
+CREDENTIALS_PATH = os.getenv('GOOGLE_APPLICATION_CREDENTIALS', 'rdesystem.json')
 
 ROOT_FOLDER_ID = '1pXuQFbe5yvBU0CECkgFNrfXySMDNWPC0'
 

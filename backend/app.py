@@ -294,7 +294,6 @@ def submit_paper():
             except: pass
         return jsonify({"detail": str(e)}), 500
 
-
 @app.route('/api/sucs/add', methods=['POST', 'OPTIONS'])
 def add_suc():
     if request.method == 'OPTIONS':
@@ -383,20 +382,12 @@ def submit_abstract():
             project_title=data['selected_track']
         )
         
-        # Get sender_id from the data
+        # Get sender_id from the data (NO JWT verification)
         sender_id = data.get('sender_id')
         
         # Validate sender_id
         if not sender_id or sender_id == 0:
-            try:
-                from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
-                verify_jwt_in_request(optional=True)
-                sender_id = get_jwt_identity()
-            except:
-                sender_id = None
-        
-        if not sender_id:
-            return jsonify({"detail": "User authentication required"}), 401
+            return jsonify({"detail": "User authentication required. Please login again."}), 401
         
         # Save to database with new fields
         new_sub = AbstractSubmission(
@@ -443,7 +434,6 @@ def submit_abstract():
         db.session.rollback()
         traceback.print_exc()
         return jsonify({"detail": str(e)}), 500
-
 @app.route('/api/staff/submissions', methods=['GET', 'OPTIONS'])
 @jwt_required()
 def get_all_submissions():
@@ -534,7 +524,7 @@ def generate_abstract_pdf(data):
     event_title_style = ParagraphStyle(
         'EventTitleStyle',
         parent=styles['Title'],
-        fontSize=12,
+        fontSize=16,
         spaceAfter=4,
         textColor=WHITE,
         alignment=1,
@@ -542,6 +532,7 @@ def generate_abstract_pdf(data):
         leading=16
     )
     
+    # FIXED: Changed 'Times New Roman' to 'Times-Roman' (built-in PostScript font)
     event_subtitle_style = ParagraphStyle(
         'EventSubtitleStyle',
         parent=styles['Normal'],
@@ -549,7 +540,7 @@ def generate_abstract_pdf(data):
         spaceAfter=2,
         textColor=WHITE,
         alignment=1,
-        fontName='Helvetica-Oblique',
+        fontName='Times-Italic',
         leading=13
     )
     
@@ -558,12 +549,12 @@ def generate_abstract_pdf(data):
         'EventDetailsStyle',
         parent=styles['Normal'],
         fontSize=12,
-        spaceAfter=0,  # No extra space after
-        spaceBefore=0,  # No extra space before
+        spaceAfter=0,  
+        spaceBefore=0,  
         textColor=WHITE,
         alignment=1,
-        fontName='Helvetica',  # Using Helvetica
-        leading=12,  # Line spacing 1.0 (same as font size)
+        fontName='Helvetica',  
+        leading=12,
     )
     
     # Updated Form Title Style with Century Gothic font, size 20
@@ -574,25 +565,27 @@ def generate_abstract_pdf(data):
         spaceAfter=12,
         textColor=WHITE,
         alignment=1,
-        fontName='Helvetica-Bold',  # Fallback to Helvetica-Bold
+        fontName='Helvetica-Bold',
         leading=24
     )
     
+    # Label style - font size 12
     section_label_style = ParagraphStyle(
         'SectionLabelStyle',
         parent=styles['Normal'],
-        fontSize=10,
-        leading=14,
+        fontSize=12,
+        leading=16,
         textColor=TEXT_COLOR,
         fontName='Helvetica-Bold',
         spaceAfter=4
     )
     
+    # Value style - font size 11
     value_style = ParagraphStyle(
         'ValueStyle',
         parent=styles['Normal'],
-        fontSize=10,
-        leading=14,
+        fontSize=11,
+        leading=15,
         textColor=TEXT_COLOR,
         spaceAfter=2
     )
@@ -600,8 +593,8 @@ def generate_abstract_pdf(data):
     abstract_style = ParagraphStyle(
         'AbstractStyle',
         parent=styles['Normal'],
-        fontSize=10,
-        leading=15,
+        fontSize=11,
+        leading=16,
         spaceAfter=8,
         alignment=4,
         textColor=TEXT_COLOR
@@ -611,8 +604,6 @@ def generate_abstract_pdf(data):
     
     story = []
     
-    # ===== HEADER SECTION (Dark Green Background) =====
-    # Combine event details into single paragraph with line break
     event_details_text = (
         "10-13 March 2027 | Roxas City, Campus, Philippines<br/>"
         "THE SEAFOOD CAPITAL OF THE PHILIPPINES"
@@ -630,15 +621,14 @@ def generate_abstract_pdf(data):
         ('BACKGROUND', (0, 0), (-1, -1), FOREST_GREEN),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        # Reduce padding for tight header
-        ('TOPPADDING', (0, 0), (-1, 0), 6),   # Event title top padding
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 2),  # Event title bottom padding
-        ('TOPPADDING', (0, 1), (-1, 1), 4),   # Event subtitle top padding
-        ('BOTTOMPADDING', (0, 1), (-1, 1), 4),  # Event subtitle bottom padding
-        ('TOPPADDING', (0, 2), (-1, 2), 6),   # Event details top padding
-        ('BOTTOMPADDING', (0, 2), (-1, 2), 2),  # Event details bottom padding
-        ('TOPPADDING', (0, 3), (-1, 3), 8),   # Form title top padding
-        ('BOTTOMPADDING', (0, 3), (-1, 3), 8),  # Form title bottom padding
+        ('TOPPADDING', (0, 0), (-1, 0), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 2),
+        ('TOPPADDING', (0, 1), (-1, 1), 4),
+        ('BOTTOMPADDING', (0, 1), (-1, 1), 4),
+        ('TOPPADDING', (0, 2), (-1, 2), 6),
+        ('BOTTOMPADDING', (0, 2), (-1, 2), 2),
+        ('TOPPADDING', (0, 3), (-1, 3), 8),
+        ('BOTTOMPADDING', (0, 3), (-1, 3), 8),
         ('LEFTPADDING', (0, 0), (-1, -1), 10),
         ('RIGHTPADDING', (0, 0), (-1, -1), 10),
         ('BOX', (0, 0), (-1, -1), 1.5, FOREST_GREEN),
@@ -647,10 +637,10 @@ def generate_abstract_pdf(data):
     story.append(Spacer(1, 12))
     
     # ===== MAIN FORM TABLE =====
-    # Determine selected preferences
+    # Determine selected preferences - using checkmark symbol ✓
     presentation_type = data.get('presentation_type', '')
-    is_oral = 'X' if presentation_type == 'oral' else '&nbsp;&nbsp;'
-    is_poster = 'X' if presentation_type == 'poster' else '&nbsp;&nbsp;'
+    is_oral = '✓' if presentation_type == 'oral' else '&nbsp;&nbsp;&nbsp;'
+    is_poster = '✓' if presentation_type == 'poster' else '&nbsp;&nbsp;&nbsp;'
     
     # Make selected option bold for presentation type
     if presentation_type == 'oral':
@@ -661,8 +651,8 @@ def generate_abstract_pdf(data):
         poster_text = f"<b>{is_poster}&nbsp;&nbsp; Poster presentation</b>"
     
     city_tour_option = data.get('city_tour_option', '')
-    is_option1 = 'X' if city_tour_option == 'option1' else '&nbsp;&nbsp;'
-    is_option2 = 'X' if city_tour_option == 'option2' else '&nbsp;&nbsp;'
+    is_option1 = '✓' if city_tour_option == 'option1' else '&nbsp;&nbsp;&nbsp;'
+    is_option2 = '✓' if city_tour_option == 'option2' else '&nbsp;&nbsp;&nbsp;'
     
     # Make selected option bold for city tour
     if city_tour_option == 'option1':

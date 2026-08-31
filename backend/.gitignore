@@ -1,0 +1,4 @@
+# Google credentials - NEVER COMMIT
+rdesystem.json
+rdesystem-secret.json
+*.json

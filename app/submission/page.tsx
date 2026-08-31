@@ -145,58 +145,54 @@ export default function AbstractSubmissionPage() {
     }
   }, [activeTab, fetchMySubmissions]);
 
-  // Generate preview function
   const generatePreview = useCallback(async (data: any) => {
-    // Check if all required fields are filled
-    const requiredFields = [
-      'selected_track', 'specific_track', 'research_title', 'author', 
-      'presenter', 'email_address', 'university_agency', 'address',
-      'presentation_type', 'city_tour_option', 'abstract', 'keywords'
-    ];
-    
-    const isComplete = requiredFields.every(field => data[field]?.trim());
-    
-    if (!isComplete) {
-      setPreviewUrl("");
-      setPreviewGenerated(false);
-      return;
-    }
-
-    setPreviewLoading(true);
-
-    try {
-      const token = localStorage.getItem("access_token");
-      if (!token) return;
-
-      // Join co-authors with comma
-      const coAuthorsString = data.co_authors.join(", ");
-
-      const submissionData = {
-        ...data,
-        co_author: coAuthorsString,
-        co_authors: undefined
-      };
-
-      const res = await fetch("http://localhost:5000/api/abstracts/preview", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify(submissionData)
-      });
-
-      if (res.ok) {
-        const result = await res.json();
-        setPreviewUrl(result.preview_url);
-        setPreviewGenerated(true);
+      // Check if all required fields are filled
+      const requiredFields = [
+        'selected_track', 'specific_track', 'research_title', 'author', 
+        'presenter', 'email_address', 'university_agency', 'address',
+        'presentation_type', 'city_tour_option', 'abstract', 'keywords'
+      ];
+      
+      const isComplete = requiredFields.every(field => data[field]?.trim());
+      
+      if (!isComplete) {
+        setPreviewUrl("");
+        setPreviewGenerated(false);
+        return;
       }
-    } catch (error) {
-      console.error("Error generating preview", error);
-    } finally {
-      setPreviewLoading(false);
-    }
-  }, []);
+
+      setPreviewLoading(true);
+
+      try {
+        // Join co-authors with comma
+        const coAuthorsString = data.co_authors.join(", ");
+
+        const submissionData = {
+          ...data,
+          co_author: coAuthorsString,
+          co_authors: undefined
+        };
+
+        const res = await fetch("http://localhost:5000/api/abstracts/preview", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            // No Authorization header needed
+          },
+          body: JSON.stringify(submissionData)
+        });
+
+        if (res.ok) {
+          const result = await res.json();
+          setPreviewUrl(result.preview_url);
+          setPreviewGenerated(true);
+        }
+      } catch (error) {
+        console.error("Error generating preview", error);
+      } finally {
+        setPreviewLoading(false);
+      }
+    }, []);
 
   // Auto-generate preview when keywords are filled
   useEffect(() => {
@@ -1020,7 +1016,7 @@ export default function AbstractSubmissionPage() {
                     }}
                     required
                     placeholder="e.g., 0917-123-4567"
-                    pattern="[0-9+\-()\s]*"
+                    pattern="[0-9+\\-()\\s]*"
                     title="Please enter a valid phone number"
                     className="w-full pl-10 pr-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#0A2540] focus:ring-1 focus:ring-[#0A2540]"
                   />
