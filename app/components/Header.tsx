@@ -12,19 +12,13 @@ export default function Header() {
     { label: "About", href: "/about" },
     { label: "Program", href: "/program" },
     { label: "Scientific Tracks", href: "/scientific-tracks" },
-<<<<<<< HEAD
-    { label: "Presentation Guidelines", href: "#" },
-    { label: "Abstract Submission", href: "/abstract-submission" },
-    { label: "Registration", href: "/registration" },
-    { label: "Committee", href: "/comittee" },
-=======
-    { label: "Abstract Submission", href: "/full-paper-submission" },
+    { label: "Abstract Submission", href: "/submission" },
     { label: "Registration", href: "/registration" },
     { label: "Presentation Guidelines", href: "/presentation-guidelines" },
->>>>>>> 181188f1f7dbaa2415db15cf27f4d712eb03ec98
+    { label: "Committee", href: "/committee" },
     { label: "Partner Institutions", href: "/partner-institutions" },
     { label: "Hotel & Mapping", href: "/hotel-mapping" },
-     { label: "Contact Us", href: "/contact-us" },  
+    { label: "Contact Us", href: "/contact-us" },  
   ];
 
   return (

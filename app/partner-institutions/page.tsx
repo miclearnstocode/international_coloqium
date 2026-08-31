@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-import Header from "../components/Header";
-import Footer from "../components/Footer";
-=======
 "use client";
 import Image from "next/image";
->>>>>>> 181188f1f7dbaa2415db15cf27f4d712eb03ec98
 import Link from "next/link";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
