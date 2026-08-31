@@ -79,6 +79,24 @@ def upload_file_to_drive(file_path, filename, project_title=None):
         ).execute()
         
         file_id = file.get('id')
+        
+        # ========== MAKE FILE PUBLICLY VIEWABLE ==========
+        # This allows anyone with the link to view the file
+        try:
+            permission = {
+                'type': 'anyone',
+                'role': 'reader',
+                'allowFileDiscovery': False
+            }
+            service.permissions().create(
+                fileId=file_id,
+                body=permission,
+                supportsAllDrives=True
+            ).execute()
+        except Exception as e:
+            print(f"Warning: Could not set public permission: {e}")
+        # =================================================
+        
         view_url = f"https://drive.google.com/file/d/{file_id}/view"
         download_url = f"https://drive.google.com/uc?export=download&id={file_id}"
         return view_url, download_url

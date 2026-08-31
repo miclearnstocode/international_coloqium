@@ -896,8 +896,8 @@ def get_my_submissions(user_id):
             'university_agency': s.university_agency,
             'abstract': s.abstract,
             'keywords': s.keywords,
-            'abstract_view_url': s.abstract_drive_view_url,
-            'abstract_download_url': s.abstract_drive_download_url,
+            'abstract_drive_view_url': s.abstract_drive_view_url,
+            'abstract_drive_download_url': s.abstract_drive_download_url,
             'status': s.status,
             'created_at': s.created_at.strftime('%Y-%m-%d %H:%M:%S') if s.created_at else None
         } for s in submissions]

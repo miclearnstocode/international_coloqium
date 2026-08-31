@@ -320,83 +320,85 @@ export default function AbstractSubmissionPage() {
     setViewingSubmission(submission);
     setShowSubmissionModal(true);
     // If there's a view URL, set it as PDF viewer URL
-    if (submission.abstract_view_url) {
-      setPdfViewerUrl(submission.abstract_view_url);
+    if (submission.abstract_drive_view_url) {
+      setPdfViewerUrl(submission.abstract_drive_view_url);
     }
   };
 
   const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    setLoading(true);
+      e.preventDefault();
+      setLoading(true);
 
-    try {
-      // Get the JWT token and user from localStorage
-      const token = localStorage.getItem("access_token");
-      const userStr = localStorage.getItem("user");
-      
-      if (!token) {
-        router.push("/login");
-        return;
-      }
-      
-      // Parse user data to get the ID
-      let userId = null;
-      if (userStr) {
-        try {
-          const user = JSON.parse(userStr);
-          userId = user.id;
-        } catch (error) {
-          console.error("Error parsing user data", error);
-        }
-      }
-
-      // Determine the final university_agency value
-      let finalAgency = formData.university_agency;
-      if (showCustomAgency && customAgency.trim()) {
-        finalAgency = customAgency.trim();
-      }
-
-      // Join co-authors with comma
-      const coAuthorsString = formData.co_authors.join(", ");
-
-      // Prepare data for submission
-      const submissionData = {
-        ...formData,
-        university_agency: finalAgency,
-        co_author: coAuthorsString,
-        co_authors: undefined,
-        sender_id: userId
-      };
-
-      const res = await fetch("http://localhost:5000/api/abstracts/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(submissionData)
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setSubmittedData(data);
-        setShowSuccessModal(true);
+      try {
+        // Get the JWT token and user from localStorage
+        const token = localStorage.getItem("access_token");
+        const userStr = localStorage.getItem("user");
         
-        // Refresh submissions after 3 seconds
-        setTimeout(() => {
-          setActiveTab("submissions");
-          fetchMySubmissions();
-        }, 3000);
-      } else {
-        const errorData = await res.json();
-        alert(errorData.detail || "Submission failed.");
+        if (!token) {
+          router.push("/login");
+          return;
+        }
+        
+        // Parse user data to get the ID
+        let userId = null;
+        if (userStr) {
+          try {
+            const user = JSON.parse(userStr);
+            userId = user.id;
+          } catch (error) {
+            console.error("Error parsing user data", error);
+          }
+        }
+
+        // Determine the final university_agency value
+        let finalAgency = formData.university_agency;
+        if (showCustomAgency && customAgency.trim()) {
+          finalAgency = customAgency.trim();
+        }
+
+        // Join co-authors with comma
+        const coAuthorsString = formData.co_authors.join(", ");
+
+        // Prepare data for submission
+        const submissionData = {
+          ...formData,
+          university_agency: finalAgency,
+          co_author: coAuthorsString,
+          co_authors: undefined,
+          sender_id: userId
+        };
+
+        const res = await fetch("http://localhost:5000/api/abstracts/submit", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(submissionData)
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setSubmittedData(data);
+          setShowSuccessModal(true);
+          setLoading(false); // Stop loading immediately
+          
+          // Close success modal after 2 seconds
+          setTimeout(() => {
+            setShowSuccessModal(false);
+            setActiveTab("submissions"); // Switch to My Submissions tab
+            fetchMySubmissions(); // Refresh submissions list
+          }, 2000);
+        } else {
+          const errorData = await res.json();
+          setLoading(false);
+          alert(errorData.detail || "Submission failed.");
+        }
+      } catch (error) {
+        setLoading(false);
+        console.error("Error submitting abstract", error);
+        alert("Failed to connect to the server.");
       }
-    } catch (error) {
-      console.error("Error submitting abstract", error);
-      alert("Failed to connect to the server.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -409,6 +411,85 @@ export default function AbstractSubmissionPage() {
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  // Google Drive PDF Viewer Component
+  const GoogleDriveViewer = ({ url }: { url: string }) => {
+      const [embedUrl, setEmbedUrl] = useState('');
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState(false);
+
+      useEffect(() => {
+          // Extract file ID from Google Drive URL
+          const extractFileId = (driveUrl: string) => {
+              const patterns = [
+                  /\/d\/([a-zA-Z0-9_-]+)/,
+                  /id=([a-zA-Z0-9_-]+)/,
+                  /open\?id=([a-zA-Z0-9_-]+)/,
+                  /\/file\/d\/([a-zA-Z0-9_-]+)/,
+                  /([a-zA-Z0-9_-]{25,})/
+              ];
+
+              for (let pattern of patterns) {
+                  const match = driveUrl.match(pattern);
+                  if (match && match[1]) {
+                      return match[1].split('?')[0].split('&')[0];
+                  }
+              }
+              return null;
+          };
+
+          if (url) {
+              const fileId = extractFileId(url);
+              if (fileId) {
+                  // Use the preview endpoint for embedding
+                  setEmbedUrl(`https://drive.google.com/file/d/${fileId}/preview`);
+                  setLoading(false);
+                  setError(false);
+              } else {
+                  setError(true);
+                  setLoading(false);
+              }
+          }
+      }, [url]);
+
+      if (loading) {
+          return (
+              <div className="flex flex-col items-center justify-center h-125 text-center">
+                  <FaSpinner className="animate-spin text-3xl text-[#0A2540] mb-4" />
+                  <p className="text-zinc-500">Loading PDF...</p>
+              </div>
+          );
+      }
+
+      if (error) {
+          return (
+              <div className="flex flex-col items-center justify-center h-125 text-center">
+                  <FaFilePdf className="text-5xl text-zinc-300 mb-4" />
+                  <p className="text-zinc-500">Unable to load PDF</p>
+                  <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-[#0A2540] text-white rounded-lg hover:bg-[#143b66]"
+                  >
+                      <FaEye /> Open in New Tab
+                  </a>
+              </div>
+          );
+      }
+
+      return (
+          <div className="relative w-full h-125">
+              <iframe
+                  src={embedUrl}
+                  className="w-full h-full border-0 rounded-lg"
+                  title="Abstract PDF"
+                  allow="autoplay; fullscreen"
+                  allowFullScreen
+              />
+          </div>
+      );
   };
 
   return (
@@ -571,52 +652,48 @@ export default function AbstractSubmissionPage() {
               
               {/* Right Column - PDF Viewer */}
               <div className="bg-zinc-100 rounded-lg p-4">
-                <h4 className="text-sm font-semibold text-zinc-500 mb-3 flex items-center gap-2">
-                  <FaFileAlt className="text-[#0A2540]" /> Abstract PDF
-                </h4>
-                
-                {pdfViewerUrl ? (
-                  <iframe
-                    src={pdfViewerUrl}
-                    className="w-full h-125 border-0 rounded-lg"
-                    title="Abstract PDF"
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-125 text-center">
-                    <FaFilePdf className="text-5xl text-zinc-300 mb-4" />
-                    <p className="text-zinc-500">No PDF file available for this submission.</p>
-                  </div>
-                )}
+                  <h4 className="text-sm font-semibold text-zinc-500 mb-3 flex items-center gap-2">
+                      <FaFileAlt className="text-[#0A2540]" /> Abstract PDF
+                  </h4>
+                  
+                  {pdfViewerUrl ? (
+                      <GoogleDriveViewer url={pdfViewerUrl} />
+                  ) : (
+                      <div className="flex flex-col items-center justify-center h-125 text-center">
+                          <FaFilePdf className="text-5xl text-zinc-300 mb-4" />
+                          <p className="text-zinc-500">No PDF file available for this submission.</p>
+                      </div>
+                  )}
               </div>
             </div>
             
             <div className="mt-4 flex justify-end gap-2">
-              {viewingSubmission.abstract_view_url && (
-                <a
-                  href={viewingSubmission.abstract_view_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-[#0A2540] text-white rounded-lg hover:bg-[#143b66]"
+                {viewingSubmission.abstract_drive_view_url && (
+                    <a
+                        href={viewingSubmission.abstract_drive_view_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-[#0A2540] text-white rounded-lg hover:bg-[#143b66]"
+                    >
+                        <FaEye /> Open in New Tab
+                    </a>
+                )}
+                {viewingSubmission.abstract_download_url && (
+                    <a
+                        href={viewingSubmission.abstract_download_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-200 text-zinc-700 rounded-lg hover:bg-zinc-300"
+                    >
+                        <FaDownload /> Download PDF
+                    </a>
+                )}
+                <button
+                    onClick={() => setShowSubmissionModal(false)}
+                    className="px-4 py-2 bg-zinc-200 text-zinc-700 rounded-lg hover:bg-zinc-300"
                 >
-                  <FaEye /> Open in New Tab
-                </a>
-              )}
-              {viewingSubmission.abstract_download_url && (
-                <a
-                  href={viewingSubmission.abstract_download_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-200 text-zinc-700 rounded-lg hover:bg-zinc-300"
-                >
-                  <FaDownload /> Download PDF
-                </a>
-              )}
-              <button
-                onClick={() => setShowSubmissionModal(false)}
-                className="px-4 py-2 bg-zinc-200 text-zinc-700 rounded-lg hover:bg-zinc-300"
-              >
-                Close
-              </button>
+                    Close
+                </button>
             </div>
           </div>
         </div>
