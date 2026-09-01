@@ -34,17 +34,17 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (res.ok) {
-        // Store the token and user data
-        localStorage.setItem("access_token", data.access_token);
-        localStorage.setItem("user", JSON.stringify(data.user));
+          // Store the token and user data
+          localStorage.setItem("access_token", data.access_token);
+          localStorage.setItem("refresh_token", data.refresh_token);
+          localStorage.setItem("user", JSON.stringify(data.user));
 
-        // Redirect based on role
-        if (data.user.role === "staff") {
-          router.push("/staff/dashboard");
-        } else {
-          // Regular user - redirect to abstract submission page
-          router.push("/submission");
-        }
+          // Redirect based on role
+          if (data.user.role === "staff") {
+              router.push("/staff/dashboard");
+          } else {
+              router.push("/submission");
+          }
       } else {
         setError(data.detail || "Invalid email or password");
       }

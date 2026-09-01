@@ -12,7 +12,7 @@ export default function Header() {
     { label: "About", href: "/about" },
     { label: "Program", href: "/program" },
     { label: "Scientific Tracks", href: "/scientific-tracks" },
-    { label: "Abstract Submission", href: "/submission" },
+    { label: "Abstract Submission", href: "/abstract-submission" },
     { label: "Registration", href: "/registration" },
     { label: "Presentation Guidelines", href: "/presentation-guidelines" },
     { label: "Committee", href: "/committee" },

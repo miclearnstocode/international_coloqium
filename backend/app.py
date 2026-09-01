@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 from datetime import timedelta
 import os, re, tempfile, traceback
 from werkzeug.utils import secure_filename
@@ -17,11 +17,11 @@ from reportlab.lib import colors
 load_dotenv()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your_super_secret_key_here')
-app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'your_jwt_secret_key_here')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['JWT_SECRET_KEY'] =  os.getenv('JWT_SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'mysql+pymysql://root:@127.0.0.1:3306/researchdb')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['MAX_CONTENT_LENGTH'] = 64 * 1024 * 1024  # 64MB max file size
+app.config['MAX_CONTENT_LENGTH'] = 64 * 1024 * 1024 
 
 # Initialize extensions
 db = SQLAlchemy(app)
@@ -188,17 +188,19 @@ def login():
             return jsonify({"detail": "Invalid email or password"}), 401
         
         access_token = create_access_token(identity=user.id, expires_delta=timedelta(days=7))
+        refresh_token = create_refresh_token(identity=user.id)
         
         return jsonify({
             "message": "Login successful",
             "access_token": access_token,
+            "refresh_token": refresh_token,
             "user": {"id": user.id, "full_name": user.full_name, "email": user.email, "role": user.role}
         }), 200
         
     except Exception as e:
         return jsonify({"detail": str(e)}), 500
 
-# ================= USER'S PAPER SUBMISSION =================
+
 @app.route('/api/papers/submit', methods=['POST', 'OPTIONS'])
 @jwt_required()
 def submit_paper():
@@ -434,21 +436,17 @@ def submit_abstract():
         db.session.rollback()
         traceback.print_exc()
         return jsonify({"detail": str(e)}), 500
+
+
 @app.route('/api/staff/submissions', methods=['GET', 'OPTIONS'])
-@jwt_required()
 def get_all_submissions():
     if request.method == 'OPTIONS':
         return jsonify({})
     try:
-        user_id = get_jwt_identity()
-        user = User.query.get(user_id)
-        if not user or user.role != 'staff':
-            return jsonify({"detail": "Unauthorized access"}), 403
-        
         submissions = AbstractSubmission.query.order_by(AbstractSubmission.created_at.desc()).all()
         result = [{
             'id': s.id,
-            'sender_id': s.sender_id,  # Add sender_id
+            'sender_id': s.sender_id,
             'user_id': s.user_id,
             'selected_track': s.selected_track,
             'specific_track': s.specific_track,
@@ -470,16 +468,10 @@ def get_all_submissions():
         return jsonify({"detail": str(e)}), 500
 
 @app.route('/api/staff/submissions/<int:submission_id>/status', methods=['PUT', 'OPTIONS'])
-@jwt_required()
 def update_submission_status(submission_id):
     if request.method == 'OPTIONS':
         return jsonify({})
     try:
-        user_id = get_jwt_identity()
-        user = User.query.get(user_id)
-        if not user or user.role != 'staff':
-            return jsonify({"detail": "Unauthorized access"}), 403
-        
         data = request.get_json()
         new_status = data.get('status')
         if new_status not in ['pending', 'accepted', 'rejected']:

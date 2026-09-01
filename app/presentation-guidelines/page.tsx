@@ -138,21 +138,14 @@ export default function PresentationGuidelinesPage() {
             </div>
 
             {/* Right Side - Image */}
-             <div className="shrink-0 w-full md:w-64 lg:w-72">
-              <div className="relative rounded-xl overflow-hidden shadow-lg border border-gray-200">
-                <Image 
-                  src="/images/guideline.png" 
-                  alt="Presentation Guidelines" 
-                  width={320}
-                  height={200}
-                  className="object-cover w-full h-48 md:h-40 lg:h-48"
-                  priority
-                />
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#0A2540]/80 to-transparent p-3">
-                  
-                </div>
-              </div>
-            </div>
+            <Image 
+              src="/images/guideline.png" 
+              alt="Presentation Guidelines" 
+              width={500} 
+              height={300} 
+              className="shrink-0 rounded-xl shadow-lg"
+              priority
+            />
           </div>
         </div>
       </section>
