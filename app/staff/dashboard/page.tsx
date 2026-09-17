@@ -28,6 +28,8 @@ export default function StaffDashboardPage() {
 
       useEffect(() => {
           const extractFileId = (driveUrl: string) => {
+              if (!driveUrl) return null;
+              
               const patterns = [
                   /\/d\/([a-zA-Z0-9_-]+)/,
                   /id=([a-zA-Z0-9_-]+)/,
@@ -55,6 +57,9 @@ export default function StaffDashboardPage() {
                   setError(true);
                   setLoading(false);
               }
+          } else {
+              setError(true);
+              setLoading(false);
           }
       }, [url]);
 
@@ -67,19 +72,11 @@ export default function StaffDashboardPage() {
           );
       }
 
-      if (error) {
+      if (error || !url) {
           return (
               <div className="flex flex-col items-center justify-center h-125 text-center">
                   <FaFilePdf className="text-5xl text-zinc-300 mb-4" />
-                  <p className="text-zinc-500">Unable to load PDF</p>
-                  <a
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-[#0A2540] text-white rounded-lg hover:bg-[#143b66]"
-                  >
-                      <FaEye /> Open in New Tab
-                  </a>
+                  <p className="text-zinc-500">No PDF file available for this submission.</p>
               </div>
           );
       }
@@ -332,151 +329,158 @@ export default function StaffDashboardPage() {
       {showSubmissionModal && viewingSubmission && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowSubmissionModal(false)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-5xl p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 shrink-0">
               <h3 className="text-xl font-bold text-[#0A2540] flex items-center gap-2">
                 <FaFolderOpen className="text-[#0A2540]" /> Submission Details
               </h3>
               <button
                 onClick={() => setShowSubmissionModal(false)}
-                className="text-zinc-400 hover:text-zinc-600"
+                className="text-zinc-400 hover:text-zinc-600 transition-colors"
               >
                 <FaTimes className="text-xl" />
               </button>
             </div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Left Column - Submission Details */}
-              <div className="space-y-4">
-                <div>
-                  <h4 className="text-sm font-semibold text-zinc-500">Research Title</h4>
-                  <p className="text-[#0A2540]">{viewingSubmission.research_title}</p>
-                </div>
+
+            {/* Modal Body - Scrollable Content */}
+            <div className="flex-1 overflow-hidden">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full p-6">
                 
-                <div>
-                  <h4 className="text-sm font-semibold text-zinc-500">Authors</h4>
-                  <p className="text-[#0A2540]">{viewingSubmission.author}{viewingSubmission.co_author ? `, ${viewingSubmission.co_author}` : ''}</p>
-                </div>
-                
-                <div>
-                  <h4 className="text-sm font-semibold text-zinc-500">Presenter</h4>
-                  <p className="text-[#0A2540] flex items-center gap-2">
-                    <FaUser className="text-zinc-400 text-xs" />
-                    {viewingSubmission.presenter}
-                  </p>
-                </div>
-                
-                <div>
-                  <h4 className="text-sm font-semibold text-zinc-500">Email</h4>
-                  <p className="text-[#0A2540] flex items-center gap-2">
-                    <FaEnvelope className="text-zinc-400 text-xs" />
-                    {viewingSubmission.email_address}
-                  </p>
-                </div>
-                
-                <div>
-                  <h4 className="text-sm font-semibold text-zinc-500">University/Agency</h4>
-                  <p className="text-[#0A2540] flex items-center gap-2">
-                    <FaUniversity className="text-zinc-400 text-xs" />
-                    {viewingSubmission.university_agency}
-                  </p>
-                </div>
-                
-                <div>
-                  <h4 className="text-sm font-semibold text-zinc-500">Address</h4>
-                  <p className="text-[#0A2540] flex items-center gap-2">
-                    <FaMapMarkerAlt className="text-zinc-400 text-xs" />
-                    {viewingSubmission.address}
-                  </p>
-                </div>
-                
-                <div>
-                  <h4 className="text-sm font-semibold text-zinc-500">Phone Number</h4>
-                  <p className="text-[#0A2540] flex items-center gap-2">
-                    <FaPhone className="text-zinc-400 text-xs" />
-                    {viewingSubmission.phone_number}
-                  </p>
-                </div>
-                
-                <div>
-                  <h4 className="text-sm font-semibold text-zinc-500">Presentation Type</h4>
-                  <p className="text-[#0A2540] flex items-center gap-2">
-                    {viewingSubmission.presentation_type === 'oral' ? (
-                      <FaMicrophone className="text-[#0A2540] text-xs" />
-                    ) : (
-                      <FaImage className="text-[#0A2540] text-xs" />
-                    )}
-                    {viewingSubmission.presentation_type === 'oral' ? 'Oral Presentation' : 'Poster Presentation'}
-                  </p>
-                </div>
-                
-                <div>
-                  <h4 className="text-sm font-semibold text-zinc-500">City Tour/Boracay Transfer</h4>
-                  <p className="text-[#0A2540] flex items-center gap-2">
-                    <FaCity className="text-zinc-400 text-xs" />
-                    {viewingSubmission.city_tour_option === 'option1' ? 'Option 1 (City Tour Only)' : 'Option 2 (City tour, and Boracay Transfer)'}
-                  </p>
-                </div>
-                
-                <div>
-                  <h4 className="text-sm font-semibold text-zinc-500">Track</h4>
-                  <p className="text-[#0A2540]">{viewingSubmission.selected_track}</p>
-                </div>
-                
-                <div>
-                  <h4 className="text-sm font-semibold text-zinc-500">Sub-Track</h4>
-                  <p className="text-[#0A2540]">{viewingSubmission.specific_track}</p>
-                </div>
-                
-                <div>
-                  <h4 className="text-sm font-semibold text-zinc-500">Status</h4>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(viewingSubmission.status)}`}>
-                    {getStatusIcon(viewingSubmission.status)}
-                    <span className="ml-1">{viewingSubmission.status.charAt(0).toUpperCase() + viewingSubmission.status.slice(1)}</span>
-                  </span>
-                </div>
-                
-                <div>
-                  <h4 className="text-sm font-semibold text-zinc-500">Abstract</h4>
-                  <p className="text-[#0A2540] whitespace-pre-wrap">{viewingSubmission.abstract}</p>
-                </div>
-                
-                <div>
-                  <h4 className="text-sm font-semibold text-zinc-500">Keywords</h4>
-                  <p className="text-[#0A2540]">{viewingSubmission.keywords}</p>
-                </div>
-                
-                <div>
-                  <h4 className="text-sm font-semibold text-zinc-500">Submission Date</h4>
-                  <p className="text-[#0A2540]">{viewingSubmission.created_at}</p>
-                </div>
-              </div>
-              
-              {/* Right Column - PDF Viewer */}
-              <div className="bg-zinc-100 rounded-lg p-4">
-                <h4 className="text-sm font-semibold text-zinc-500 mb-3 flex items-center gap-2">
-                  <FaFileAlt className="text-[#0A2540]" /> Abstract PDF
-                </h4>
-                
-                {pdfViewerUrl ? (
-                  <GoogleDriveViewer url={pdfViewerUrl} />
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-125 text-center">
-                    <FaFilePdf className="text-5xl text-zinc-300 mb-4" />
-                    <p className="text-zinc-500">No PDF file available for this submission.</p>
+                {/* Left Column - Scrollable Details */}
+                <div className="overflow-y-auto pr-2 space-y-4 custom-scrollbar">
+                  <div>
+                    <h4 className="text-sm font-semibold text-zinc-500">Research Title</h4>
+                    <p className="text-[#0A2540]">{viewingSubmission.research_title}</p>
                   </div>
-                )}
+                  
+                  <div>
+                    <h4 className="text-sm font-semibold text-zinc-500">Authors</h4>
+                    <p className="text-[#0A2540]">{viewingSubmission.author}{viewingSubmission.co_author ? `, ${viewingSubmission.co_author}` : ''}</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-semibold text-zinc-500">Presenter</h4>
+                    <p className="text-[#0A2540] flex items-center gap-2">
+                      <FaUser className="text-zinc-400 text-xs" />
+                      {viewingSubmission.presenter}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-semibold text-zinc-500">Email</h4>
+                    <p className="text-[#0A2540] flex items-center gap-2">
+                      <FaEnvelope className="text-zinc-400 text-xs" />
+                      {viewingSubmission.email_address}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-semibold text-zinc-500">University/Agency</h4>
+                    <p className="text-[#0A2540] flex items-center gap-2">
+                      <FaUniversity className="text-zinc-400 text-xs" />
+                      {viewingSubmission.university_agency}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-semibold text-zinc-500">Address</h4>
+                    <p className="text-[#0A2540] flex items-center gap-2">
+                      <FaMapMarkerAlt className="text-zinc-400 text-xs" />
+                      {viewingSubmission.address}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-semibold text-zinc-500">Phone Number</h4>
+                    <p className="text-[#0A2540] flex items-center gap-2">
+                      <FaPhone className="text-zinc-400 text-xs" />
+                      {viewingSubmission.phone_number}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-semibold text-zinc-500">Presentation Type</h4>
+                    <p className="text-[#0A2540] flex items-center gap-2">
+                      {viewingSubmission.presentation_type === 'oral' ? (
+                        <FaMicrophone className="text-[#0A2540] text-xs" />
+                      ) : (
+                        <FaImage className="text-[#0A2540] text-xs" />
+                      )}
+                      {viewingSubmission.presentation_type === 'oral' ? 'Oral Presentation' : 'Poster Presentation'}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-semibold text-zinc-500">City Tour/Boracay Transfer</h4>
+                    <p className="text-[#0A2540] flex items-center gap-2">
+                      <FaCity className="text-zinc-400 text-xs" />
+                      {viewingSubmission.city_tour_option === 'option1' ? 'Option 1 (City Tour Only)' : 'Option 2 (City tour, and Boracay Transfer)'}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-semibold text-zinc-500">Track</h4>
+                    <p className="text-[#0A2540]">{viewingSubmission.selected_track}</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-semibold text-zinc-500">Sub-Track</h4>
+                    <p className="text-[#0A2540]">{viewingSubmission.specific_track}</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-semibold text-zinc-500">Status</h4>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(viewingSubmission.status)}`}>
+                      {getStatusIcon(viewingSubmission.status)}
+                      <span className="ml-1">{viewingSubmission.status.charAt(0).toUpperCase() + viewingSubmission.status.slice(1)}</span>
+                    </span>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-semibold text-zinc-500">Abstract</h4>
+                    <p className="text-[#0A2540] whitespace-pre-wrap">{viewingSubmission.abstract}</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-semibold text-zinc-500">Keywords</h4>
+                    <p className="text-[#0A2540]">{viewingSubmission.keywords}</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-semibold text-zinc-500">Submission Date</h4>
+                    <p className="text-[#0A2540]">{viewingSubmission.created_at}</p>
+                  </div>
+                </div>
+                
+                {/* Right Column - PDF Viewer (Fixed) */}
+                <div className="bg-zinc-100 rounded-lg p-4 flex flex-col h-full">
+                  <h4 className="text-sm font-semibold text-zinc-500 mb-3 flex items-center gap-2 shrink-0">
+                    <FaFileAlt className="text-[#0A2540]" /> Abstract PDF
+                  </h4>
+                  
+                  <div className="flex-1 min-h-0">
+                    {pdfViewerUrl ? (
+                      <GoogleDriveViewer url={pdfViewerUrl} />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-full text-center">
+                        <FaFilePdf className="text-5xl text-zinc-300 mb-4" />
+                        <p className="text-zinc-500">No PDF file available for this submission.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
-            
-            {/* Action Buttons */}
-            <div className="mt-6 border-t border-zinc-200 pt-4">
-              <h4 className="text-sm font-semibold text-zinc-500 mb-3">Actions</h4>
-              <div className="flex flex-wrap gap-3">
+
+            {/* Floating Footer - Actions */}
+            <div className="shrink-0 border-t border-zinc-200 bg-white px-6 py-4 shadow-[0_-4px_12px_rgba(0,0,0,0.04)]">
+              <div className="flex flex-wrap items-center gap-3">
                 <button
                   onClick={() => updateStatus(viewingSubmission.id, 'accepted')}
                   disabled={updatingStatus || viewingSubmission.status === 'accepted'}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {updatingStatus && selectedSubmissionId === viewingSubmission.id ? (
                     <FaSpinner className="animate-spin" />
@@ -488,7 +492,7 @@ export default function StaffDashboardPage() {
                 <button
                   onClick={() => updateStatus(viewingSubmission.id, 'rejected')}
                   disabled={updatingStatus || viewingSubmission.status === 'rejected'}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {updatingStatus && selectedSubmissionId === viewingSubmission.id ? (
                     <FaSpinner className="animate-spin" />
@@ -500,17 +504,20 @@ export default function StaffDashboardPage() {
                 <button
                   onClick={() => updateStatus(viewingSubmission.id, 'pending')}
                   disabled={updatingStatus || viewingSubmission.status === 'pending'}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   <FaHourglassHalf />
                   Mark as Pending
                 </button>
+                
+                <div className="flex-1" />
+                
                 {viewingSubmission.abstract_drive_view_url && (
                   <a
                     href={viewingSubmission.abstract_drive_view_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-[#0A2540] text-white rounded-lg hover:bg-[#143b66]"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-[#0A2540] text-white rounded-lg hover:bg-[#143b66] transition-colors"
                   >
                     <FaEye /> Open in New Tab
                   </a>
@@ -520,14 +527,14 @@ export default function StaffDashboardPage() {
                     href={viewingSubmission.abstract_download_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-200 text-zinc-700 rounded-lg hover:bg-zinc-300"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-200 text-zinc-700 rounded-lg hover:bg-zinc-300 transition-colors"
                   >
                     <FaDownload /> Download PDF
                   </a>
                 )}
                 <button
                   onClick={() => setShowSubmissionModal(false)}
-                  className="px-4 py-2 bg-zinc-200 text-zinc-700 rounded-lg hover:bg-zinc-300"
+                  className="px-4 py-2 bg-zinc-200 text-zinc-700 rounded-lg hover:bg-zinc-300 transition-colors"
                 >
                   Close
                 </button>
