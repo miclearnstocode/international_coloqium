@@ -106,7 +106,7 @@ export default function AbstractSubmissionPage() {
   useEffect(() => {
     const fetchSUCs = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/sucs");
+        const res = await fetch("http://127.0.0.1:5000/api/sucs");
         const data = await res.json();
         setSucs(data);
       } catch (error) {
@@ -126,7 +126,7 @@ export default function AbstractSubmissionPage() {
       const user = JSON.parse(userStr);
       const userId = user.id;
       
-      const res = await fetch(`http://localhost:5000/api/my-submissions/${userId}`);
+      const res = await fetch(`http://127.0.0.1:5000/api/my-submissions/${userId}`);
       if (res.ok) {
         const data = await res.json();
         setMySubmissions(data);
@@ -173,7 +173,7 @@ export default function AbstractSubmissionPage() {
           co_authors: undefined
         };
 
-        const res = await fetch("http://localhost:5000/api/abstracts/preview", {
+        const res = await fetch("http://127.0.0.1:5000/api/abstracts/preview", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -368,7 +368,7 @@ export default function AbstractSubmissionPage() {
           sender_id: userId
         };
 
-        const res = await fetch("http://localhost:5000/api/abstracts/submit", {
+        const res = await fetch("http://127.0.0.1:5000/api/abstracts/submit", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

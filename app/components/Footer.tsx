@@ -1,5 +1,8 @@
 // app/components/Footer.tsx
+"use client";
+
 import Link from "next/link";
+import Image from "next/image";
 import { FaFacebookF, FaTwitter, FaLinkedinIn, FaInstagram } from "react-icons/fa";
 
 export default function Footer() {
@@ -9,11 +12,16 @@ export default function Footer() {
         
         {/* Left: Logo */}
         <div className="flex items-center gap-3">
-          <div className="relative">
-            <div className="h-12 w-12 rounded-full bg-white/10 text-white flex items-center justify-center text-2xl font-bold overflow-hidden border-2 border-[#D5A54D]">
-              IC
+          <Link href="/" className="relative flex items-center">
+            <div className="relative h-14 w-14 overflow-hidden rounded-full border-2 border-[#D5A54D]">
+              <Image
+                src="/images/mainlogo.png"
+                alt="3rd International Agri-Life & Bioresource Science Symposium Logo"
+                fill
+                className="object-cover"
+              />
             </div>
-          </div>
+          </Link>
           <div className="flex flex-col leading-tight">
             <span className="text-sm font-bold tracking-wider">3RD INTERNATIONAL AGRI-</span>
             <span className="text-sm font-bold tracking-wider">LIFE & BIORESOURCE</span>
