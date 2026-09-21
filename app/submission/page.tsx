@@ -116,7 +116,7 @@ export default function AbstractSubmissionPage() {
   useEffect(() => {
     const fetchSUCs = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/sucs");
+        const res = await fetch("http://127.0.0.1:5000/api/sucs");
         const data = await res.json();
         setSucs(data);
       } catch (error) {
@@ -135,8 +135,13 @@ export default function AbstractSubmissionPage() {
 
       const user = JSON.parse(userStr);
       const userId = user.id;
+<<<<<<< HEAD
 
       const res = await fetch(`http://localhost:5000/api/my-submissions/${userId}`);
+=======
+      
+      const res = await fetch(`http://127.0.0.1:5000/api/my-submissions/${userId}`);
+>>>>>>> 52297edf10a47d1322410be1edd751bc19305efc
       if (res.ok) {
         const data = await res.json();
         setMySubmissions(data);
@@ -197,12 +202,48 @@ export default function AbstractSubmissionPage() {
         setPreviewUrl(result.preview_url);
         setPreviewGenerated(true);
       }
+<<<<<<< HEAD
     } catch (error) {
       console.error("Error generating preview", error);
     } finally {
       setPreviewLoading(false);
     }
   }, []);
+=======
+
+      setPreviewLoading(true);
+
+      try {
+        // Join co-authors with comma
+        const coAuthorsString = data.co_authors.join(", ");
+
+        const submissionData = {
+          ...data,
+          co_author: coAuthorsString,
+          co_authors: undefined
+        };
+
+        const res = await fetch("http://127.0.0.1:5000/api/abstracts/preview", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            // No Authorization header needed
+          },
+          body: JSON.stringify(submissionData)
+        });
+
+        if (res.ok) {
+          const result = await res.json();
+          setPreviewUrl(result.preview_url);
+          setPreviewGenerated(true);
+        }
+      } catch (error) {
+        console.error("Error generating preview", error);
+      } finally {
+        setPreviewLoading(false);
+      }
+    }, []);
+>>>>>>> 52297edf10a47d1322410be1edd751bc19305efc
 
   // Auto-generate preview when keywords are filled
   useEffect(() => {
@@ -321,9 +362,59 @@ export default function AbstractSubmissionPage() {
       const token = localStorage.getItem("access_token");
       const userStr = localStorage.getItem("user");
 
+<<<<<<< HEAD
       if (!token) {
         router.push("/login");
         return;
+=======
+        // Determine the final university_agency value
+        let finalAgency = formData.university_agency;
+        if (showCustomAgency && customAgency.trim()) {
+          finalAgency = customAgency.trim();
+        }
+
+        // Join co-authors with comma
+        const coAuthorsString = formData.co_authors.join(", ");
+
+        // Prepare data for submission
+        const submissionData = {
+          ...formData,
+          university_agency: finalAgency,
+          co_author: coAuthorsString,
+          co_authors: undefined,
+          sender_id: userId
+        };
+
+        const res = await fetch("http://127.0.0.1:5000/api/abstracts/submit", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(submissionData)
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setSubmittedData(data);
+          setShowSuccessModal(true);
+          setLoading(false); // Stop loading immediately
+          
+          // Close success modal after 2 seconds
+          setTimeout(() => {
+            setShowSuccessModal(false);
+            setActiveTab("submissions"); // Switch to My Submissions tab
+            fetchMySubmissions(); // Refresh submissions list
+          }, 2000);
+        } else {
+          const errorData = await res.json();
+          setLoading(false);
+          alert(errorData.detail || "Submission failed.");
+        }
+      } catch (error) {
+        setLoading(false);
+        console.error("Error submitting abstract", error);
+        alert("Failed to connect to the server.");
+>>>>>>> 52297edf10a47d1322410be1edd751bc19305efc
       }
 
       let userId = null;

@@ -7,3 +7,7 @@ venv\Scripts\activate
 git rm --cached backend/rdesystem-secret.json
 
 echo "backend/rdesystem-secret.json" >> .gitignore
+
+
+//to connect the database in mac
+/Applications/MAMP/Library/bin/mysql80/bin/mysql -u root -p

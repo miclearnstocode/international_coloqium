@@ -24,7 +24,11 @@ export default function PartnerInstitutionsPage() {
   const coHosts = [
     {
       name: "Hiroshima University",
+<<<<<<< HEAD
       logo: "/images/hiroshima-logo.png",
+=======
+      logo: "/images/hiroshima-logo.webp",
+>>>>>>> 52297edf10a47d1322410be1edd751bc19305efc
       location: "Japan"
     },
     {

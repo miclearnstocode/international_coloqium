@@ -40,7 +40,7 @@ jwt = JWTManager(app)
 
 # CORS configuration
 CORS(app, 
-     origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+     origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5000", "http://127.0.0.1:5000"],
      supports_credentials=True,
      allow_headers=["Content-Type", "Authorization", "Accept", "X-Requested-With"],
      expose_headers=["Content-Type", "Authorization"],
@@ -193,7 +193,7 @@ def register():
         db.session.rollback()
         return jsonify({"detail": str(e)}), 500
 
-@app.route('/api/login', methods=['POST', 'OPTIONS'])
+@app.route('/api/login', methods=['POST', 'GET', 'OPTIONS'])
 def login():
     if request.method == 'OPTIONS':
         return jsonify({})
