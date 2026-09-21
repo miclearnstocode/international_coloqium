@@ -13,9 +13,19 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
 from reportlab.lib.units import inch
 from reportlab.lib import colors
+import random
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from datetime import datetime, timedelta
 
 load_dotenv()
-
+MAIL_SERVER = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
+MAIL_PORT = int(os.getenv('MAIL_PORT', 587))
+MAIL_USERNAME = os.getenv('MAIL_USERNAME')
+MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
+MAIL_FROM = os.getenv('MAIL_FROM', MAIL_USERNAME)
+MAIL_FROM_NAME = os.getenv('MAIL_FROM_NAME', 'Symposium Portal')
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['JWT_SECRET_KEY'] =  os.getenv('JWT_SECRET_KEY')
@@ -121,6 +131,15 @@ class SUC(db.Model):
     type = db.Column(db.String(50), nullable=True)
     is_active = db.Column(db.Boolean, default=True)
 
+class PasswordResetCode(db.Model):
+    __tablename__ = 'password_reset_codes'
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(100), nullable=False, index=True)
+    code = db.Column(db.String(6), nullable=False)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    used = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    
 # Create tables
 with app.app_context():
     db.create_all()
