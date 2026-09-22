@@ -7,7 +7,7 @@ import Footer from "../components/Footer";
 import { 
   FaEnvelope, FaPhone, FaMapMarkerAlt, FaRegPaperPlane, 
   FaCheckCircle, FaArrowRight, FaUser, FaBuilding, 
-  FaGlobe, FaTag, FaComment, FaSend, FaShieldAlt,
+  FaGlobe, FaTag, FaComment, FaShieldAlt,
   FaUsers, FaHandshake, FaUniversity, FaRegBuilding,
   FaClipboardList, FaMoneyBillWave, FaTruck, FaPlane,
   FaCalendarAlt, FaFileAlt, FaMicrophone, FaQrcode,
@@ -166,8 +166,8 @@ export default function ContactPage() {
                 <FaEnvelope className="text-[#D5A54D] text-lg" />
                 <div>
                   <p className="font-semibold text-[#0A2540] text-sm">Email</p>
-                  <a href="mailto:rde@capsu.edu.ph" className="text-xs text-[#1D3D6D] hover:text-[#F5A623] transition-colors">
-                    rde@capsu.edu.ph
+                  <a href="mailto:internationalsymposium@capsu.edu.ph" className="text-xs text-[#1D3D6D] hover:text-[#F5A623] transition-colors">
+                    internationalsymposium@capsu.edu.ph
                   </a>
                 </div>
               </div>
@@ -204,8 +204,8 @@ export default function ContactPage() {
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
                   <FaEnvelope className="text-[#D5A54D] text-sm" />
-                  <a href="mailto:rde@capsu.edu.ph" className="text-[#1D3D6D] hover:text-[#F5A623] transition-colors">
-                    rde@capsu.edu.ph
+                  <a href="mailto:internationalsymposium@capsu.edu.ph" className="text-[#1D3D6D] hover:text-[#F5A623] transition-colors">
+                    internationalsymposium@capsu.edu.ph
                   </a>
                 </div>
                 <div className="flex items-center gap-2">
@@ -318,8 +318,8 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <p className="font-semibold text-sm">Email</p>
-                      <a href="mailto:rde@capsu.edu.ph" className="text-sm text-gray-300 hover:text-[#D5A54D] transition-colors">
-                        rde@capsu.edu.ph
+                      <a href="mailto:internationalsymposium@capsu.edu.ph" className="text-sm text-gray-300 hover:text-[#D5A54D] transition-colors">
+                        internationalsymposium@capsu.edu.ph
                       </a>
                     </div>
                   </div>

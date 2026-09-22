@@ -395,7 +395,7 @@ export default function PresentationGuidelinesPage() {
           </p>
           <div className="inline-flex items-center gap-3 bg-[#F8FAFC] rounded-lg px-6 py-3 border border-zinc-200">
             <FaEnvelope className="text-[#F5A623] text-xl" />
-            <span className="text-[#0A2540] font-medium">rde@capsu.edu.ph</span>
+            <span className="text-[#0A2540] font-medium">internationalsymposium@capsu.edu.ph</span>
           </div>
         </div>
       </section>

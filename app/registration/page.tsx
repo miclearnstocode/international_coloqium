@@ -297,7 +297,7 @@ export default function RegistrationPage() {
                     <div>
                       <p className="font-bold text-[#0A2540] text-sm mb-2">Please email or upload your proof of payment</p>
                       <div className="text-xs text-zinc-600 space-y-1">
-                        <p>Email: <span className="font-semibold text-[#0A2540]">ic2025.secretariat@example.com</span></p>
+                        <p>Email: <span className="font-semibold text-[#0A2540]">internationalsymposium@capsu.edu.ph</span></p>
                         <p>Subject: <span className="font-semibold text-[#0A2540]">IC2025 Payment – [Your Name]</span></p>
                       </div>
                     </div>
