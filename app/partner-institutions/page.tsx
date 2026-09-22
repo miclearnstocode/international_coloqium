@@ -4,11 +4,7 @@ import Link from "next/link";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { 
-  FaUniversity, FaHandshake, FaUsers, FaGlobe, 
-  FaCheckCircle, FaArrowRight, FaEnvelope, FaBuilding,
-  FaRegBuilding, FaUserFriends, FaMicroscope, FaFlask,
-  FaLeaf, FaFish, FaUtensils, FaChartLine, FaAward,
-  FaTrophy, FaMedal, FaStar, FaUserTie
+  FaCheckCircle, FaArrowRight, FaEnvelope, FaBuilding, FaStar
 } from "react-icons/fa";
 
 export default function PartnerInstitutionsPage() {
@@ -24,12 +20,7 @@ export default function PartnerInstitutionsPage() {
   const coHosts = [
     {
       name: "Hiroshima University",
-<<<<<<< HEAD
-      logo: "/images/hiroshima-logo.png",
-=======
       logo: "/images/hiroshima-logo.webp",
->>>>>>> 52297edf10a47d1322410be1edd751bc19305efc
-      location: "Japan"
     },
     {
       name: "Visayas State University",
@@ -167,7 +158,7 @@ export default function PartnerInstitutionsPage() {
       </section>
 
       {/* ================= THE ROLE OF PARTNER INSTITUTIONS ================= */}
-      <section className="py-12 bg-gradient-to-r from-[#0A2540] to-[#1a3a5c]">
+      <section className="py-12 bg-linear-to-r from-[#0A2540] to-[#1a3a5c]">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-white uppercase">The Role of Partner Institutions</h2>
@@ -331,7 +322,7 @@ export default function PartnerInstitutionsPage() {
       </section>
 
       {/* ================= BECOME A PARTNER ================= */}
-      <section className="py-12 bg-gradient-to-r from-[#0A2540] to-[#1a3a5c]">
+      <section className="py-12 bg-linear-to-r from-[#0A2540] to-[#1a3a5c]">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">Become a Partner</h2>
           <div className="w-16 h-1 bg-[#F5A623] mx-auto mb-6"></div>

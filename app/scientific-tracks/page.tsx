@@ -231,8 +231,8 @@ export default function ScientificTracks() {
               </div>
             </div>
             <Link 
-  href="/full-paper-submission" 
-  className="bg-[#1D3D6D] text-white px-8 py-4 rounded-lg font-bold hover:bg-[#143b66] transition-colors flex items-center gap-2 shrink-0 hover:text-white transition-all"
+  href="/abstract-submission" 
+  className="bg-[#1D3D6D] text-white px-8 py-4 rounded-lg font-bold hover:bg-[#143b66] transition-colors flex items-center gap-2 shrink-0 hover:text-white"
 >
   Submit Abstract <FaRegPaperPlane className="rotate-[-20deg]" />
 </Link>

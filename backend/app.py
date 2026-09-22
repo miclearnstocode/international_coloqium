@@ -1,8 +1,10 @@
+from functools import wraps
+
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
-from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 from datetime import timedelta
 import os, re, tempfile, traceback
 from werkzeug.utils import secure_filename
@@ -18,6 +20,16 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
+from models import (
+    db,
+    User,
+    AbstractSubmission,
+    SUC,
+    PasswordResetCode,
+    PageContent,
+    PageContentItem,
+    ContentAuditLog,
+)
 
 load_dotenv()
 MAIL_SERVER = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
@@ -33,8 +45,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'mysql+pymysql
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAX_CONTENT_LENGTH'] = 64 * 1024 * 1024 
 
-# Initialize extensions
-db = SQLAlchemy(app)
+db.init_app(app)     
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 
@@ -87,59 +98,6 @@ def revoked_token_callback(jwt_header, jwt_payload):
         "error": "token_revoked"
     }), 401
     
-    
-# Models
-class User(db.Model):
-    __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    full_name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(100), unique=True, nullable=False, index=True)
-    password_hash = db.Column(db.String(255), nullable=False)
-    role = db.Column(db.Enum('user', 'staff'), nullable=False, default='user')
-    created_at = db.Column(db.DateTime, server_default=db.func.now())
-
-class AbstractSubmission(db.Model):
-    __tablename__ = 'abstract_submissions'
-    id = db.Column(db.Integer, primary_key=True)
-    sender_id = db.Column(db.Integer, nullable=False)
-    user_id = db.Column(db.Integer, nullable=False)
-    selected_track = db.Column(db.String(255), nullable=False)
-    specific_track = db.Column(db.String(255), nullable=False)
-    research_title = db.Column(db.String(500), nullable=False)
-    author = db.Column(db.String(255), nullable=False)
-    co_author = db.Column(db.Text, nullable=True)
-    presenter = db.Column(db.String(255), nullable=False)
-    email_address = db.Column(db.String(100), nullable=False)
-    university_agency = db.Column(db.String(255), nullable=False)
-    address = db.Column(db.String(255), nullable=True)
-    phone_number = db.Column(db.String(20), nullable=True) 
-    presentation_type = db.Column(db.String(50), nullable=True)
-    city_tour_option = db.Column(db.String(50), nullable=True) 
-    abstract = db.Column(db.Text, nullable=False)
-    keywords = db.Column(db.String(255), nullable=False)
-    abstract_drive_view_url = db.Column(db.String(500), nullable=True)
-    abstract_drive_download_url = db.Column(db.String(500), nullable=True)
-    status = db.Column(db.String(50), nullable=False, default='pending')
-    created_at = db.Column(db.DateTime, server_default=db.func.now())
-    
-class SUC(db.Model):
-    __tablename__ = 'sucs_agency'
-    id = db.Column(db.Integer, primary_key=True)
-    region = db.Column(db.String(100), nullable=False)
-    name = db.Column(db.String(255), nullable=False, unique=True)
-    abbreviation = db.Column(db.String(50), nullable=True)
-    type = db.Column(db.String(50), nullable=True)
-    is_active = db.Column(db.Boolean, default=True)
-
-class PasswordResetCode(db.Model):
-    __tablename__ = 'password_reset_codes'
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(100), nullable=False, index=True)
-    code = db.Column(db.String(6), nullable=False)
-    expires_at = db.Column(db.DateTime, nullable=False)
-    used = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, server_default=db.func.now())
-    
 # Create tables
 with app.app_context():
     db.create_all()
@@ -151,6 +109,19 @@ def handle_exception(e):
     if hasattr(e, 'code') and e.code:
         return jsonify({"msg": str(e.description or "Error")}), e.code
     return jsonify({"error": str(e)}), 500
+
+# ================= ROLE-BASED ACCESS HELPERS =================
+def super_admin_required(fn):
+    """Decorator: restricts a route to super_admin users only."""
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        verify_jwt_in_request()
+        user_id = get_jwt_identity()
+        user = User.query.get(user_id)
+        if not user or user.role != 'admin':
+            return jsonify({"detail": "Super admin access required"}), 403
+        return fn(*args, **kwargs)
+    return wrapper
 
 @app.route('/')
 def home():
@@ -928,5 +899,228 @@ def get_sucs():
     except Exception as e:
         return jsonify({"detail": str(e)}), 500
 
+
+@app.route('/api/content/<page_slug>', methods=['GET', 'OPTIONS'])
+def get_page_content(page_slug):
+    """Public endpoint: fetch all content for a page."""
+    if request.method == 'OPTIONS':
+        return jsonify({})
+    try:
+        blocks = PageContent.query.filter_by(page_slug=page_slug).all()
+        items = PageContentItem.query.filter_by(
+            page_slug=page_slug, is_active=True
+        ).order_by(PageContentItem.item_order).all()
+
+        # Build nested dict: { section_key: { field_key: value } }
+        content = {}
+        for b in blocks:
+            content.setdefault(b.section_key, {})[b.field_key] = b.field_value
+
+        # Group items: { section_key: [ {...}, {...} ] }
+        list_items = {}
+        for it in items:
+            list_items.setdefault(it.section_key, []).append(it.item_data)
+
+        return jsonify({
+            "content": content,
+            "items": list_items
+        }), 200
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"detail": str(e)}), 500
+
+@app.route('/api/admin/content/<page_slug>', methods=['PUT', 'OPTIONS'])
+@super_admin_required
+def update_page_content(page_slug):
+    if request.method == 'OPTIONS':
+        return jsonify({})
+    try:
+        user_id = get_jwt_identity()
+        data = request.get_json()
+        updates = data.get('updates', [])  # [{section_key, field_key, field_value, field_type}]
+
+        for upd in updates:
+            section_key = upd.get('section_key')
+            field_key = upd.get('field_key')
+            field_value = upd.get('field_value')
+            field_type = upd.get('field_type', 'text')
+
+            if not section_key or not field_key:
+                continue
+
+            existing = PageContent.query.filter_by(
+                page_slug=page_slug,
+                section_key=section_key,
+                field_key=field_key
+            ).first()
+
+            old_value = existing.field_value if existing else None
+
+            if existing:
+                existing.field_value = field_value
+                existing.field_type = field_type
+                existing.updated_by = user_id
+            else:
+                new_block = PageContent(
+                    page_slug=page_slug,
+                    section_key=section_key,
+                    field_key=field_key,
+                    field_value=field_value,
+                    field_type=field_type,
+                    updated_by=user_id
+                )
+                db.session.add(new_block)
+
+            # Audit log
+            log = ContentAuditLog(
+                admin_id=user_id,
+                page_slug=page_slug,
+                action='update' if existing else 'create',
+                field_key=f"{section_key}.{field_key}",
+                old_value=old_value,
+                new_value=field_value
+            )
+            db.session.add(log)
+
+        db.session.commit()
+        return jsonify({"message": "Content updated successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        traceback.print_exc()
+        return jsonify({"detail": str(e)}), 500
+
+
+@app.route('/api/admin/content/<page_slug>/items/<section_key>', methods=['PUT', 'OPTIONS'])
+@super_admin_required
+def update_page_items(page_slug, section_key):
+    if request.method == 'OPTIONS':
+        return jsonify({})
+    try:
+        data = request.get_json()
+        items = data.get('items', [])  # list of dicts
+
+        # Delete existing items for this section
+        PageContentItem.query.filter_by(
+            page_slug=page_slug, section_key=section_key
+        ).delete()
+
+        # Insert new items
+        for idx, item in enumerate(items):
+            new_item = PageContentItem(
+                page_slug=page_slug,
+                section_key=section_key,
+                item_order=idx,
+                item_data=item,
+                is_active=True
+            )
+            db.session.add(new_item)
+
+        db.session.commit()
+        return jsonify({"message": "Items updated successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        traceback.print_exc()
+        return jsonify({"detail": str(e)}), 500
+
+
+@app.route('/api/admin/content/<page_slug>/seed', methods=['POST', 'OPTIONS'])
+@super_admin_required
+def seed_page_content(page_slug):
+    """Seed default content for a page if not already present."""
+    if request.method == 'OPTIONS':
+        return jsonify({})
+    try:
+        data = request.get_json() or {}
+        fields = data.get('fields', [])   # [{section_key, field_key, field_value, field_type}]
+        items_seed = data.get('items', {})  # { section_key: [ {..}, {..} ] }
+
+        created_fields = 0
+        for f in fields:
+            exists = PageContent.query.filter_by(
+                page_slug=page_slug,
+                section_key=f['section_key'],
+                field_key=f['field_key']
+            ).first()
+            if not exists:
+                db.session.add(PageContent(
+                    page_slug=page_slug,
+                    section_key=f['section_key'],
+                    field_key=f['field_key'],
+                    field_value=f.get('field_value', ''),
+                    field_type=f.get('field_type', 'text')
+                ))
+                created_fields += 1
+
+        created_items = 0
+        for section_key, items_list in items_seed.items():
+            existing_count = PageContentItem.query.filter_by(
+                page_slug=page_slug, section_key=section_key
+            ).count()
+            if existing_count == 0:
+                for idx, item in enumerate(items_list):
+                    db.session.add(PageContentItem(
+                        page_slug=page_slug,
+                        section_key=section_key,
+                        item_order=idx,
+                        item_data=item,
+                        is_active=True
+                    ))
+                    created_items += 1
+
+        db.session.commit()
+        return jsonify({
+            "message": "Seed complete",
+            "fields_created": created_fields,
+            "items_created": created_items
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        traceback.print_exc()
+        return jsonify({"detail": str(e)}), 500
+
+
+@app.route('/api/admin/pages', methods=['GET', 'OPTIONS'])
+@super_admin_required
+def list_admin_pages():
+    if request.method == 'OPTIONS':
+        return jsonify({})
+    try:
+        # Discover pages from content table + a static registry
+        page_registry = [
+            {"slug": "home", "name": "Home Page", "path": "/"},
+            {"slug": "about", "name": "About Page", "path": "/about"},
+            {"slug": "program", "name": "Program Page", "path": "/program"},
+            {"slug": "registration", "name": "Registration Page", "path": "/registration"},
+            {"slug": "scientific-tracks", "name": "Scientific Tracks", "path": "/scientific-tracks"},
+            {"slug": "contact", "name": "Contact Page", "path": "/contact"},
+        ]
+
+        # Count fields per page
+        for p in page_registry:
+            p['field_count'] = PageContent.query.filter_by(page_slug=p['slug']).count()
+            p['item_count'] = PageContentItem.query.filter_by(page_slug=p['slug']).count()
+
+        return jsonify(page_registry), 200
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"detail": str(e)}), 500
+
+
+@app.route('/api/admin/content/<page_slug>/audit', methods=['GET', 'OPTIONS'])
+@super_admin_required
+def get_audit_log(page_slug):
+    if request.method == 'OPTIONS':
+        return jsonify({})
+    try:
+        logs = ContentAuditLog.query.filter_by(page_slug=page_slug)\
+            .order_by(ContentAuditLog.created_at.desc()).limit(100).all()
+        return jsonify([l.to_dict() for l in logs]), 200
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"detail": str(e)}), 500
+    
 if __name__ == '__main__':
     app.run(debug=True, port=5000, host='127.0.0.1')
