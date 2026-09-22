@@ -160,7 +160,7 @@ export default function UsersAndRolesPage() {
       <Sidebar />
 
       <main className="flex-1 ml-64 flex flex-col">
-        <AdminHeader isEditMode={false} onToggleEditMode={() => {}} />
+        <AdminHeader />
 
         <div className="p-8">
           {/* Breadcrumb */}
