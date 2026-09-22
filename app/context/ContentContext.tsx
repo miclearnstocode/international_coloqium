@@ -6,17 +6,22 @@ import {
   useState,
   useEffect,
   useCallback,
+  useMemo,
   ReactNode,
 } from "react";
 import { useSearchParams } from "next/navigation";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
 
+// LocalStorage key used by the admin panel to persist drafts for preview
+const DRAFT_STORAGE_KEY = "symposium_draft_content";
+
 interface ContentContextType {
   content: Record<string, Record<string, string>>;
   items: Record<string, any[]>;
   isEditMode: boolean;
   isSuperAdmin: boolean;
+  isPreviewMode: boolean;
   hasUnsavedChanges: boolean;
   loading: boolean;
   toggleEditMode: () => void;
@@ -37,6 +42,7 @@ export function ContentProvider({
 }) {
   const searchParams = useSearchParams();
   const wantsEdit = searchParams?.get("edit") === "1";
+  const wantsPreview = searchParams?.get("preview") === "1";
 
   const [content, setContent] = useState<Record<string, Record<string, string>>>({});
   const [items, setItems] = useState<Record<string, any[]>>({});
@@ -50,7 +56,7 @@ export function ContentProvider({
   >({});
   const [pendingItems, setPendingItems] = useState<Record<string, any[]>>({});
 
-  // ===== Fetch page content =====
+  // ===== Fetch page content from the API =====
   const fetchContent = useCallback(async () => {
     try {
       const res = await fetch(`${API_BASE}/api/content/${pageSlug}`);
@@ -65,6 +71,58 @@ export function ContentProvider({
       setLoading(false);
     }
   }, [pageSlug]);
+
+  // ===== Load draft content from localStorage (admin preview) =====
+  // This runs AFTER fetchContent so the draft can override DB content.
+  const applyLocalDraft = useCallback(() => {
+    if (!wantsPreview) return;
+    try {
+      const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
+      if (!raw) return;
+
+      const drafts = JSON.parse(raw) as Record<
+        string,
+        {
+          section: string;
+          fields: { key: string; value: string }[];
+          list?: { key: string; items: any[] };
+        }[]
+      >;
+
+      const pageDraft = drafts[pageSlug];
+      if (!pageDraft) return;
+
+      // Convert draft sections into the { content, items } shape the context uses
+      const draftContent: Record<string, Record<string, string>> = {};
+      const draftItems: Record<string, any[]> = {};
+
+      pageDraft.forEach((section) => {
+        section.fields?.forEach((f) => {
+          if (!draftContent[section.section]) draftContent[section.section] = {};
+          // Extract the short field name after the dot (e.g. "hero.title" → "title")
+          const shortKey = f.key.includes(".") ? f.key.split(".").slice(1).join(".") : f.key;
+          draftContent[section.section][shortKey] = f.value;
+        });
+
+        if (section.list) {
+          draftItems[section.list.key] = section.list.items;
+        }
+      });
+
+      // Merge draft on top of DB content
+      setContent((prev) => {
+        const merged = { ...prev };
+        Object.entries(draftContent).forEach(([section, fields]) => {
+          merged[section] = { ...(merged[section] || {}), ...fields };
+        });
+        return merged;
+      });
+
+      setItems((prev) => ({ ...prev, ...draftItems }));
+    } catch (err) {
+      console.error("Failed to apply local draft:", err);
+    }
+  }, [pageSlug, wantsPreview]);
 
   // ===== Verify super admin role =====
   const verifyAdmin = useCallback(async () => {
@@ -104,6 +162,14 @@ export function ContentProvider({
     })();
   }, [fetchContent, verifyAdmin, wantsEdit]);
 
+  // Apply local draft AFTER DB content is loaded (separate effect so
+  // fetchContent's async completion triggers the merge).
+  useEffect(() => {
+    if (!loading) {
+      applyLocalDraft();
+    }
+  }, [loading, applyLocalDraft]);
+
   // ===== Update a single field =====
   const updateField = (section: string, field: string, value: string) => {
     setContent((prev) => ({
@@ -124,7 +190,7 @@ export function ContentProvider({
     setHasUnsavedChanges(true);
   };
 
-  // ===== Save everything =====
+  // ===== Save everything to the backend =====
   const saveContent = async () => {
     const token = localStorage.getItem("access_token");
     if (!token) throw new Error("Not authenticated. Please login as admin.");
@@ -172,6 +238,18 @@ export function ContentProvider({
       }
     }
 
+    // Clear the local draft for this page — published DB content is now the source of truth
+    try {
+      const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
+      if (raw) {
+        const drafts = JSON.parse(raw);
+        delete drafts[pageSlug];
+        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(drafts));
+      }
+    } catch {
+      /* ignore */
+    }
+
     setPendingFields({});
     setPendingItems({});
     setHasUnsavedChanges(false);
@@ -191,24 +269,38 @@ export function ContentProvider({
     setIsEditMode((prev) => !prev);
   };
 
+  // ===== Memoize context value =====
+  const value = useMemo(
+    () => ({
+      content,
+      items,
+      isEditMode,
+      isSuperAdmin,
+      isPreviewMode: wantsPreview,
+      hasUnsavedChanges,
+      loading,
+      toggleEditMode,
+      updateField,
+      updateItems,
+      saveContent,
+      refreshContent: fetchContent,
+    }),
+    [
+      content,
+      items,
+      isEditMode,
+      isSuperAdmin,
+      wantsPreview,
+      hasUnsavedChanges,
+      loading,
+      fetchContent,
+      // toggleEditMode / updateField / updateItems / saveContent close over
+      // state setters only, so they're stable — no need to include them.
+    ]
+  );
+
   return (
-    <ContentContext.Provider
-      value={{
-        content,
-        items,
-        isEditMode,
-        isSuperAdmin,
-        hasUnsavedChanges,
-        loading,
-        toggleEditMode,
-        updateField,
-        updateItems,
-        saveContent,
-        refreshContent: fetchContent,
-      }}
-    >
-      {children}
-    </ContentContext.Provider>
+    <ContentContext.Provider value={value}>{children}</ContentContext.Provider>
   );
 }
 

@@ -1,8 +1,6 @@
 from functools import wraps
-
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 from datetime import timedelta
@@ -12,7 +10,7 @@ from dotenv import load_dotenv
 from google_drive import upload_file_to_drive
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.units import inch
 from reportlab.lib import colors
 import random
@@ -110,13 +108,14 @@ def handle_exception(e):
         return jsonify({"msg": str(e.description or "Error")}), e.code
     return jsonify({"error": str(e)}), 500
 
-# ================= ROLE-BASED ACCESS HELPERS =================
 def super_admin_required(fn):
-    """Decorator: restricts a route to super_admin users only."""
     @wraps(fn)
     def wrapper(*args, **kwargs):
+        if request.method == 'OPTIONS':
+            return jsonify({}), 200
+
         verify_jwt_in_request()
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())      # ← cast back to int
         user = User.query.get(user_id)
         if not user or user.role != 'admin':
             return jsonify({"detail": "Super admin access required"}), 403
@@ -152,7 +151,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         
-        access_token = create_access_token(identity=new_user.id, expires_delta=timedelta(days=7))
+        access_token = create_access_token(identity=str(new_user.id), expires_delta=timedelta(days=7))
         
         return jsonify({
             "message": "User created successfully",
@@ -177,8 +176,8 @@ def login():
         if not user or not bcrypt.check_password_hash(user.password_hash, data['password']):
             return jsonify({"detail": "Invalid email or password"}), 401
         
-        access_token = create_access_token(identity=user.id, expires_delta=timedelta(days=7))
-        refresh_token = create_refresh_token(identity=user.id)
+        access_token = create_access_token(identity=str(user.id), expires_delta=timedelta(days=7))
+        refresh_token = create_refresh_token(identity=str(user.id))
         
         return jsonify({
             "message": "Login successful",
@@ -1081,6 +1080,19 @@ def seed_page_content(page_slug):
         traceback.print_exc()
         return jsonify({"detail": str(e)}), 500
 
+PAGE_REGISTRY = [
+    {"slug": "home",                  "name": "Home Page",              "path": "/",                        "category": "Home"},
+    {"slug": "about",              "name": "About Page",             "path": "/about",                "category": "About"},
+    {"slug": "program",               "name": "Program Page",           "path": "/program",                 "category": "Program"},
+    {"slug": "scientific-tracks",     "name": "Scientific Tracks",      "path": "/scientific-tracks",       "category": "Scientific Tracks"},
+    {"slug": "abstract-submission",   "name": "Abstract Submission",    "path": "/abstract-submission",     "category": "Abstract Submission"},
+    {"slug": "registration",          "name": "Registration Page",      "path": "/registration",            "category": "Registration"},
+    {"slug": "presentation-guidelines","name": "Presentation Guidelines","path": "/presentation-guidelines", "category": "Guidelines"},
+    {"slug": "partner-institutions",  "name": "Partner Institutions",   "path": "/partner-institutions",    "category": "Partner Institutions"},
+    {"slug": "hotel-mapping",         "name": "Hotel & Mapping",        "path": "/hotel-mapping",           "category": "Hotel & Mapping"},
+    {"slug": "contact-us",            "name": "Contact Us",             "path": "/contact-us",              "category": "Contact Us"},
+]
+
 
 @app.route('/api/admin/pages', methods=['GET', 'OPTIONS'])
 @super_admin_required
@@ -1088,26 +1100,23 @@ def list_admin_pages():
     if request.method == 'OPTIONS':
         return jsonify({})
     try:
-        # Discover pages from content table + a static registry
-        page_registry = [
-            {"slug": "home", "name": "Home Page", "path": "/"},
-            {"slug": "about", "name": "About Page", "path": "/about"},
-            {"slug": "program", "name": "Program Page", "path": "/program"},
-            {"slug": "registration", "name": "Registration Page", "path": "/registration"},
-            {"slug": "scientific-tracks", "name": "Scientific Tracks", "path": "/scientific-tracks"},
-            {"slug": "contact", "name": "Contact Page", "path": "/contact"},
-        ]
+        # Build the response from the registry + DB counts
+        result = []
+        for p in PAGE_REGISTRY:
+            entry = {
+                "slug": p["slug"],
+                "name": p["name"],
+                "path": p["path"],
+                "category": p["category"],
+                "field_count": PageContent.query.filter_by(page_slug=p["slug"]).count(),
+                "item_count": PageContentItem.query.filter_by(page_slug=p["slug"]).count(),
+            }
+            result.append(entry)
 
-        # Count fields per page
-        for p in page_registry:
-            p['field_count'] = PageContent.query.filter_by(page_slug=p['slug']).count()
-            p['item_count'] = PageContentItem.query.filter_by(page_slug=p['slug']).count()
-
-        return jsonify(page_registry), 200
+        return jsonify(result), 200
     except Exception as e:
         traceback.print_exc()
         return jsonify({"detail": str(e)}), 500
-
 
 @app.route('/api/admin/content/<page_slug>/audit', methods=['GET', 'OPTIONS'])
 @super_admin_required
@@ -1119,6 +1128,101 @@ def get_audit_log(page_slug):
             .order_by(ContentAuditLog.created_at.desc()).limit(100).all()
         return jsonify([l.to_dict() for l in logs]), 200
     except Exception as e:
+        traceback.print_exc()
+        return jsonify({"detail": str(e)}), 500
+
+# ================= USER MANAGEMENT (Admin only) =================
+
+@app.route('/api/admin/users', methods=['GET', 'OPTIONS'])
+@super_admin_required
+def list_users():
+    """List all registered users, including the current admin."""
+    if request.method == 'OPTIONS':
+        return jsonify({})
+    try:
+        current_user_id = int(get_jwt_identity())
+
+        users = User.query.order_by(User.created_at.desc()).all()
+        result = []
+        for u in users:
+            data = u.to_dict()
+            data['is_self'] = (u.id == current_user_id)  # flag so frontend can disable self-actions
+            result.append(data)
+
+        # Aggregate stats for the dashboard header
+        stats = {
+            "total": len(users),
+            "admin": sum(1 for u in users if u.role == 'admin'),
+            "staff": sum(1 for u in users if u.role == 'staff'),
+            "user": sum(1 for u in users if u.role == 'user'),
+        }
+
+        return jsonify({"users": result, "stats": stats}), 200
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"detail": str(e)}), 500
+
+
+@app.route('/api/admin/users/<int:user_id>', methods=['PUT', 'OPTIONS'])
+@super_admin_required
+def update_user(user_id):
+    """Update a user's role or full name."""
+    if request.method == 'OPTIONS':
+        return jsonify({})
+    try:
+        current_user_id = int(get_jwt_identity())
+        data = request.get_json() or {}
+
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({"detail": "User not found"}), 404
+
+        new_role = data.get('role')
+        new_name = data.get('full_name')
+
+        # Prevent admin from demoting themselves (avoid lockout)
+        if user.id == current_user_id and new_role and new_role != 'admin':
+            return jsonify({"detail": "You cannot change your own role"}), 400
+
+        if new_role is not None:
+            if new_role not in ('user', 'staff', 'admin'):
+                return jsonify({"detail": "Invalid role"}), 400
+            user.role = new_role
+
+        if new_name is not None:
+            if not new_name.strip():
+                return jsonify({"detail": "Full name cannot be empty"}), 400
+            user.full_name = new_name.strip()
+
+        db.session.commit()
+        return jsonify({"message": "User updated successfully", "user": user.to_dict()}), 200
+    except Exception as e:
+        db.session.rollback()
+        traceback.print_exc()
+        return jsonify({"detail": str(e)}), 500
+
+
+@app.route('/api/admin/users/<int:user_id>', methods=['DELETE', 'OPTIONS'])
+@super_admin_required
+def delete_user(user_id):
+    """Delete a user (cannot delete yourself)."""
+    if request.method == 'OPTIONS':
+        return jsonify({})
+    try:
+        current_user_id = int(get_jwt_identity())
+
+        if user_id == current_user_id:
+            return jsonify({"detail": "You cannot delete your own account"}), 400
+
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({"detail": "User not found"}), 404
+
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({"message": "User deleted successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
         traceback.print_exc()
         return jsonify({"detail": str(e)}), 500
     

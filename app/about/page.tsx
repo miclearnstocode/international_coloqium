@@ -259,7 +259,7 @@ export default function AboutPage() {
 
             {/* Right Side - Image Placeholder */}
             <div className="relative">
-              <div className="bg-gradient-to-br from-[#1D3D6D]/5 to-[#D5A54D]/5 rounded-2xl p-8 border border-gray-200">
+              <div className="bg-linear-to-br from-[#1D3D6D]/5 to-[#D5A54D]/5 rounded-2xl p-8 border border-gray-200">
                 <div className="relative h-64 rounded-xl overflow-hidden shadow-lg">
                   <Image 
                     src="/images/tracks/about-symposium.jpg" 
@@ -272,7 +272,7 @@ export default function AboutPage() {
                       const parent = target.parentElement;
                       if (parent) {
                         parent.innerHTML = `
-                          <div class="flex flex-col items-center justify-center h-full bg-gradient-to-br from-[#1D3D6D] to-[#0B2A4A] text-white p-30 text-center rounded-xl">
+                          <div class="flex flex-col items-center justify-center h-full bg-linear-to-br from-[#1D3D6D] to-[#0B2A4A] text-white p-30 text-center rounded-xl">
                             
                             <h3 class="text-xl font-bold">Symposium Theme</h3>
                             <p class="text-sm opacity-80 mt-2">Converging Frontiers in Agri-Life and Bioresource Sciences: <br />
@@ -345,7 +345,7 @@ Science, Innovation, and Collaboration for a Resilient and Sustainable Future</p
       </section>
 
       {/* ================= OBJECTIVES ================= */}
-      <section className="py-16 bg-gradient-to-r from-[#0A2540] to-[#1a3a5c]">
+      <section className="py-16 bg-linear-to-r from-[#0A2540] to-[#1a3a5c]">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-white uppercase">Symposium Objectives</h2>
@@ -392,7 +392,7 @@ Science, Innovation, and Collaboration for a Resilient and Sustainable Future</p
                 key={idx}
                 className="flex items-center gap-3 bg-[#F8FAFC] rounded-lg p-4 border border-zinc-100 hover:shadow-md transition-all hover:-translate-y-0.5"
               >
-                <FaCheckCircle className="text-[#D5A54D] text-sm flex-shrink-0" />
+                <FaCheckCircle className="text-[#D5A54D] text-sm shrink-0" />
                 <span className="text-sm text-gray-700">{item}</span>
               </div>
             ))}
