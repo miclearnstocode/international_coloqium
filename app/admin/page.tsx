@@ -11,15 +11,15 @@ import {
 // --- Mock Data based on the image ---
 const pagesData = [
   { id: 1, title: 'Home', slug: '/', category: 'Home', status: 'Published', updated: 'Sep 16, 2025 10:24 AM' },
-  { id: 2, title: 'About', slug: '/abstract', category: 'Submission', status: 'Published', updated: 'Sep 15, 2025 04:12 PM' },
-  { id: 3, title: 'Program', slug: '/symposium', category: 'About', status: 'Published', updated: 'Sep 15, 2025 03:45 PM' },
-  { id: 4, title: 'Scientific Tracks', slug: '/registration', category: 'Registration', status: 'Published', updated: 'Sep 14, 2025 11:20 AM' },
-  { id: 5, title: 'Abstract Submission', slug: '/guidelines', category: 'Guidelines', status: 'Published', updated: 'Sep 14, 2025 09:32 AM' },
-  { id: 6, title: 'Registration', slug: '/venue-map', category: 'Logistics', status: 'Published', updated: 'Sep 13, 2025 05:17 PM' },
-  { id: 7, title: 'Guidelines', slug: '/program', category: 'Program', status: 'Published', updated: 'Sep 12, 2025 02:41 PM' },
-  { id: 8, title: 'Partner Institutions', slug: '/contact', category: 'Contact', status: 'Published', updated: 'Sep 12, 2025 11:06 AM' },
-  { id: 9, title: 'Hotel & Mapping', slug: '/partners', category: 'Partners', status: 'Published', updated: 'Sep 11, 2025 03:22 PM' },
-  { id: 10, title: 'Contact Us', slug: '/register', category: 'Registration', status: 'Draft', updated: 'Sep 10, 2025 01:14 PM' }
+  { id: 2, title: 'About', slug: '/about-us', category: 'About', status: 'Published', updated: 'Sep 15, 2025 04:12 PM' },
+  { id: 3, title: 'Program', slug: '/program', category: 'Program', status: 'Published', updated: 'Sep 15, 2025 03:45 PM' },
+  { id: 4, title: 'Scientific Tracks', slug: '/scientific-tracks', category: 'Scientific Tracks', status: 'Published', updated: 'Sep 14, 2025 11:20 AM' },
+  { id: 5, title: 'Abstract Submission', slug: '/abstract-submission', category: 'Abstract Submission', status: 'Published', updated: 'Sep 14, 2025 09:32 AM' },
+  { id: 6, title: 'Registration', slug: '/registration', category: 'Registration', status: 'Published', updated: 'Sep 13, 2025 05:17 PM' },
+  { id: 7, title: 'Guidelines', slug: '/presentation-guidelines', category: 'Guidelines', status: 'Published', updated: 'Sep 12, 2025 02:41 PM' },
+  { id: 8, title: 'Partner Institutions', slug: '/partner-institutions', category: 'Partner Institutions', status: 'Published', updated: 'Sep 12, 2025 11:06 AM' },
+  { id: 9, title: 'Hotel & Mapping', slug: '/hotel-mapping', category: 'Hotel & Mapping', status: 'Published', updated: 'Sep 11, 2025 03:22 PM' },
+  { id: 10, title: 'Contact Us', slug: '/contact-us', category: 'Contact Us', status: 'Draft', updated: 'Sep 10, 2025 01:14 PM' }
 ];
 
 export default function AdminPages() {
