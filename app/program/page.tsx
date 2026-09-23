@@ -91,7 +91,7 @@ function ScrollProgressBar() {
     };
   }, []);
   return (
-    <div className="fixed top-0 left-0 right-0 z-[100] h-[3px] bg-transparent pointer-events-none">
+    <div className="fixed top-0 left-0 right-0 z-100 h-0.75 bg-transparent pointer-events-none">
       <div
         className="h-full origin-left bg-linear-to-r from-[#D5A54D] via-[#F0C674] to-[#1D3D6D] shadow-[0_0_12px_rgba(213,165,77,0.6)]"
         style={{ transform: `scaleX(${progress})`, transition: "transform 0.08s linear" }}
@@ -424,7 +424,7 @@ export default function ProgramPage() {
       {/* ================= KEY DATES ================= */}
       <section
         ref={keyDatesScroll.ref}
-        className="py-8 bg-gradient-to-r from-[#0A2540] to-[#1a3a5c] relative overflow-hidden"
+        className="py-8 bg-linear-to-r from-[#0A2540] to-[#1a3a5c] relative overflow-hidden"
       >
         <div
           aria-hidden

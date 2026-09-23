@@ -213,7 +213,7 @@ export default function PresentationGuidelinesPage() {
       </section>
 
       {/* ================= FULL PAPER SUBMISSIONS ================= */}
-      <section className="py-16 bg-gradient-to-r from-[#0A2540] to-[#1a3a5c]">
+      <section className="py-16 bg-linear-to-r from-[#0A2540] to-[#1a3a5c]">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-10">
             <div className="flex items-center justify-center gap-3 mb-4">
@@ -396,7 +396,7 @@ export default function PresentationGuidelinesPage() {
       </section>
 
       {/* ================= DOWNLOAD GUIDELINES ================= */}
-       <section className="py-16 bg-gradient-to-r from-[#0A2540] to-[#1a3a5c]">
+       <section className="py-16 bg-linear-to-r from-[#0A2540] to-[#1a3a5c]">
   <div className="max-w-7xl mx-auto px-6">
     <div className="bg-white rounded-2xl p-8 md:p-12 text-center shadow-xl">
       <h2 className="text-2xl font-bold text-[#0A2540] mb-4">
