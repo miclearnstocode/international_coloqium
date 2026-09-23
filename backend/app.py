@@ -1226,5 +1226,21 @@ def delete_user(user_id):
         traceback.print_exc()
         return jsonify({"detail": str(e)}), 500
     
+@app.route('/api/auth/me', methods=['GET', 'OPTIONS'])
+@jwt_required()
+def get_current_user():
+    """Return the currently authenticated user's info."""
+    if request.method == 'OPTIONS':
+        return jsonify({}), 200
+    try:
+        user_id = int(get_jwt_identity())
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({"detail": "User not found"}), 404
+        return jsonify(user.to_dict()), 200
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"detail": str(e)}), 500
+    
 if __name__ == '__main__':
     app.run(debug=True, port=5000, host='127.0.0.1')

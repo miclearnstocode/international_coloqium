@@ -190,19 +190,18 @@ export function ContentProvider({
     setHasUnsavedChanges(true);
   };
 
-  // ===== Save everything to the backend =====
+  // ===== Save everything to the database =====
   const saveContent = async () => {
     const token = localStorage.getItem("access_token");
     if (!token) throw new Error("Not authenticated. Please login as admin.");
 
-    const updates = Object.entries(pendingFields).flatMap(
-      ([section_key, fields]) =>
-        Object.entries(fields).map(([field_key, field_value]) => ({
-          section_key,
-          field_key,
-          field_value,
-          field_type: "text",
-        }))
+    const updates = Object.entries(pendingFields).flatMap(([section_key, fields]) =>
+      Object.entries(fields).map(([field_key, field_value]) => ({
+        section_key,
+        field_key: field_key.includes(".") ? field_key.split(".").slice(1).join(".") : field_key,
+        field_value,
+        field_type: "text",
+      }))
     );
 
     if (updates.length > 0) {
@@ -220,6 +219,7 @@ export function ContentProvider({
       }
     }
 
+    // ── Save each list section ──
     for (const [section_key, sectionItems] of Object.entries(pendingItems)) {
       const res = await fetch(
         `${API_BASE}/api/admin/content/${pageSlug}/items/${section_key}`,
@@ -236,18 +236,6 @@ export function ContentProvider({
         const err = await res.json().catch(() => ({}));
         throw new Error(err.detail || `Failed to save items for ${section_key}`);
       }
-    }
-
-    // Clear the local draft for this page — published DB content is now the source of truth
-    try {
-      const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
-      if (raw) {
-        const drafts = JSON.parse(raw);
-        delete drafts[pageSlug];
-        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(drafts));
-      }
-    } catch {
-      /* ignore */
     }
 
     setPendingFields({});

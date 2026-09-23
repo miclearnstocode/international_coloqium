@@ -17,9 +17,7 @@ import {
   FaLeaf,
 } from "react-icons/fa";
 
-// ============================================================
-// NavItem — auto-highlights the active route via usePathname
-// ============================================================
+
 const NavItem = ({
   icon,
   label,
@@ -31,8 +29,6 @@ const NavItem = ({
 }) => {
   const pathname = usePathname();
 
-  // Active when the current pathname is exactly the href,
-  // OR when it's a sub-route (e.g. /admin/pages/123 matches /admin/pages).
   const active =
     pathname === href ||
     (href !== "/admin" && pathname?.startsWith(href + "/"));
@@ -54,9 +50,6 @@ const NavItem = ({
   );
 };
 
-// ============================================================
-// Sidebar
-// ============================================================
 export const Sidebar = () => (
   <aside className="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full z-10">
     {/* Logo / Brand */}
@@ -65,11 +58,8 @@ export const Sidebar = () => (
         <FaLeaf className="text-xl" />
       </div>
       <div>
-        <h1 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-          3rd International
-        </h1>
         <h2 className="text-sm font-bold text-green-800 leading-tight">
-          Agri-Life &amp; BioresourceScience Symposium
+          Agri-Life &amp; Bioresource Sciences International Symposium 
         </h2>
       </div>
     </div>

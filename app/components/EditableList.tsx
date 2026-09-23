@@ -1,8 +1,15 @@
 "use client";
 
 import { useContent } from "@/app/context/ContentContext";
-import { ReactNode } from "react";
-import { FaPlus, FaTrash, FaArrowUp, FaArrowDown } from "react-icons/fa";
+import { ReactNode, useRef, useState, useCallback } from "react";
+import {
+  FaPlus,
+  FaTrash,
+  FaArrowUp,
+  FaArrowDown,
+  FaCheck,
+  FaSpinner,
+} from "react-icons/fa";
 
 interface EditableListProps {
   section: string;
@@ -22,36 +29,103 @@ export default function EditableList({
   emptyItem = {},
   renderItem,
 }: EditableListProps) {
-  const { items, isEditMode, updateItems } = useContent();
+  const { items, isEditMode, updateItems, saveContent } = useContent();
+  const [saveState, setSaveState] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
+
+  // Debounce timer ref — lives across renders
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const adminItems = items?.[section];
   const listItems = adminItems && adminItems.length > 0 ? adminItems : fallback;
+
+  // Debounced persist — waits 600ms of inactivity before firing
+  const schedulePersist = useCallback(() => {
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(async () => {
+      setSaveState("saving");
+      try {
+        await saveContent();
+        setSaveState("saved");
+        setTimeout(() => setSaveState("idle"), 1400);
+      } catch (err) {
+        console.error(`[EditableList] Save failed for "${section}":`, err);
+        setSaveState("error");
+        setTimeout(() => setSaveState("idle"), 3000);
+      }
+    }, 600);
+  }, [saveContent, section]);
+
+  // Immediate persist — used for add/delete/move where the intent is clear
+  const persistNow = async () => {
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    setSaveState("saving");
+    try {
+      await saveContent();
+      setSaveState("saved");
+      setTimeout(() => setSaveState("idle"), 1400);
+    } catch (err) {
+      console.error(`[EditableList] Save failed for "${section}":`, err);
+      setSaveState("error");
+      setTimeout(() => setSaveState("idle"), 3000);
+    }
+  };
 
   const handleUpdate = (index: number, newItem: any) => {
     const newList = [...listItems];
     newList[index] = newItem;
     updateItems(section, newList);
+    schedulePersist(); // debounced — good for typing
   };
 
-  const handleAdd = () => {
-    updateItems(section, [...listItems, { ...emptyItem }]);
+  const handleAdd = async () => {
+    const newList = [...listItems, { ...emptyItem }];
+    updateItems(section, newList);
+    await persistNow();
   };
 
-  const handleDelete = (index: number) => {
+  const handleDelete = async (index: number) => {
     if (!confirm("Delete this item?")) return;
-    updateItems(section, listItems.filter((_: any, i: number) => i !== index));
+    const newList = listItems.filter((_: any, i: number) => i !== index);
+    updateItems(section, newList);
+    await persistNow();
   };
 
-  const handleMove = (index: number, direction: -1 | 1) => {
+  const handleMove = async (index: number, direction: -1 | 1) => {
     const newIndex = index + direction;
     if (newIndex < 0 || newIndex >= listItems.length) return;
     const newList = [...listItems];
     [newList[index], newList[newIndex]] = [newList[newIndex], newList[index]];
     updateItems(section, newList);
+    await persistNow();
   };
 
   return (
     <div className="space-y-2">
+      {/* Save status badge */}
+      {isEditMode && saveState !== "idle" && (
+        <div className="flex justify-end">
+          <span
+            className={`text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 ${
+              saveState === "saving"
+                ? "bg-blue-100 text-blue-700"
+                : saveState === "saved"
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700"
+            }`}
+          >
+            {saveState === "saving" && <FaSpinner className="animate-spin" />}
+            {saveState === "saved" && <FaCheck />}
+            {saveState === "saving"
+              ? "Saving…"
+              : saveState === "saved"
+                ? "Saved"
+                : "Error"}
+          </span>
+        </div>
+      )}
+
       {listItems.map((item: any, index: number) => (
         <div key={index} className="relative">
           {isEditMode && (
@@ -79,11 +153,12 @@ export default function EditableList({
               </button>
             </div>
           )}
-          {renderItem(item, index, isEditMode, (newItem) =>
-            handleUpdate(index, newItem)
-          )}
+          {renderItem(item, index, isEditMode, (newItem) => {
+            handleUpdate(index, newItem);
+          })}
         </div>
       ))}
+
       {isEditMode && (
         <button
           onClick={handleAdd}

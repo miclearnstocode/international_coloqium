@@ -1,7 +1,7 @@
 import { PageDefinition } from './types';
 
 export const partnerInstitutionsPage: PageDefinition = {
-  slug: '/partner-institutions',
+  slug: 'partner-institutions',
   name: 'Partner Institutions',
   path: '/partner-institutions',
   category: 'Partner Institutions',

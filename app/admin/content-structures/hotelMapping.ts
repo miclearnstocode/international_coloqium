@@ -1,7 +1,7 @@
 import { PageDefinition } from './types';
 
 export const hotelMappingPage: PageDefinition = {
-  slug: '/hotel-mapping',
+  slug: 'hotel-mapping',
   name: 'Hotel & Mapping',
   path: '/hotel-mapping',
   category: 'Hotel & Mapping',

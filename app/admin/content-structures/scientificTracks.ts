@@ -1,7 +1,7 @@
 import { PageDefinition } from './types';
 
 export const scientificTracksPage: PageDefinition = {
-  slug: '/scientific-tracks',
+  slug: 'scientific-tracks',
   name: 'Scientific Tracks',
   path: '/scientific-tracks',
   category: 'Scientific Tracks',

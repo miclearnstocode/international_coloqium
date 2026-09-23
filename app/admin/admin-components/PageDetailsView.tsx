@@ -7,31 +7,39 @@ import {
   FaSync,
   FaExternalLinkAlt,
 } from "react-icons/fa";
-import { PageDefinition } from "@/app/admin/content-structures";
+import { PageDefinition, SectionDefinition } from "@/app/admin/content-structures";
 import { getCategoryColor } from "./utils";
 import { useState } from "react";
 
 export const PageDetailsView = ({
   selectedPage,
+  draftContent,
   editorAvailable,
+  isSaving,
   onEdit,
   onViewPage,
   previewKey = 0,
 }: {
   selectedPage: PageDefinition;
+  draftContent?: SectionDefinition[];
   editorAvailable: boolean;
+  isSaving?: boolean;
   onEdit: () => void;
   onViewPage: () => void;
   previewKey?: number;
 }) => {
-  // Local key allows the "Refresh" button to reload the iframe
-  // independently of the parent's previewKey.
   const [localKey, setLocalKey] = useState(0);
   const combinedKey = previewKey + localKey;
 
+  // Prefer the DB-merged draft if provided, otherwise fall back to static structure
+  const blocks =
+    draftContent && draftContent.length > 0
+      ? draftContent
+      : selectedPage.structure;
+
   return (
     <div className="space-y-6">
-      {/* ── Live Page Preview (scaled) ── */}
+      {/* ── Live Page Preview ── */}
       <div>
         <div className="flex justify-between items-center mb-2">
           <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -57,7 +65,6 @@ export const PageDetailsView = ({
           </div>
         </div>
 
-        {/* Fixed-size viewport with scaled iframe */}
         <div className="w-full h-56 rounded-lg border border-blue-100 overflow-hidden bg-gray-100 relative">
           <iframe
             key={combinedKey}
@@ -73,7 +80,7 @@ export const PageDetailsView = ({
               position: "absolute",
               top: 0,
               left: 0,
-              pointerEvents: "none", // disable interaction — it's a preview
+              pointerEvents: "none",
             }}
           />
         </div>
@@ -179,15 +186,15 @@ export const PageDetailsView = ({
 
       <hr className="border-gray-100" />
 
-      {/* ── Quick Actions (Edit + View only) ── */}
+      {/* ── Quick Actions ── */}
       <div>
         <h4 className="text-sm font-bold text-gray-800 mb-3">Quick Actions</h4>
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={onEdit}
-            disabled={!editorAvailable}
+            disabled={!editorAvailable || isSaving}
             className={`flex items-center justify-center gap-2 py-2 rounded text-xs font-medium ${
-              editorAvailable
+              editorAvailable && !isSaving
                 ? "bg-blue-600 text-white hover:bg-blue-700"
                 : "bg-gray-100 text-gray-400 cursor-not-allowed"
             }`}
@@ -216,8 +223,8 @@ export const PageDetailsView = ({
           </a>
         </div>
         <div className="space-y-4">
-          {selectedPage.structure.length > 0 ? (
-            selectedPage.structure.map((section, idx) => (
+          {blocks.length > 0 ? (
+            blocks.map((section, idx) => (
               <div
                 key={idx}
                 className="border border-gray-100 rounded-lg overflow-hidden"

@@ -1,7 +1,7 @@
 import { PageDefinition } from './types';
 
 export const homePage: PageDefinition = {
-  slug: '/',
+  slug: 'home',
   name: 'Home',
   path: '/',
   category: 'Home',

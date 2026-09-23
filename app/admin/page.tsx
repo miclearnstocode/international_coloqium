@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   FaHome,
   FaChevronRight,
@@ -25,8 +25,14 @@ import { PageDetailsView } from "@/app/admin/admin-components/PageDetailsView";
 import { ContentEditorView } from "@/app/admin/admin-components/ContentEditorView";
 import { getCategoryColor } from "@/app/admin/admin-components/utils";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
+
+// Helper: "hero.title" → "title"
+const splitFieldKey = (key: string) =>
+  key.includes(".") ? key.split(".").slice(1).join(".") : key;
+
 export default function AdminPages() {
-  // --- State ---
+  // ── State ──
   const [pages, setPages] = useState<PageDefinition[]>(PAGES);
   const [selectedPage, setSelectedPage] = useState<PageDefinition>(PAGES[0]);
   const [activeTab, setActiveTab] = useState<"details" | "editor">("details");
@@ -35,22 +41,86 @@ export default function AdminPages() {
     "All" | "Published" | "Draft" | "Archived"
   >("All");
   const [draftContent, setDraftContent] = useState<SectionDefinition[]>([]);
+  const [pristineDraft, setPristineDraft] = useState<SectionDefinition[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [isLoadingContent, setIsLoadingContent] = useState(false);
 
-  // --- Effects ---
+  // ── Load draft from DB whenever the selected page changes ──
   useEffect(() => {
-    setHasUnsavedChanges(false);
-    setDraftContent(JSON.parse(JSON.stringify(selectedPage.structure)));
+    let cancelled = false;
+
+    const loadDraftFromDB = async () => {
+      setIsLoadingContent(true);
+      setHasUnsavedChanges(false);
+      setSaveError(null);
+
+      const baseStructure: SectionDefinition[] = JSON.parse(
+        JSON.stringify(selectedPage.structure)
+      );
+
+      try {
+        const res = await fetch(`${API_BASE}/api/content/${selectedPage.slug}`);
+        if (!res.ok) throw new Error("Failed to fetch page content");
+
+        const data: {
+          content: Record<string, Record<string, string>>;
+          items: Record<string, any[]>;
+        } = await res.json();
+
+        const merged: SectionDefinition[] = baseStructure.map((section) => {
+          // Merge scalar fields — split the "hero." prefix before lookup
+          const fields = section.fields.map((f) => {
+            const lookupKey = splitFieldKey(f.key);
+            const dbValue = data.content?.[section.section]?.[lookupKey];
+            return dbValue !== undefined && dbValue !== null
+              ? { ...f, value: dbValue }
+              : f;
+          });
+
+          // Merge list items
+          let list = section.list;
+          if (section.list) {
+            const dbItems = data.items?.[section.list.key];
+            if (Array.isArray(dbItems) && dbItems.length > 0) {
+              list = { ...section.list, items: dbItems };
+            }
+          }
+
+          return { ...section, fields, list };
+        });
+
+        if (!cancelled) {
+          setDraftContent(merged);
+          setPristineDraft(JSON.parse(JSON.stringify(merged)));
+        }
+      } catch (err) {
+        console.error("[AdminPages] Failed to load DB content:", err);
+        if (!cancelled) {
+          setDraftContent(baseStructure);
+          setPristineDraft(JSON.parse(JSON.stringify(baseStructure)));
+        }
+      } finally {
+        if (!cancelled) setIsLoadingContent(false);
+      }
+    };
+
+    loadDraftFromDB();
+    return () => {
+      cancelled = true;
+    };
   }, [selectedPage]);
 
+  // ── Dirty check against the pristine snapshot ──
   useEffect(() => {
-    const original = JSON.stringify(selectedPage.structure);
+    const original = JSON.stringify(pristineDraft);
     const draft = JSON.stringify(draftContent);
     setHasUnsavedChanges(original !== draft);
-  }, [draftContent, selectedPage]);
+  }, [draftContent, pristineDraft]);
 
-  // --- Derived ---
+  // ── Derived ──
   const filteredPages = useMemo(
     () =>
       pages.filter((p) => {
@@ -76,7 +146,7 @@ export default function AdminPages() {
 
   const editorAvailable = hasStructure(selectedPage.slug);
 
-  // --- Handlers ---
+  // ── Edit handlers (local draft updates) ──
   const handleFieldChange = (
     sIdx: number,
     fieldKey: string,
@@ -91,11 +161,6 @@ export default function AdminPages() {
       next[sIdx] = section;
       return next;
     });
-  };
-
-  const handleViewPage = () => {
-    const url = `${selectedPage.path}?preview=1`;
-    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   const handleListItemChange = (
@@ -151,47 +216,107 @@ export default function AdminPages() {
     });
   };
 
-  const handleSave = () => {
-    const timestamp = new Date().toLocaleString();
-    const updatedPage: PageDefinition = {
-      ...selectedPage,
-      structure: JSON.parse(JSON.stringify(draftContent)),
-      updated: timestamp,
-    };
-
-    // 1. Update in-memory state
-    setPages((prev) =>
-      prev.map((p) => (p.slug === selectedPage.slug ? updatedPage : p))
-    );
-    setSelectedPage(updatedPage);
-    setHasUnsavedChanges(false);
-
-    // 2. Persist to localStorage so the public preview can pick it up
-    try {
-      const STORAGE_KEY = "symposium_draft_content";
-      const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-      existing[selectedPage.slug] = updatedPage.structure;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
-    } catch (err) {
-      console.error("Failed to persist draft content:", err);
-    }
-
-    // 3. Refresh the live preview iframe
-    setPreviewKey((k) => k + 1);
-
-    alert(
-      'Changes saved successfully! The preview has been refreshed.'
-    );
+  // ── View public page (opens in new tab) ──
+  const handleViewPage = () => {
+    const url = `${selectedPage.path}?preview=1`;
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
+  // ── Save to DB ──
+  const handleSave = useCallback(async () => {
+    setIsSaving(true);
+    setSaveError(null);
+
+    try {
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem("access_token")
+          : null;
+      if (!token) throw new Error("Not authenticated. Please log in again.");
+
+      // 1) Save scalar fields
+      const updates = draftContent.flatMap((section) =>
+        section.fields.map((f) => ({
+          section_key: section.section,
+          field_key: splitFieldKey(f.key),
+          field_value: f.value,
+          field_type: f.type || "text",
+        }))
+      );
+
+      if (updates.length > 0) {
+        const res = await fetch(
+          `${API_BASE}/api/admin/content/${selectedPage.slug}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ updates }),
+          }
+        );
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || "Failed to save fields");
+        }
+      }
+
+      // 2) Save list sections
+      for (const section of draftContent) {
+        if (!section.list) continue;
+        const res = await fetch(
+          `${API_BASE}/api/admin/content/${selectedPage.slug}/items/${section.list.key}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ items: section.list.items }),
+          }
+        );
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(
+            err.detail || `Failed to save list "${section.list.key}"`
+          );
+        }
+      }
+
+      // 3) Update in-memory state and reset pristine snapshot
+      const timestamp = new Date().toLocaleString();
+      const updatedPage: PageDefinition = {
+        ...selectedPage,
+        structure: JSON.parse(JSON.stringify(draftContent)),
+        updated: timestamp,
+      };
+      setPages((prev) =>
+        prev.map((p) => (p.slug === selectedPage.slug ? updatedPage : p))
+      );
+      setSelectedPage(updatedPage);
+      setPristineDraft(JSON.parse(JSON.stringify(draftContent)));
+      setHasUnsavedChanges(false);
+
+      // 4) Refresh preview iframe
+      setPreviewKey((k) => k + 1);
+    } catch (err: any) {
+      console.error("[AdminPages] Save failed:", err);
+      setSaveError(err.message || "Save failed. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  }, [draftContent, selectedPage]);
+
   const handleDiscard = () => {
-    setDraftContent(JSON.parse(JSON.stringify(selectedPage.structure)));
+    setDraftContent(JSON.parse(JSON.stringify(pristineDraft)));
     setHasUnsavedChanges(false);
+    setSaveError(null);
   };
 
   const handleAddPage = () => {
     const newPage: PageDefinition = {
-      slug: `/new-page-${pages.length + 1}`,
+      slug: `new-page-${pages.length + 1}`,
       name: "New Page",
       path: `/new-page-${pages.length + 1}`,
       category: "Uncategorized",
@@ -208,7 +333,6 @@ export default function AdminPages() {
       <Sidebar />
 
       <main className="flex-1 ml-64 flex flex-col">
-        {/* Header — no more props needed */}
         <AdminHeader />
 
         <div className="p-8 flex gap-8 h-[calc(100vh-64px)] overflow-hidden">
@@ -432,17 +556,25 @@ export default function AdminPages() {
               {activeTab === "details" ? (
                 <PageDetailsView
                   selectedPage={selectedPage}
+                  draftContent={draftContent}
                   editorAvailable={editorAvailable}
+                  isSaving={isSaving}
                   onEdit={() => setActiveTab("editor")}
                   onViewPage={handleViewPage}
                   previewKey={previewKey}
                 />
+              ) : isLoadingContent ? (
+                <div className="flex items-center justify-center h-full text-sm text-gray-400">
+                  Loading content…
+                </div>
               ) : (
                 <ContentEditorView
                   selectedPage={selectedPage}
                   editorAvailable={editorAvailable}
                   draftContent={draftContent}
                   hasUnsavedChanges={hasUnsavedChanges}
+                  isSaving={isSaving}
+                  saveError={saveError}
                   onFieldChange={handleFieldChange}
                   onListItemChange={handleListItemChange}
                   onAddListItem={handleAddListItem}

@@ -1,7 +1,7 @@
 import { PageDefinition } from './types';
 
 export const abstractSubmissionPage: PageDefinition = {
-  slug: '/abstract-submission',
+  slug: 'abstract-submission',
   name: 'Abstract Submission',
   path: '/abstract-submission',
   category: 'Abstract Submission',

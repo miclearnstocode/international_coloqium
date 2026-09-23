@@ -565,7 +565,7 @@ function HomeInner() {
             >
               <span className="reveal-up inline-block">
                 <EditableField
-                  section="hero"
+                  section="Hero Section"
                   field="welcome_badge"
                   fallback="Welcome to"
                   as="span"
@@ -575,7 +575,7 @@ function HomeInner() {
 
               <div className="reveal-up stagger-1">
                 <EditableField
-                  section="hero"
+                  section="Hero Section"
                   field="title"
                   fallback="3rd International Agri- Life & Bioresource Science Symposium"
                   as="h1"
@@ -586,7 +586,7 @@ function HomeInner() {
 
               <div className="reveal-up stagger-2">
                 <EditableField
-                  section="hero"
+                  section="Hero Section"
                   field="subtitle"
                   fallback="Converging Frontiers in Agri-Life and Bioresource Sciences"
                   as="p"
@@ -597,7 +597,7 @@ function HomeInner() {
 
               <div className="reveal-up stagger-3">
                 <EditableField
-                  section="hero"
+                  section="Hero Section"
                   field="description"
                   fallback="Science, Innovation & Collaboration for a Resilient and Sustainable Future"
                   as="p"
@@ -609,7 +609,7 @@ function HomeInner() {
               <div className="reveal-up stagger-4 flex items-center gap-3 mb-3">
                 <FaCalendarAlt className="text-[#D5A54D] text-xl" />
                 <EditableField
-                  section="hero"
+                  section="Hero Section"
                   field="event_date"
                   fallback="March 11-13, 2027"
                   as="p"
@@ -620,7 +620,7 @@ function HomeInner() {
               <div className="reveal-up stagger-5 flex items-center gap-3 mb-8">
                 <FaMapMarkerAlt className="text-[#D5A54D] text-xl" />
                 <EditableField
-                  section="hero"
+                  section="Hero Section"
                   field="event_location"
                   fallback="Roxas City, Capiz, Philippines"
                   as="p"
@@ -634,7 +634,7 @@ function HomeInner() {
                   className="premium-btn inline-flex items-center gap-2 bg-linear-to-r from-[#1D3D6D] to-[#16305a] text-white px-6 py-3 rounded-md font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
                 >
                   <EditableField
-                    section="hero"
+                    section="Hero Section"
                     field="cta_text"
                     fallback="Learn More"
                     as="span"
