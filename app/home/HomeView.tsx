@@ -82,11 +82,16 @@ function HomeInner() {
         <div className="absolute top-0 right-0 w-150 h-150 bg-[#E3EAF5] rounded-full opacity-60 -translate-y-1/2 translate-x-1/3"></div>
         <div className="absolute bottom-0 left-0 w-100 h-100 bg-[#E3EAF5] rounded-full opacity-40 translate-y-1/2 -translate-x-1/4"></div>
 
-        <div className="absolute -right-57.5 top-1/2 -translate-y-1/2 w-307.5 h-307.5 opacity-40 lg:opacity-70 pointer-events-none z-0">
-          <video autoPlay loop muted playsInline preload="auto" className="w-full h-full object-contain">
-            <source src="/videos/global.mp4" type="video/mp4" />
-          </video>
-        </div>
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          className="absolute -right-57.5 top-1/2 -translate-y-1/2 w-400 h-400 opacity-40 lg:opacity-70 pointer-events-none z-0 object-contain"
+        >
+          <source src="/videos/global.mp4" type="video/mp4" />
+        </video>
 
         <div className="relative z-10 mx-auto max-w-350 px-8 py-12 lg:py-16 min-h-150">
           <div className="relative">
