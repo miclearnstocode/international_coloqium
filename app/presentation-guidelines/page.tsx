@@ -5,11 +5,8 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { 
   FaFileAlt, FaCheckCircle, FaClock, FaUsers, FaLaptop, 
-  FaMicrophone, FaVideo, FaQuestionCircle, FaDownload,
-  FaPrint, FaCalendarAlt, FaBookOpen, FaDesktop, FaMobileAlt,
-  FaFilePowerpoint, FaImage, FaRuler, FaPalette, FaShareAlt,
-  FaHashtag, FaEnvelope, FaUserGraduate, FaUniversity, FaIdCard
-} from "react-icons/fa";
+  FaMicrophone, FaDownload, FaPrint, FaBookOpen, FaFilePowerpoint, 
+  FaImage, FaRuler, FaPalette, FaShareAlt, FaEnvelope, FaUserGraduate, FaUniversity } from "react-icons/fa";
 
 export default function PresentationGuidelinesPage() {
   const oralGuidelines = [
@@ -112,40 +109,38 @@ export default function PresentationGuidelinesPage() {
       
       {/* ================= PAGE HERO WITH IMAGE ================= */}
       <section className="relative bg-white overflow-hidden border-b border-zinc-100">
+        {/* Floating image — absolute, sits above/beside the text */}
+        <Image
+          src="/images/guideline.png"
+          alt="Presentation Guidelines"
+          width={500}
+          height={300}
+          priority
+          className="hidden md:block absolute top-1/2 -translate-y-1/2 right-40 w-125 max-w-none h-auto object-contain pointer-events-none z-20"
+        />
+
         <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-sm text-zinc-500 mb-6">
             <Link href="/" className="hover:text-[#F5A623] transition-colors">
               Home
             </Link>
-            
             <span className="text-zinc-300">›</span>
             <span className="text-[#0A2540] font-medium">Presentation Guidelines</span>
           </div>
 
-          {/* Content with Image on Right */}
-          <div className="flex flex-col md:flex-row items-start gap-8">
-            {/* Left Side - Text Content */}
-            <div className="flex-1">
-              <h1 className="text-5xl font-bold text-[#0A2540] mb-4">Presentation Guidelines</h1>
-              <div className="w-16 h-1 bg-[#F5A623] mb-4"></div>
-              <p className="text-lg text-gray-600 max-w-2xl leading-relaxed">
-                3rd International Agri-Life and Bioresource Sciences Symposium
-              </p>
-              <p className="text-sm text-gray-500 mt-1">
-                March 10-13, 2027 | Roxas City, Capiz, Philippines – The Seafood Capital of the Philippines
-              </p>
-            </div>
-
-            {/* Right Side - Image */}
-            <Image 
-              src="/images/guideline.png" 
-              alt="Presentation Guidelines" 
-              width={500} 
-              height={300} 
-              className="shrink-0 rounded-xl shadow-lg"
-              priority
-            />
+          {/* Text content — no image column, text fills the row */}
+          <div className="relative z-10">
+            <h1 className="text-5xl font-bold text-[#0A2540] mb-4">
+              Presentation Guidelines
+            </h1>
+            <div className="w-16 h-1 bg-[#F5A623] mb-4"></div>
+            <p className="text-lg text-gray-600 max-w-2xl leading-relaxed">
+              3rd International Agri-Life and Bioresource Sciences Symposium
+            </p>
+            <p className="text-sm text-gray-500 mt-1">
+              March 10-13, 2027 | Roxas City, Capiz, Philippines – The Seafood Capital of the Philippines
+            </p>
           </div>
         </div>
       </section>

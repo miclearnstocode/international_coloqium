@@ -5,7 +5,7 @@ import Footer from "../components/Footer";
 
 import { 
   FaUser, FaFileAlt, FaCheckCircle, FaRegPaperPlane, FaTachometerAlt, 
-  FaLanguage, FaDownload, FaPencilAlt, FaSearch, FaRegCalendarAlt, 
+  FaLanguage, FaPencilAlt, FaSearch, FaRegCalendarAlt, 
   FaInfoCircle, FaEnvelope, FaQuestionCircle, FaUserPlus,
   FaSignInAlt, FaChevronDown, FaArrowRight, FaBullhorn
 } from "react-icons/fa";
@@ -19,6 +19,16 @@ export default function FullabstractSubmission() {
 
       {/* ================= PAGE HERO ================= */}
       <section className="relative bg-white overflow-hidden border-b border-zinc-100">
+        {/* Floating laptop image — absolutely positioned, sits above text */}
+        <img
+          src="/images/laptop2.png"
+          alt="Laptop Submission"
+          width={500}
+          height={300}
+          className="hidden md:block absolute top-1/2 -translate-y-1/2 right-55 w-125 h-auto max-w-none object-contain pointer-events-none z-20"
+        />
+
+        {/* Content */}
         <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
           <div className="flex items-center gap-2 text-sm text-zinc-500 mb-8">
             <Link href="/" className="hover:text-[#F5A623] transition-colors">
@@ -30,29 +40,30 @@ export default function FullabstractSubmission() {
 
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* Left Content */}
-            <div>
-              <h1 className="text-5xl font-bold text-[#0A2540] mb-4">Abstract Submission</h1>
+            <div className="relative z-10">
+              <h1 className="text-5xl font-bold text-[#0A2540] mb-4">
+                Abstract Submission
+              </h1>
               <div className="w-16 h-1 bg-[#F5A623] mb-6"></div>
-              
+
               <p className="text-zinc-600 mb-8 leading-relaxed">
-                We welcome original, unpublished abstracts that contribute to the advancement of knowledge and practice aligned with the conference themes. All submissions will undergo a rigorous peer-review process.
+                We welcome original, unpublished abstracts that contribute to the
+                advancement of knowledge and practice aligned with the conference
+                themes. All submissions will undergo a rigorous peer-review process.
               </p>
 
               <div className="flex flex-wrap gap-4">
-                <Link href="/login" className="inline-flex items-center gap-2 bg-[#0A2540] text-white px-8 py-3 rounded-md font-semibold hover:bg-[#143b66] transition-colors shadow-md">
+                <Link
+                  href="/login"
+                  className="inline-flex items-center gap-2 bg-[#0A2540] text-white px-8 py-3 rounded-md font-semibold hover:bg-[#143b66] transition-colors shadow-md"
+                >
                   Submit Your Abstract <FaRegPaperPlane className="rotate-[-20deg]" />
                 </Link>
               </div>
             </div>
 
-            {/* Right Image (Laptop) */}
-            <div className="hidden md:block relative w-full h-125 z-0">
-                <img 
-                    src="/images/laptop2.png" 
-                    alt="Laptop Submission" 
-                    className="absolute -right-22.5 top-1/2 -translate-y-1/2 w-175 max-w-none h-auto object-contain pointer-events-none z-5" 
-                />
-            </div>
+            {/* Right column intentionally empty — the image floats above */}
+            <div className="hidden md:block" />
           </div>
         </div>
       </section>
