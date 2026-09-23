@@ -24,15 +24,18 @@ import {
 import { PageDetailsView } from "@/app/admin/admin-components/PageDetailsView";
 import { ContentEditorView } from "@/app/admin/admin-components/ContentEditorView";
 import { getCategoryColor } from "@/app/admin/admin-components/utils";
+import { useConfirm } from "@/app/admin/admin-components/useConfirm";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
 
-// Helper: "hero.title" → "title"
 const splitFieldKey = (key: string) =>
   key.includes(".") ? key.split(".").slice(1).join(".") : key;
 
 export default function AdminPages() {
-  // ── State ──
+  // ── Confirm dialog hook ──
+  const { confirm, ConfirmDialogHost } = useConfirm();
+
+  // ── Existing state (unchanged) ──
   const [pages, setPages] = useState<PageDefinition[]>(PAGES);
   const [selectedPage, setSelectedPage] = useState<PageDefinition>(PAGES[0]);
   const [activeTab, setActiveTab] = useState<"details" | "editor">("details");
@@ -48,7 +51,7 @@ export default function AdminPages() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isLoadingContent, setIsLoadingContent] = useState(false);
 
-  // ── Load draft from DB whenever the selected page changes ──
+  // ── Load draft from DB (unchanged) ──
   useEffect(() => {
     let cancelled = false;
 
@@ -71,7 +74,6 @@ export default function AdminPages() {
         } = await res.json();
 
         const merged: SectionDefinition[] = baseStructure.map((section) => {
-          // Merge scalar fields — split the "hero." prefix before lookup
           const fields = section.fields.map((f) => {
             const lookupKey = splitFieldKey(f.key);
             const dbValue = data.content?.[section.section]?.[lookupKey];
@@ -80,7 +82,6 @@ export default function AdminPages() {
               : f;
           });
 
-          // Merge list items
           let list = section.list;
           if (section.list) {
             const dbItems = data.items?.[section.list.key];
@@ -113,14 +114,14 @@ export default function AdminPages() {
     };
   }, [selectedPage]);
 
-  // ── Dirty check against the pristine snapshot ──
+  // ── Dirty check (unchanged) ──
   useEffect(() => {
     const original = JSON.stringify(pristineDraft);
     const draft = JSON.stringify(draftContent);
     setHasUnsavedChanges(original !== draft);
   }, [draftContent, pristineDraft]);
 
-  // ── Derived ──
+  // ── Derived (unchanged) ──
   const filteredPages = useMemo(
     () =>
       pages.filter((p) => {
@@ -146,12 +147,8 @@ export default function AdminPages() {
 
   const editorAvailable = hasStructure(selectedPage.slug);
 
-  // ── Edit handlers (local draft updates) ──
-  const handleFieldChange = (
-    sIdx: number,
-    fieldKey: string,
-    value: string
-  ) => {
+  // ── Field/list edit handlers (unchanged) ──
+  const handleFieldChange = (sIdx: number, fieldKey: string, value: string) => {
     setDraftContent((prev) => {
       const next = [...prev];
       const section = { ...next[sIdx] };
@@ -163,11 +160,7 @@ export default function AdminPages() {
     });
   };
 
-  const handleListItemChange = (
-    sIdx: number,
-    iIdx: number,
-    itemData: any
-  ) => {
+  const handleListItemChange = (sIdx: number, iIdx: number, itemData: any) => {
     setDraftContent((prev) => {
       const next = [...prev];
       const section = { ...next[sIdx] };
@@ -216,14 +209,13 @@ export default function AdminPages() {
     });
   };
 
-  // ── View public page (opens in new tab) ──
   const handleViewPage = () => {
     const url = `${selectedPage.path}?preview=1`;
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  // ── Save to DB ──
-  const handleSave = useCallback(async () => {
+  // ── The actual DB write (renamed from handleSave) ──
+  const performSave = useCallback(async () => {
     setIsSaving(true);
     setSaveError(null);
 
@@ -234,7 +226,6 @@ export default function AdminPages() {
           : null;
       if (!token) throw new Error("Not authenticated. Please log in again.");
 
-      // 1) Save scalar fields
       const updates = draftContent.flatMap((section) =>
         section.fields.map((f) => ({
           section_key: section.section,
@@ -262,7 +253,6 @@ export default function AdminPages() {
         }
       }
 
-      // 2) Save list sections
       for (const section of draftContent) {
         if (!section.list) continue;
         const res = await fetch(
@@ -284,7 +274,6 @@ export default function AdminPages() {
         }
       }
 
-      // 3) Update in-memory state and reset pristine snapshot
       const timestamp = new Date().toLocaleString();
       const updatedPage: PageDefinition = {
         ...selectedPage,
@@ -297,8 +286,6 @@ export default function AdminPages() {
       setSelectedPage(updatedPage);
       setPristineDraft(JSON.parse(JSON.stringify(draftContent)));
       setHasUnsavedChanges(false);
-
-      // 4) Refresh preview iframe
       setPreviewKey((k) => k + 1);
     } catch (err: any) {
       console.error("[AdminPages] Save failed:", err);
@@ -307,6 +294,42 @@ export default function AdminPages() {
       setIsSaving(false);
     }
   }, [draftContent, selectedPage]);
+
+  // ── Save handler: asks for confirmation, then runs the actual save ──
+  const handleSave = useCallback(async () => {
+    // Count what's about to change so the message is informative
+    const fieldCount = draftContent.reduce(
+      (sum, s) => sum + s.fields.filter((f) => f.value?.trim()).length,
+      0
+    );
+    const listCount = draftContent.filter((s) => s.list).length;
+
+    const ok = await confirm({
+      title: `Save changes to "${selectedPage.name}"?`,
+      message: (
+        <>
+          You're about to publish{" "}
+          <strong>{fieldCount}</strong> content field
+          {fieldCount === 1 ? "" : "s"}
+          {listCount > 0 && (
+            <>
+              {" "}
+              and <strong>{listCount}</strong> list
+              {listCount === 1 ? "" : "s"}
+            </>
+          )}{" "}
+          to the live site. Visitors will see the update immediately.
+        </>
+      ),
+      confirmLabel: "Yes, Save",
+      cancelLabel: "Keep editing",
+      variant: "primary",
+    });
+
+    if (!ok) return;
+
+    await performSave();
+  }, [confirm, draftContent, selectedPage, performSave]);
 
   const handleDiscard = () => {
     setDraftContent(JSON.parse(JSON.stringify(pristineDraft)));
@@ -336,7 +359,7 @@ export default function AdminPages() {
         <AdminHeader />
 
         <div className="p-8 flex gap-8 h-[calc(100vh-64px)] overflow-hidden">
-          {/* LEFT: Pages table */}
+          {/* LEFT: Pages table (unchanged) */}
           <div className="flex-1 flex flex-col min-w-0">
             <div className="mb-6">
               <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
@@ -587,6 +610,9 @@ export default function AdminPages() {
           </div>
         </div>
       </main>
+
+      {/* ── Confirm dialog portal — rendered once, driven by useConfirm ── */}
+      {ConfirmDialogHost}
     </div>
   );
 }
