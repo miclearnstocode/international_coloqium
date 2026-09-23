@@ -603,7 +603,7 @@ export default function StaffDashboardPage() {
 
         {/* Filters */}
         <div className="bg-white rounded-xl shadow-sm border border-zinc-100 p-4 mb-6 flex flex-wrap gap-4">
-          <div className="flex-1 min-w-[200px]">
+          <div className="flex-1 min-w-50">
             <div className="relative">
               <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400" />
               <input
