@@ -7,6 +7,8 @@ import {
   FaSync,
   FaExternalLinkAlt,
   FaUndo,
+  FaCalendarAlt,
+  FaNewspaper,
 } from "react-icons/fa";
 import {
   PageDefinition,
@@ -15,6 +17,12 @@ import {
 import { getCategoryColor } from "./utils";
 import { useState } from "react";
 import { useConfirm } from "./useConfirm";
+
+// Slug(s) that should render the News & Events panel instead of generic SEO
+const NEWS_EVENTS_SLUGS = ["news-events", "news", "events", "news-and-events"];
+
+const isNewsEventsPage = (page: PageDefinition) =>
+  NEWS_EVENTS_SLUGS.includes(page.slug.toLowerCase());
 
 export const PageDetailsView = ({
   selectedPage,
@@ -40,19 +48,18 @@ export const PageDetailsView = ({
   const [localKey, setLocalKey] = useState(0);
   const combinedKey = previewKey + localKey;
 
-  // Confirmation dialog host
   const { confirm, ConfirmDialogHost } = useConfirm();
 
-  // Prefer the DB-merged draft if provided, otherwise fall back to static structure
   const blocks =
     draftContent && draftContent.length > 0
       ? draftContent
       : selectedPage.structure;
 
+  const showNewsEventsPanel = isNewsEventsPage(selectedPage);
+
   // ── Handlers that need confirmation ──
 
   const handleEditClick = async () => {
-    // No confirmation needed if there are no pending changes
     if (!hasUnsavedChanges) {
       onEdit();
       return;
@@ -209,34 +216,50 @@ export const PageDetailsView = ({
 
         <hr className="border-gray-100" />
 
-        {/* ── SEO Settings ── */}
-        <div>
-          <h4 className="text-sm font-bold text-gray-800 mb-3">SEO Settings</h4>
-          <div className="space-y-3">
+        {/* ── News & Events Panel (only for news/events pages) ── */}
+        {showNewsEventsPanel && (
+          <>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">
-                Meta Title
-              </label>
-              <input
-                type="text"
-                defaultValue="3rd International Agri-Life & BioresourceScience Symposium"
-                className="w-full p-2 border border-gray-300 rounded text-xs text-gray-600 focus:outline-none focus:border-blue-500"
-              />
+              <h4 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
+                <FaNewspaper className="text-blue-600" />
+                News &amp; Events Details
+              </h4>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">
+                    Event Name
+                  </label>
+                  <input
+                    type="text"
+                    defaultValue={
+                      blocks.find((b) => b.section === "News & Events")
+                        ?.fields.find((f) => f.key.endsWith("title"))?.value ||
+                      "3rd International Agri-Life & BioresourceScience Symposium"
+                    }
+                    className="w-full p-2 border border-gray-300 rounded text-xs text-gray-600 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">
+                    Event Description
+                  </label>
+                  <textarea
+                    rows={4}
+                    defaultValue={
+                      blocks.find((b) => b.section === "News & Events")
+                        ?.fields.find((f) => f.key.endsWith("description"))
+                        ?.value ||
+                      "Join the 3rd International Agri-Life & BioresourceScience Symposium. Advancing sustainable agriculture, life sciences, and bioresource innovation for a better tomorrow."
+                    }
+                    className="w-full p-2 border border-gray-300 rounded text-xs text-gray-600 focus:outline-none focus:border-blue-500 resize-none"
+                  />
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">
-                Meta Description
-              </label>
-              <textarea
-                rows={3}
-                defaultValue="Join the 3rd International Agri-Life & BioresourceScience Symposium. Advancing sustainable agriculture, life sciences, and bioresource innovation for a better tomorrow."
-                className="w-full p-2 border border-gray-300 rounded text-xs text-gray-600 focus:outline-none focus:border-blue-500 resize-none"
-              />
-            </div>
-          </div>
-        </div>
 
-        <hr className="border-gray-100" />
+            <hr className="border-gray-100" />
+          </>
+        )}
 
         {/* ── Page Visibility ── */}
         <div>
@@ -278,7 +301,6 @@ export const PageDetailsView = ({
               <FaEye /> View Page
             </button>
 
-            {/* Only show Discard when there are unsaved changes */}
             {hasUnsavedChanges && onDiscard && (
               <button
                 onClick={handleDiscardClick}
@@ -373,7 +395,6 @@ export const PageDetailsView = ({
         </div>
       </div>
 
-      {/* Confirmation dialog host — renders nothing until confirm() is called */}
       {ConfirmDialogHost}
     </>
   );

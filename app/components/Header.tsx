@@ -1,13 +1,48 @@
-// app/components/Header.tsx
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import {
+  fetchPublicEvents,
+  pickFeaturedEvent,
+  formatDateRange,
+  type PublicEvent,
+} from "@/app/lib/events";
+
+// Fallback values shown if no event is in the DB yet
+const FALLBACK = {
+  titleLine1: "3rd International",
+  titleLine2: "Agri-Life & Bioresource",
+  titleLine3: "Science Symposium",
+  dateRange: "March 10–13, 2027",
+  location: "Roxas City, Philippines",
+};
+
+/**
+ * Break a long event title into up to 3 lines for the header layout.
+ * Example: "3rd International Agri-Life & Bioresource Science Symposium"
+ *   → ["3rd International", "Agri-Life & Bioresource", "Science Symposium"]
+ */
+function splitTitle(title: string): [string, string, string] {
+  const clean = title.replace(/\s+/g, " ").trim();
+  if (!clean) return ["", "", ""];
+
+  const words = clean.split(" ");
+  if (words.length <= 3) return [clean, "", ""];
+
+  // Greedy 3-way split — roughly balanced by word count
+  const per = Math.ceil(words.length / 3);
+  const l1 = words.slice(0, per).join(" ");
+  const l2 = words.slice(per, per * 2).join(" ");
+  const l3 = words.slice(per * 2).join(" ");
+  return [l1, l2, l3];
+}
 
 export default function Header() {
   const pathname = usePathname();
+  const [event, setEvent] = useState<PublicEvent | null>(null);
 
   const navItems = [
     { label: "Home", href: "/" },
@@ -24,12 +59,31 @@ export default function Header() {
 
   // Refs to each nav item so we can measure positions
   const itemRefs = useRef<(HTMLLIElement | null)[]>([]);
-  // Position + width of the animated underline
-  const [underline, setUnderline] = useState({ left: 0, width: 0, visible: false });
-  // Position + width of hover indicator (separate from underline)
-  const [hover, setHover] = useState({ left: 0, width: 0, visible: false });
+  const [underline, setUnderline] = useState({
+    left: 0,
+    width: 0,
+    visible: false,
+  });
+  const [hover, setHover] = useState({
+    left: 0,
+    width: 0,
+    visible: false,
+  });
 
-  // Recompute underline whenever the route changes or the window resizes
+  // ── Load featured event ──
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const events = await fetchPublicEvents();
+      if (cancelled) return;
+      setEvent(pickFeaturedEvent(events));
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // ── Animated underline ──
   useEffect(() => {
     const update = () => {
       const activeIndex = navItems.findIndex((item) => item.href === pathname);
@@ -51,17 +105,27 @@ export default function Header() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
+  // ── Derived header values ──
+  const [line1, line2, line3] = event
+    ? splitTitle(event.title)
+    : [FALLBACK.titleLine1, FALLBACK.titleLine2, FALLBACK.titleLine3];
+
+  const dateRange = event
+    ? formatDateRange(event.date, event.endDate) || FALLBACK.dateRange
+    : FALLBACK.dateRange;
+
+  const location = event?.location?.trim() || FALLBACK.location;
+
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-100">
       <nav className="mx-auto flex max-w-350 items-center justify-between px-8 py-4">
         {/* ── Logo + Title ── */}
         <div className="relative flex items-center gap-6 shrink-0 pl-2">
-          {/* Circle logo — sits absolutely inside the padded wrapper */}
           <Link href="/" className="relative shrink-0 group z-10">
             <div className="relative h-24 w-24 rounded-full overflow-hidden border-4 border-[#D5A54D] bg-white shadow-md transition-transform duration-300 group-hover:scale-105 group-hover:shadow-lg">
               <Image
                 src="/images/mainlogo.png"
-                alt="3rd International Agri-Life & Bioresource Science Symposium Logo"
+                alt="Symposium Logo"
                 fill
                 className="object-cover scale-110"
                 priority
@@ -69,23 +133,32 @@ export default function Header() {
             </div>
           </Link>
 
-          {/* Title text — sits beside the logo, never under it */}
           <div className="relative flex flex-col leading-tight z-20">
-            <span className="text-base font-bold tracking-wider text-[#0B2A4A] whitespace-nowrap">
-              3rd International
-            </span>
-            <span className="text-base font-bold tracking-wider text-[#0B2A4A] whitespace-nowrap">
-              Agri-Life &amp; Bioresource
-            </span>
-            <span className="text-sm font-semibold tracking-wider text-[#0B2A4A] whitespace-nowrap">
-              Science Symposium
-            </span>
-            <span className="text-xs text-[#D5A54D] font-medium whitespace-nowrap mt-1">
-              March 10–13, 2027
-            </span>
-            <span className="text-xs text-[#D5A54D] font-medium whitespace-nowrap">
-              Roxas City, Philippines
-            </span>
+            {line1 && (
+              <span className="text-base font-bold tracking-wider text-[#0B2A4A] whitespace-nowrap">
+                {line1}
+              </span>
+            )}
+            {line2 && (
+              <span className="text-base font-bold tracking-wider text-[#0B2A4A] whitespace-nowrap">
+                {line2}
+              </span>
+            )}
+            {line3 && (
+              <span className="text-sm font-semibold tracking-wider text-[#0B2A4A] whitespace-nowrap">
+                {line3}
+              </span>
+            )}
+            {dateRange && (
+              <span className="text-xs text-[#D5A54D] font-medium whitespace-nowrap mt-1">
+                {dateRange}
+              </span>
+            )}
+            {location && (
+              <span className="text-xs text-[#D5A54D] font-medium whitespace-nowrap">
+                {location}
+              </span>
+            )}
           </div>
         </div>
 
@@ -94,7 +167,6 @@ export default function Header() {
           className="hidden lg:flex items-center gap-5 text-sm font-medium text-gray-600 relative"
           onMouseLeave={() => setHover((h) => ({ ...h, visible: false }))}
         >
-          {/* Animated hover background */}
           <span
             aria-hidden
             className="absolute top-1/2 -translate-y-1/2 h-9 rounded-md bg-[#0B2A4A]/5 transition-all duration-300 ease-out pointer-events-none"
@@ -105,7 +177,6 @@ export default function Header() {
             }}
           />
 
-          {/* Animated active underline */}
           <span
             aria-hidden
             className="absolute bottom-0 h-[2px] rounded-full bg-[#D5A54D] transition-all duration-300 ease-out pointer-events-none"

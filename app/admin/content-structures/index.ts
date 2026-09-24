@@ -9,6 +9,7 @@ import { guidelinesPage } from './guidelines';
 import { partnerInstitutionsPage } from './partnerInstitutions';
 import { hotelMappingPage } from './hotelMapping';
 import { contactPage } from './contact';
+import { newsEventsPage } from './newsEvents';
 
 // All pages live here. Adding a new page = 1 import + 1 array entry.
 export const PAGES: PageDefinition[] = [
@@ -22,6 +23,7 @@ export const PAGES: PageDefinition[] = [
   partnerInstitutionsPage,
   hotelMappingPage,
   contactPage,
+  newsEventsPage,
 ];
 
 // Fast lookup by slug

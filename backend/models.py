@@ -182,4 +182,44 @@ class ContentAuditLog(db.Model):
             'new_value': self.new_value,
             'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None
         }
-        
+
+class Event(db.Model):
+    """Stores news & event entries created by admins."""
+    __tablename__ = 'events'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(500), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    date = db.Column(db.String(50), nullable=True)        # ISO date "2025-09-01"
+    end_date = db.Column(db.String(50), nullable=True)    # optional end date
+    location = db.Column(db.String(255), nullable=True)
+    category = db.Column(db.String(100), nullable=False, default='Announcement')
+    status = db.Column(db.Enum('Draft', 'Published'), nullable=False, default='Draft')
+    featured = db.Column(db.Boolean, default=False)
+    item_order = db.Column(db.Integer, default=0)         # for drag-reorder
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
+    created_by = db.Column(db.Integer, nullable=True)     # admin user id
+
+    __table_args__ = (
+        db.Index('idx_event_status', 'status'),
+        db.Index('idx_event_order', 'item_order'),
+    )
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'description': self.description,
+            'date': self.date,
+            'endDate': self.end_date,
+            'location': self.location,
+            'category': self.category,
+            'status': self.status,
+            'featured': self.featured,
+            'order': self.item_order,
+            'is_active': self.is_active,
+            'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None,
+            'updated_at': self.updated_at.strftime('%Y-%m-%d %H:%M:%S') if self.updated_at else None,
+            'created_by': self.created_by,
+        }
