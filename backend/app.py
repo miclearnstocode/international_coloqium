@@ -42,17 +42,7 @@ CORS(app,
      max_age=3600
 )
 
-@app.after_request
-def after_request(response):
-    origin = request.headers.get('Origin')
-    if origin in ['http://localhost:3000', 'http://127.0.0.1:3000']:
-        # Remove existing headers first to avoid duplicates
-        response.headers.remove('Access-Control-Allow-Origin')
-        response.headers.add('Access-Control-Allow-Origin', origin)
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, X-Requested-With')
-    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-    response.headers.add('Access-Control-Allow-Credentials', 'true')
-    return response
+
 @jwt.unauthorized_loader
 def missing_token_callback(reason):
     return jsonify({

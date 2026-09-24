@@ -31,6 +31,9 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
 const splitFieldKey = (key: string) =>
   key.includes(".") ? key.split(".").slice(1).join(".") : key;
 
+const getSectionKey = (section: SectionDefinition, fieldKey?: string) =>
+  fieldKey?.includes(".") ? fieldKey.split(".")[0] : section.section;
+
 export default function AdminPages() {
   // ── Confirm dialog hook ──
   const { confirm, ConfirmDialogHost } = useConfirm();
@@ -77,7 +80,10 @@ export default function AdminPages() {
         const merged: SectionDefinition[] = baseStructure.map((section) => {
           const fields = section.fields.map((f) => {
             const lookupKey = splitFieldKey(f.key);
-            const dbValue = data.content?.[section.section]?.[lookupKey];
+            const canonicalSection = getSectionKey(section, f.key);
+            const dbValue =
+              data.content?.[canonicalSection]?.[lookupKey] ??
+              data.content?.[section.section]?.[lookupKey];
             return dbValue !== undefined && dbValue !== null
               ? { ...f, value: dbValue }
               : f;
@@ -229,7 +235,7 @@ export default function AdminPages() {
 
       const updates = draftContent.flatMap((section) =>
         section.fields.map((f) => ({
-          section_key: section.section,
+          section_key: getSectionKey(section, f.key),
           field_key: splitFieldKey(f.key),
           field_value: f.value,
           field_type: f.type || "text",

@@ -1,7 +1,5 @@
 "use client";
 
-import Header from "@/app/components/Header";
-import Footer from "@/app/components/Footer";
 import { ContentProvider } from "@/app/context/ContentContext";
 import HomeView from "@/app/home/HomeView";
 

@@ -5,7 +5,7 @@ export const contactPage: PageDefinition = {
   name: 'Contact Us',
   path: '/contact-us',
   category: 'Contact Us',
-  status: 'Draft',
+  status: 'Published',
   updated: 'Sep 10, 2025 01:14 PM',
   structure: [
     // ============ PAGE HERO ============
