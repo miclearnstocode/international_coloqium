@@ -1,184 +1,130 @@
 "use client";
 
-import { useContent } from "@/app/context/ContentContext";
 import { useEffect, useRef, useState } from "react";
-import { FaEdit, FaCheck, FaTimes, FaSpinner } from "react-icons/fa";
+import { useContent } from "@/app/context/ContentContext";
+
+// Block-level HTML tags — the wrapper div must be block, not inline span,
+// to avoid invalid HTML (inline wrapping block) and broken outline rendering.
+const BLOCK_TAGS = new Set([
+  "address", "article", "aside", "blockquote", "canvas", "dd", "details",
+  "dialog", "div", "dl", "dt", "fieldset", "figcaption", "figure", "footer",
+  "form", "h1", "h2", "h3", "h4", "h5", "h6", "header", "hgroup", "hr",
+  "legend", "li", "main", "nav", "noscript", "ol", "p", "pre", "section",
+  "summary", "table", "ul",
+]);
 
 interface EditableFieldProps {
   section: string;
   field: string;
   fallback: string;
-  as?: "h1" | "h2" | "h3" | "p" | "span" | "div" | "a";
+  as?: keyof React.JSX.IntrinsicElements;
   className?: string;
   multiline?: boolean;
+  label?: string;
 }
 
 export default function EditableField({
   section,
   field,
   fallback,
-  as = "span",
+  as: Tag = "span",
   className = "",
   multiline = false,
+  label,
 }: EditableFieldProps) {
-  const { content, isEditMode, updateField, saveContent, isSuperAdmin } =
-    useContent();
-  const [isEditing, setIsEditing] = useState(false);
-  const [tempValue, setTempValue] = useState("");
-  const [saveState, setSaveState] = useState<
-    "idle" | "saving" | "saved" | "error"
-  >("idle");
-  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
+  const { content, isEditMode, isSuperAdmin, updateField } = useContent();
+  const isActive = isEditMode && isSuperAdmin;
 
-  const adminValue = content?.[section]?.[field];
-  const value =
-    adminValue !== undefined && adminValue !== null ? adminValue : fallback;
+  const saved = content?.[section]?.[field];
+  const value = saved !== undefined && saved !== null ? saved : fallback;
 
+  const ref = useRef<HTMLElement | null>(null);
+  const [focused, setFocused] = useState(false);
+  const [hovered, setHovered] = useState(false);
+
+  // Seed / update DOM content only when NOT focused (don't stomp the caret).
   useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus();
-      inputRef.current.select();
+    if (!isActive) return;
+    const el = ref.current;
+    if (!el) return;
+    if (!focused && el.innerText !== value) {
+      el.innerText = value;
     }
-  }, [isEditing]);
+  }, [value, isActive, focused]);
 
-  const startEdit = () => {
-    if (!isSuperAdmin) return;
-    setTempValue(value);
-    setIsEditing(true);
-    setSaveState("idle");
-  };
+  // ── VIEW MODE ──────────────────────────────────────────────────────────────
+  if (!isActive) {
+    // Use createElement so `Tag` can be any HTML element string.
+    const { createElement } = require("react");
+    return createElement(Tag, { className }, value);
+  }
 
-  const commitEdit = async () => {
-    const trimmed = tempValue.trim();
-
-    // No actual change → exit without hitting the API
-    if (trimmed === value) {
-      setIsEditing(false);
-      return;
-    }
-
-    setSaveState("saving");
-    updateField(section, field, trimmed);
-
-    try {
-      await saveContent();
-      setSaveState("saved");
-      setTimeout(() => setSaveState("idle"), 1400);
-    } catch (err) {
-      console.error(`[EditableField] Save failed for ${section}.${field}:`, err);
-      setSaveState("error");
-      setTimeout(() => setSaveState("idle"), 3000);
-    }
-
-    setIsEditing(false);
-  };
-
-  const cancelEdit = () => {
-    setIsEditing(false);
-    setSaveState("idle");
+  // ── EDIT MODE ──────────────────────────────────────────────────────────────
+  const handleInput = () => {
+    const el = ref.current;
+    if (!el) return;
+    const next = el.innerText;
+    if (next !== value) updateField(section, field, next);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !multiline && !e.shiftKey) {
+    if (!multiline && e.key === "Enter") {
       e.preventDefault();
-      commitEdit();
+      (e.target as HTMLElement).blur();
     }
-    if (e.key === "Escape") {
-      e.preventDefault();
-      cancelEdit();
-    }
-    // For multiline textareas, Ctrl/Cmd+Enter saves
-    if (e.key === "Enter" && multiline && (e.ctrlKey || e.metaKey)) {
-      e.preventDefault();
-      commitEdit();
-    }
+    if (e.key === "Escape") (e.target as HTMLElement).blur();
   };
 
-  const Tag = as as any;
+  // Use a block wrapper for block-level tags, inline for inline tags.
+  // This keeps HTML valid and lets the dashed outline render correctly.
+  const isBlock = BLOCK_TAGS.has(String(Tag).toLowerCase());
+  const WrapperTag = isBlock ? "div" : "span";
+  // Render arbitrary intrinsic tags without selecting an incompatible SVG ref
+  // type from the JSX intrinsic-element union.
+  const EditableTag = Tag as React.ElementType<any>;
 
-  // ── Read-only for visitors ──
-  if (!isEditMode) {
-    return <Tag className={className}>{value}</Tag>;
-  }
-
-  // ── Editing state ──
-  if (isEditing) {
-    return (
-      <div className="relative border-2 border-blue-500 rounded p-2 bg-blue-50 z-50">
-        {multiline ? (
-          <textarea
-            ref={(el) => {
-              inputRef.current = el;
-            }}
-            value={tempValue}
-            onChange={(e) => setTempValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="w-full p-2 border rounded text-gray-800 bg-white text-base"
-            rows={4}
-          />
-        ) : (
-          <input
-            ref={(el) => {
-              inputRef.current = el;
-            }}
-            type="text"
-            value={tempValue}
-            onChange={(e) => setTempValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="w-full p-2 border rounded text-gray-800 bg-white text-base"
-          />
-        )}
-        <div className="flex items-center gap-2 mt-2">
-          <button
-            onClick={commitEdit}
-            disabled={saveState === "saving"}
-            className="bg-green-600 text-white px-3 py-1 rounded text-xs flex items-center gap-1 hover:bg-green-700 disabled:opacity-60"
-          >
-            {saveState === "saving" ? (
-              <FaSpinner className="animate-spin" />
-            ) : (
-              <FaCheck />
-            )}
-            Save
-          </button>
-          <button
-            onClick={cancelEdit}
-            className="bg-gray-400 text-white px-3 py-1 rounded text-xs flex items-center gap-1 hover:bg-gray-500"
-          >
-            <FaTimes /> Cancel
-          </button>
-          <span className="text-[10px] text-gray-500 ml-2">
-            {multiline ? "Ctrl+Enter to save · Esc to cancel" : "Enter to save · Esc to cancel"}
-          </span>
-        </div>
-      </div>
-    );
-  }
-
-  // ── Idle edit mode (pencil on hover) ──
   return (
-    <div className="relative group inline-block">
-      <Tag className={className}>{value}</Tag>
-
-      <button
-        onClick={startEdit}
-        className="absolute -top-3 -right-3 bg-blue-600 text-white p-1.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-50"
-        title={`Edit ${section}.${field}`}
+    <WrapperTag
+      className="relative group/editable"
+      style={{ display: isBlock ? "block" : "inline" }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {/* Field-name badge — indicates what this field is */}
+      <span
+        className={`
+          pointer-events-none absolute -top-3 left-0 z-30
+          inline-flex items-center gap-1
+          bg-[#D5A54D] text-white text-[9px] font-bold uppercase tracking-widest
+          px-2 py-0.5 rounded-full shadow-md
+          transition-all duration-150
+          ${hovered || focused ? "opacity-100 scale-100" : "opacity-80 group-hover/editable:opacity-100"}
+        `}
       >
-        <FaEdit size={12} />
-      </button>
+        {label || field}
+      </span>
 
-      {saveState === "saved" && (
-        <span className="absolute -top-3 -right-10 bg-green-600 text-white text-[10px] px-2 py-0.5 rounded-full z-50 flex items-center gap-1">
-          <FaCheck size={8} /> Saved
-        </span>
-      )}
-
-      {saveState === "error" && (
-        <span className="absolute -top-3 -right-12 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded-full z-50">
-          Save failed
-        </span>
-      )}
-    </div>
+      {/* The actual editable element.
+          IMPORTANT: do NOT pass `children` here — we seed innerText via the
+          useEffect above.  Passing children alongside contentEditable causes
+          React to fight the DOM and overwrite the user's typing on every
+          re-render, which makes the element appear unresponsive. */}
+      <EditableTag
+        ref={ref}
+        className={className}
+        // data-editable drives the CSS outlines in globals.css
+        data-editable
+        contentEditable
+        suppressContentEditableWarning
+        spellCheck={false}
+        onInput={handleInput}
+        onKeyDown={handleKeyDown}
+        onFocus={() => setFocused(true)}
+        onBlur={() => {
+          setFocused(false);
+          handleInput(); // flush final value on blur
+        }}
+      />
+    </WrapperTag>
   );
 }

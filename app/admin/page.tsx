@@ -35,10 +35,11 @@ export default function AdminPages() {
   // ── Confirm dialog hook ──
   const { confirm, ConfirmDialogHost } = useConfirm();
 
-  // ── Existing state (unchanged) ──
+  // ── State ──
   const [pages, setPages] = useState<PageDefinition[]>(PAGES);
   const [selectedPage, setSelectedPage] = useState<PageDefinition>(PAGES[0]);
-  const [activeTab, setActiveTab] = useState<"details" | "editor">("details");
+  // "editorOpen" replaces the old tab state — it just controls the modal
+  const [editorOpen, setEditorOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<
     "All" | "Published" | "Draft" | "Archived"
@@ -51,7 +52,7 @@ export default function AdminPages() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isLoadingContent, setIsLoadingContent] = useState(false);
 
-  // ── Load draft from DB (unchanged) ──
+  // ── Load draft from DB ──
   useEffect(() => {
     let cancelled = false;
 
@@ -114,14 +115,14 @@ export default function AdminPages() {
     };
   }, [selectedPage]);
 
-  // ── Dirty check (unchanged) ──
+  // ── Dirty check ──
   useEffect(() => {
     const original = JSON.stringify(pristineDraft);
     const draft = JSON.stringify(draftContent);
     setHasUnsavedChanges(original !== draft);
   }, [draftContent, pristineDraft]);
 
-  // ── Derived (unchanged) ──
+  // ── Derived ──
   const filteredPages = useMemo(
     () =>
       pages.filter((p) => {
@@ -147,7 +148,7 @@ export default function AdminPages() {
 
   const editorAvailable = hasStructure(selectedPage.slug);
 
-  // ── Field/list edit handlers (unchanged) ──
+  // ── Field/list edit handlers ──
   const handleFieldChange = (sIdx: number, fieldKey: string, value: string) => {
     setDraftContent((prev) => {
       const next = [...prev];
@@ -214,7 +215,7 @@ export default function AdminPages() {
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  // ── The actual DB write (renamed from handleSave) ──
+  // ── The actual DB write ──
   const performSave = useCallback(async () => {
     setIsSaving(true);
     setSaveError(null);
@@ -295,9 +296,8 @@ export default function AdminPages() {
     }
   }, [draftContent, selectedPage]);
 
-  // ── Save handler: asks for confirmation, then runs the actual save ──
+  // ── Save handler with confirmation ──
   const handleSave = useCallback(async () => {
-    // Count what's about to change so the message is informative
     const fieldCount = draftContent.reduce(
       (sum, s) => sum + s.fields.filter((f) => f.value?.trim()).length,
       0
@@ -351,6 +351,12 @@ export default function AdminPages() {
     setSelectedPage(newPage);
   };
 
+  // ── Open editor modal (only if editor is available) ──
+  const handleOpenEditor = () => {
+    if (!editorAvailable) return;
+    setEditorOpen(true);
+  };
+
   return (
     <div className="flex min-h-screen bg-[#F8F9FA] font-sans text-gray-800">
       <Sidebar />
@@ -359,7 +365,7 @@ export default function AdminPages() {
         <AdminHeader />
 
         <div className="p-8 flex gap-8 h-[calc(100vh-64px)] overflow-hidden">
-          {/* LEFT: Pages table (unchanged) */}
+          {/* LEFT: Pages table */}
           <div className="flex-1 flex flex-col min-w-0">
             <div className="mb-6">
               <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
@@ -550,60 +556,36 @@ export default function AdminPages() {
             </div>
           </div>
 
-          {/* RIGHT: Details / Editor */}
+          {/* RIGHT: Details panel only (no tabs) */}
           <div className="w-96 bg-white border border-gray-200 rounded-xl shadow-sm flex flex-col overflow-hidden">
-            <div className="flex border-b border-gray-200">
-              <button
-                onClick={() => setActiveTab("details")}
-                className={`flex-1 py-3 text-sm font-medium border-b-2 ${
-                  activeTab === "details"
-                    ? "border-blue-600 text-blue-600"
-                    : "border-transparent text-gray-500"
-                }`}
-              >
-                Page Details
-              </button>
-              <button
-                onClick={() => setActiveTab("editor")}
-                className={`flex-1 py-3 text-sm font-medium border-b-2 ${
-                  activeTab === "editor"
-                    ? "border-blue-600 text-blue-600"
-                    : "border-transparent text-gray-500"
-                }`}
-              >
-                Content Editor
-              </button>
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <h2 className="text-sm font-bold text-gray-700">Page Details</h2>
+              {editorAvailable && (
+                <button
+                  onClick={handleOpenEditor}
+                  className="text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-md flex items-center gap-1.5 cursor-pointer"
+                >
+                  Edit Content
+                </button>
+              )}
             </div>
 
             <div className="flex-1 overflow-y-auto p-6">
-              {activeTab === "details" ? (
+              {isLoadingContent ? (
+                <div className="flex items-center justify-center h-full text-sm text-gray-400">
+                  Loading content…
+                </div>
+              ) : (
                 <PageDetailsView
                   selectedPage={selectedPage}
                   draftContent={draftContent}
                   editorAvailable={editorAvailable}
                   isSaving={isSaving}
-                  onEdit={() => setActiveTab("editor")}
-                  onViewPage={handleViewPage}
-                  previewKey={previewKey}
-                />
-              ) : isLoadingContent ? (
-                <div className="flex items-center justify-center h-full text-sm text-gray-400">
-                  Loading content…
-                </div>
-              ) : (
-                <ContentEditorView
-                  selectedPage={selectedPage}
-                  editorAvailable={editorAvailable}
-                  draftContent={draftContent}
                   hasUnsavedChanges={hasUnsavedChanges}
-                  isSaving={isSaving}
-                  saveError={saveError}
-                  onFieldChange={handleFieldChange}
-                  onListItemChange={handleListItemChange}
-                  onAddListItem={handleAddListItem}
-                  onDeleteListItem={handleDeleteListItem}
-                  onSave={handleSave}
+                  onEdit={handleOpenEditor}
+                  onViewPage={handleViewPage}
                   onDiscard={handleDiscard}
+                  previewKey={previewKey}
                 />
               )}
             </div>
@@ -611,7 +593,25 @@ export default function AdminPages() {
         </div>
       </main>
 
-      {/* ── Confirm dialog portal — rendered once, driven by useConfirm ── */}
+      {/* ── Content Editor Modal ── */}
+      <ContentEditorView
+        open={editorOpen}
+        selectedPage={selectedPage}
+        editorAvailable={editorAvailable}
+        draftContent={draftContent}
+        hasUnsavedChanges={hasUnsavedChanges}
+        isSaving={isSaving}
+        saveError={saveError}
+        onFieldChange={handleFieldChange}
+        onListItemChange={handleListItemChange}
+        onAddListItem={handleAddListItem}
+        onDeleteListItem={handleDeleteListItem}
+        onSave={handleSave}
+        onDiscard={handleDiscard}
+        onClose={() => setEditorOpen(false)}
+      />
+
+      {/* ── Confirm dialog portal ── */}
       {ConfirmDialogHost}
     </div>
   );

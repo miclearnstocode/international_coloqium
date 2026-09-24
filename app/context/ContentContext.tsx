@@ -6,6 +6,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useRef,
   useMemo,
   ReactNode,
 } from "react";
@@ -13,7 +14,6 @@ import { useSearchParams } from "next/navigation";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
 
-// LocalStorage key used by the admin panel to persist drafts for preview
 const DRAFT_STORAGE_KEY = "symposium_draft_content";
 
 interface ContentContextType {
@@ -32,6 +32,14 @@ interface ContentContextType {
 }
 
 const ContentContext = createContext<ContentContextType | null>(null);
+
+/** Normalise whatever the backend sends as a role string into a canonical set. */
+function resolveIsAdmin(role: unknown): boolean {
+  if (!role || typeof role !== "string") return false;
+  const normalised = role.toLowerCase().replace(/[\s_-]/g, "");
+  // accept: "admin", "superadmin", "super_admin", "super-admin", "ADMIN", etc.
+  return normalised === "admin" || normalised === "superadmin";
+}
 
 export function ContentProvider({
   pageSlug,
@@ -56,7 +64,13 @@ export function ContentProvider({
   >({});
   const [pendingItems, setPendingItems] = useState<Record<string, any[]>>({});
 
-  // ===== Fetch page content from the API =====
+  // Refs so callbacks never become stale
+  const pendingFieldsRef = useRef(pendingFields);
+  const pendingItemsRef = useRef(pendingItems);
+  useEffect(() => { pendingFieldsRef.current = pendingFields; }, [pendingFields]);
+  useEffect(() => { pendingItemsRef.current = pendingItems; }, [pendingItems]);
+
+  // ===== Fetch page content =====
   const fetchContent = useCallback(async () => {
     try {
       const res = await fetch(`${API_BASE}/api/content/${pageSlug}`);
@@ -66,14 +80,13 @@ export function ContentProvider({
         setItems(data.items || {});
       }
     } catch (err) {
-      console.error("Failed to fetch content:", err);
+      console.error("[ContentContext] Failed to fetch content:", err);
     } finally {
       setLoading(false);
     }
   }, [pageSlug]);
 
-  // ===== Load draft content from localStorage (admin preview) =====
-  // This runs AFTER fetchContent so the draft can override DB content.
+  // ===== Load draft from localStorage (preview mode) =====
   const applyLocalDraft = useCallback(() => {
     if (!wantsPreview) return;
     try {
@@ -92,24 +105,18 @@ export function ContentProvider({
       const pageDraft = drafts[pageSlug];
       if (!pageDraft) return;
 
-      // Convert draft sections into the { content, items } shape the context uses
       const draftContent: Record<string, Record<string, string>> = {};
       const draftItems: Record<string, any[]> = {};
 
       pageDraft.forEach((section) => {
         section.fields?.forEach((f) => {
           if (!draftContent[section.section]) draftContent[section.section] = {};
-          // Extract the short field name after the dot (e.g. "hero.title" → "title")
           const shortKey = f.key.includes(".") ? f.key.split(".").slice(1).join(".") : f.key;
           draftContent[section.section][shortKey] = f.value;
         });
-
-        if (section.list) {
-          draftItems[section.list.key] = section.list.items;
-        }
+        if (section.list) draftItems[section.list.key] = section.list.items;
       });
 
-      // Merge draft on top of DB content
       setContent((prev) => {
         const merged = { ...prev };
         Object.entries(draftContent).forEach(([section, fields]) => {
@@ -117,61 +124,93 @@ export function ContentProvider({
         });
         return merged;
       });
-
       setItems((prev) => ({ ...prev, ...draftItems }));
     } catch (err) {
-      console.error("Failed to apply local draft:", err);
+      console.error("[ContentContext] Failed to apply local draft:", err);
     }
   }, [pageSlug, wantsPreview]);
 
-  // ===== Verify super admin role =====
+  // ===== Verify admin role =====
   const verifyAdmin = useCallback(async () => {
     const token =
       typeof window !== "undefined"
         ? localStorage.getItem("access_token")
         : null;
+
     if (!token) {
+      console.debug("[ContentContext] verifyAdmin: no token in localStorage");
       setIsSuperAdmin(false);
       return false;
     }
+
     try {
       const res = await fetch(`${API_BASE}/api/auth/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       if (res.ok) {
         const user = await res.json();
-        const isAdmin = user.role === "admin";
+        console.debug("[ContentContext] /api/auth/me response:", user);
+
+        const isAdmin = resolveIsAdmin(user.role);
+        console.debug(
+          `[ContentContext] role="${user.role}" → resolveIsAdmin=${isAdmin}`
+        );
         setIsSuperAdmin(isAdmin);
         return isAdmin;
+      } else {
+        console.warn(
+          `[ContentContext] /api/auth/me returned ${res.status} — treating as non-admin`
+        );
       }
-    } catch {
-      /* ignore */
+    } catch (err) {
+      console.error("[ContentContext] verifyAdmin fetch error:", err);
     }
+
     setIsSuperAdmin(false);
     return false;
   }, []);
 
+  // ===== Boot: fetch content + verify admin + enable edit mode if ?edit=1 =====
   useEffect(() => {
     (async () => {
       await fetchContent();
       const admin = await verifyAdmin();
-      // Auto-enable edit mode if admin arrived with ?edit=1
+
       if (admin && wantsEdit) {
+        console.debug("[ContentContext] Admin confirmed + ?edit=1 → enabling edit mode");
         setIsEditMode(true);
+        return;
+      }
+      setIsEditMode(false);
+
+      // Non-admin: strip ?edit=1 from the URL so the page looks totally normal
+      if (wantsEdit && typeof window !== "undefined") {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("edit");
+        window.history.replaceState(null, "", url.toString());
       }
     })();
   }, [fetchContent, verifyAdmin, wantsEdit]);
 
-  // Apply local draft AFTER DB content is loaded (separate effect so
-  // fetchContent's async completion triggers the merge).
+  // Apply draft AFTER content is fetched
   useEffect(() => {
-    if (!loading) {
-      applyLocalDraft();
-    }
+    if (!loading) applyLocalDraft();
   }, [loading, applyLocalDraft]);
 
-  // ===== Update a single field =====
-  const updateField = (section: string, field: string, value: string) => {
+  // ===== THE KEY BIT: toggle body.editing for the CSS =====
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const on = isEditMode && isSuperAdmin;
+    console.debug(`[ContentContext] body.editing → ${on} (isEditMode=${isEditMode}, isSuperAdmin=${isSuperAdmin})`);
+    document.body.classList.toggle("editing", on);
+    return () => {
+      document.body.classList.remove("editing");
+    };
+  }, [isEditMode, isSuperAdmin]);
+
+  // ===== Field / list updates =====
+  const updateField = useCallback((section: string, field: string, value: string) => {
     setContent((prev) => ({
       ...prev,
       [section]: { ...(prev[section] || {}), [field]: value },
@@ -181,21 +220,23 @@ export function ContentProvider({
       [section]: { ...(prev[section] || {}), [field]: value },
     }));
     setHasUnsavedChanges(true);
-  };
+  }, []);
 
-  // ===== Update a list =====
-  const updateItems = (section: string, newItems: any[]) => {
+  const updateItems = useCallback((section: string, newItems: any[]) => {
     setItems((prev) => ({ ...prev, [section]: newItems }));
     setPendingItems((prev) => ({ ...prev, [section]: newItems }));
     setHasUnsavedChanges(true);
-  };
+  }, []);
 
-  // ===== Save everything to the database =====
-  const saveContent = async () => {
+  // ===== Save =====
+  const saveContent = useCallback(async () => {
     const token = localStorage.getItem("access_token");
     if (!token) throw new Error("Not authenticated. Please login as admin.");
 
-    const updates = Object.entries(pendingFields).flatMap(([section_key, fields]) =>
+    const currentPendingFields = pendingFieldsRef.current;
+    const currentPendingItems = pendingItemsRef.current;
+
+    const updates = Object.entries(currentPendingFields).flatMap(([section_key, fields]) =>
       Object.entries(fields).map(([field_key, field_value]) => ({
         section_key,
         field_key: field_key.includes(".") ? field_key.split(".").slice(1).join(".") : field_key,
@@ -215,12 +256,11 @@ export function ContentProvider({
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.detail || "Failed to save content");
+        throw new Error((err as any).detail || "Failed to save content");
       }
     }
 
-    // ── Save each list section ──
-    for (const [section_key, sectionItems] of Object.entries(pendingItems)) {
+    for (const [section_key, sectionItems] of Object.entries(currentPendingItems)) {
       const res = await fetch(
         `${API_BASE}/api/admin/content/${pageSlug}/items/${section_key}`,
         {
@@ -234,7 +274,7 @@ export function ContentProvider({
       );
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.detail || `Failed to save items for ${section_key}`);
+        throw new Error((err as any).detail || `Failed to save items for ${section_key}`);
       }
     }
 
@@ -242,22 +282,23 @@ export function ContentProvider({
     setPendingItems({});
     setHasUnsavedChanges(false);
     await fetchContent();
-  };
+  }, [pageSlug, fetchContent]);
 
-  // ===== Toggle edit mode =====
-  const toggleEditMode = () => {
+  const toggleEditMode = useCallback(() => {
     if (!isSuperAdmin) return;
-    if (isEditMode && hasUnsavedChanges) {
-      if (!confirm("You have unsaved changes. Discard them?")) return;
-      setPendingFields({});
-      setPendingItems({});
-      setHasUnsavedChanges(false);
-      fetchContent();
-    }
-    setIsEditMode((prev) => !prev);
-  };
+    setIsEditMode((prev) => {
+      const next = !prev;
+      if (prev && hasUnsavedChanges) {
+        if (!confirm("You have unsaved changes. Discard them?")) return prev;
+        setPendingFields({});
+        setPendingItems({});
+        setHasUnsavedChanges(false);
+        fetchContent();
+      }
+      return next;
+    });
+  }, [isSuperAdmin, hasUnsavedChanges, fetchContent]);
 
-  // ===== Memoize context value =====
   const value = useMemo(
     () => ({
       content,
@@ -281,9 +322,11 @@ export function ContentProvider({
       wantsPreview,
       hasUnsavedChanges,
       loading,
+      toggleEditMode,
+      updateField,
+      updateItems,
+      saveContent,
       fetchContent,
-      // toggleEditMode / updateField / updateItems / saveContent close over
-      // state setters only, so they're stable — no need to include them.
     ]
   );
 

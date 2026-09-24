@@ -179,7 +179,7 @@ export default function Header() {
 
           <span
             aria-hidden
-            className="absolute bottom-0 h-[2px] rounded-full bg-[#D5A54D] transition-all duration-300 ease-out pointer-events-none"
+            className="absolute bottom-0 h-0.5 rounded-full bg-[#D5A54D] transition-all duration-300 ease-out pointer-events-none"
             style={{
               left: underline.left,
               width: underline.width,

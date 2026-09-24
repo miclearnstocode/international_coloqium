@@ -8,7 +8,7 @@ import { FaCalendarAlt, FaMapMarkerAlt, FaCheckCircle } from "react-icons/fa";
 import { ContentProvider, useContent } from "@/app/context/ContentContext";
 import EditableField from "@/app/components/EditableField";
 import EditableList from "@/app/components/EditableList";
-import AdminToolbar from "@/app/components/AdminToolbar";
+
 
 // ===== Reusable scroll-reveal hook =====
 function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
@@ -130,7 +130,9 @@ function AnimatedNumber({ value, className }: { value: number; className?: strin
 }
 
 function HomeInner() {
-  const { isEditMode } = useContent();
+  const { isEditMode, isSuperAdmin } = useContent();
+
+  const canEdit = isEditMode && isSuperAdmin;
 
   const [timeLeft, setTimeLeft] = useState({
     days: 82,
@@ -143,8 +145,8 @@ function HomeInner() {
 
   // ===== Splash / docking state =====
   type Phase = "splash" | "docking" | "docked";
-  const [phase, setPhase] = useState<Phase>("splash");
-  const [showBackdrop, setShowBackdrop] = useState(true);
+  const [phase, setPhase] = useState<Phase>(canEdit ? "docked" : "splash");
+  const [showBackdrop, setShowBackdrop] = useState(!canEdit);
   const [delta, setDelta] = useState<{ x: number; y: number } | null>(null);
 
   const dockRef = useRef<HTMLDivElement | null>(null);
@@ -167,8 +169,18 @@ function HomeInner() {
     return () => clearInterval(id);
   }, []);
 
+  // When entering edit mode, skip the splash animation immediately
+  useEffect(() => {
+    if (canEdit) {
+      setPhase("docked");
+      setShowBackdrop(false);
+    }
+  }, [canEdit]);
+
   // ===== Measure delta between viewport center and dock position =====
   useEffect(() => {
+    if (canEdit) return; // skip splash logic entirely while editing
+
     const measure = () => {
       const dock = dockRef.current;
       if (!dock) return false;
@@ -191,10 +203,11 @@ function HomeInner() {
       const raf = requestAnimationFrame(measure);
       return () => cancelAnimationFrame(raf);
     }
-  }, []);
+  }, [canEdit]);
 
   // ===== Auto-dock after splash is shown =====
   useEffect(() => {
+    if (canEdit) return;
     if (phase !== "splash" || !delta) return;
     const t = setTimeout(() => {
       setPhase("docking");
@@ -206,7 +219,7 @@ function HomeInner() {
       });
     }, 2600);
     return () => clearTimeout(t);
-  }, [phase, delta]);
+  }, [phase, delta, canEdit]);
 
   const dismissSplash = () => {
     if (phase !== "splash") return;
@@ -267,24 +280,27 @@ function HomeInner() {
     { text: "Industry & Development Partners" },
   ];
 
-  // Parallax translations
-  const heroParallax = (heroScroll.progress - 0.5) * -80;
-  const videoParallax = (heroScroll.progress - 0.5) * -140;
-  const orbParallax = (heroScroll.progress - 0.5) * 60;
-  const ringParallax = (heroScroll.progress - 0.5) * 120;
+  // Parallax translations — disabled while editing so text doesn't drift under the caret
+  const parallaxEnabled = !canEdit;
+  const heroParallax = parallaxEnabled ? (heroScroll.progress - 0.5) * -80 : 0;
+  const videoParallax = parallaxEnabled ? (heroScroll.progress - 0.5) * -140 : 0;
+  const orbParallax = parallaxEnabled ? (heroScroll.progress - 0.5) * 60 : 0;
+  const ringParallax = parallaxEnabled ? (heroScroll.progress - 0.5) * 120 : 0;
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F5F6FA] font-sans text-[#0B2A4A] overflow-x-hidden">
       <ScrollProgressBar />
 
-      {/* ===== Splash backdrop ===== */}
-      <div
-        aria-hidden
-        onClick={dismissSplash}
-        className={`fixed inset-0 z-95 bg-[#0B2A4A]/40 backdrop-blur-sm transition-opacity duration-500 ${
-          showBackdrop ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
-      />
+      {/* ===== Splash backdrop (view mode only) ===== */}
+      {!canEdit && (
+        <div
+          aria-hidden
+          onClick={dismissSplash}
+          className={`fixed inset-0 z-95 bg-[#0B2A4A]/40 backdrop-blur-sm transition-opacity duration-500 ${
+            showBackdrop ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+        />
+      )}
 
       <style jsx global>{`
         @keyframes floatSlow {
@@ -499,6 +515,14 @@ function HomeInner() {
           transition: transform 0.15s linear;
         }
 
+        /* ===== Suppress hover-lift animations while editing ===== */
+        body.editing .premium-card:hover {
+          transform: none;
+          box-shadow:
+            0 1px 2px rgba(11, 42, 74, 0.04),
+            0 8px 20px -12px rgba(11, 42, 74, 0.10);
+        }
+
         @media (prefers-reduced-motion: reduce) {
           *, *::before, *::after {
             animation-duration: 0.001ms !important;
@@ -569,6 +593,7 @@ function HomeInner() {
                   field="welcome_badge"
                   fallback="Welcome to"
                   as="span"
+                  label="Welcome Badge"
                   className="inline-block bg-linear-to-r from-[#E3D5C0] to-[#EFE3CF] text-[#8B6F47] text-xs font-bold uppercase tracking-widest px-5 py-2 rounded-sm mb-6 shadow-sm ring-1 ring-[#D5A54D]/30"
                 />
               </span>
@@ -579,7 +604,8 @@ function HomeInner() {
                   field="title"
                   fallback="3rd International Agri- Life & Bioresource Science Symposium"
                   as="h1"
-                  className="text-5xl lg:text-6xl font-bold leading-tight mb-6 text-[#0B2A4A]"
+                  label="Main Title"
+                  className="text-5xl lg:text-6xl font-bold leading-tight mb-6 text-[#0B2A4A] block"
                   multiline
                 />
               </div>
@@ -590,7 +616,8 @@ function HomeInner() {
                   field="subtitle"
                   fallback="Converging Frontiers in Agri-Life and Bioresource Sciences"
                   as="p"
-                  className="text-[#D5A54D] text-xl lg:text-2xl font-semibold mb-3"
+                  label="Subtitle"
+                  className="text-[#D5A54D] text-xl lg:text-2xl font-semibold mb-3 block"
                   multiline
                 />
               </div>
@@ -601,29 +628,32 @@ function HomeInner() {
                   field="description"
                   fallback="Science, Innovation & Collaboration for a Resilient and Sustainable Future"
                   as="p"
-                  className="text-gray-800 text-base lg:text-lg mb-8 max-w-md leading-relaxed"
+                  label="Description"
+                  className="text-gray-800 text-base lg:text-lg mb-8 max-w-md leading-relaxed block"
                   multiline
                 />
               </div>
 
               <div className="reveal-up stagger-4 flex items-center gap-3 mb-3">
-                <FaCalendarAlt className="text-[#D5A54D] text-xl" />
+                <FaCalendarAlt className="text-[#D5A54D] text-xl shrink-0" />
                 <EditableField
                   section="Hero Section"
                   field="event_date"
                   fallback="March 11-13, 2027"
                   as="p"
+                  label="Event Date"
                   className="text-gray-800 text-xl lg:text-2xl font-semibold"
                 />
               </div>
 
               <div className="reveal-up stagger-5 flex items-center gap-3 mb-8">
-                <FaMapMarkerAlt className="text-[#D5A54D] text-xl" />
+                <FaMapMarkerAlt className="text-[#D5A54D] text-xl shrink-0" />
                 <EditableField
                   section="Hero Section"
                   field="event_location"
                   fallback="Roxas City, Capiz, Philippines"
                   as="p"
+                  label="Event Location"
                   className="text-gray-800 text-xl lg:text-2xl font-semibold"
                 />
               </div>
@@ -638,6 +668,7 @@ function HomeInner() {
                     field="cta_text"
                     fallback="Learn More"
                     as="span"
+                    label="CTA Text"
                   />
                   <span aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-1">→</span>
                 </Link>
@@ -651,11 +682,11 @@ function HomeInner() {
           className="hidden md:block absolute top-40 right-0 lg:right-32 xl:right-64 z-96"
           style={{
             transform:
-              phase === "splash" && delta
+              !canEdit && phase === "splash" && delta
                 ? `translate(${delta.x}px, ${delta.y}px)`
                 : `translateY(${heroParallax * 0.4}px)`,
             transition:
-              phase === "docking"
+              !canEdit && phase === "docking"
                 ? "transform 3000ms cubic-bezier(0.22, 1, 0.36, 1)"
                 : "none",
             willChange: "transform",
@@ -664,7 +695,7 @@ function HomeInner() {
           <div
             ref={dockRef}
             className={`premium-card bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl p-8 w-105 border border-gray-100 relative ${
-              phase === "splash" ? "splash-in" : ""
+              !canEdit && phase === "splash" ? "splash-in" : ""
             }`}
           >
             <button
@@ -692,7 +723,8 @@ function HomeInner() {
               field="title"
               fallback="3rd International Agri-Life & Bioresource Science Symposium"
               as="h2"
-              className="text-center text-xl font-bold mb-2 text-[#D5A54D]"
+              label="Card Title"
+              className="text-center text-xl font-bold mb-2 text-[#D5A54D] block"
               multiline
             />
 
@@ -701,7 +733,8 @@ function HomeInner() {
               field="description"
               fallback="Join researchers, scientists, educators, students, industry partners, and institutional leaders from the Philippines and around the world for three days of scientific exchange, interdisciplinary dialogue, and international collaboration."
               as="p"
-              className="text-center text-gray-800 text-xs mb-6 leading-relaxed"
+              label="Card Description"
+              className="text-center text-gray-800 text-xs mb-6 leading-relaxed block"
               multiline
             />
 
@@ -715,6 +748,7 @@ function HomeInner() {
                   field="button_text"
                   fallback="View Event Details"
                   as="span"
+                  label="Button Text"
                 />
               </a>
             </div>
@@ -742,7 +776,8 @@ function HomeInner() {
               field="title"
               fallback="SYMPOSIUM COUNTDOWN"
               as="h2"
-              className="text-3xl font-bold text-[#0B2A4A] mb-2"
+              label="Section Title"
+              className="text-3xl font-bold text-[#0B2A4A] mb-2 block"
             />
             <div className="w-24 h-1 gold-underline mx-auto rounded-full"></div>
           </div>
@@ -757,7 +792,7 @@ function HomeInner() {
               <div
                 key={c.key}
                 className={`reveal-up stagger-${i + 1} premium-card scroll-lift bg-linear-to-b from-[#F5F6FA] to-white rounded-xl p-8 flex flex-col items-center justify-center shadow-sm border border-gray-100`}
-                style={{ ["--scroll-y" as any]: `${(1 - countdownScroll.progress) * c.offset}px` }}
+                style={{ ["--scroll-y" as any]: `${parallaxEnabled ? (1 - countdownScroll.progress) * c.offset : 0}px` }}
               >
                 <svg className="w-10 h-10 text-[#1D3D6D] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d={c.iconPath} />
@@ -775,9 +810,9 @@ function HomeInner() {
           </div>
 
           <p className="reveal-up stagger-5 text-center font-semibold text-gray-700">
-            <EditableField section="countdown" field="event_date" fallback="March 11-13, 2027" as="span" />
+            <EditableField section="countdown" field="event_date" fallback="March 11-13, 2027" as="span" label="Event Date" />
             <span className="mx-2 text-gray-300">|</span>
-            <EditableField section="countdown" field="event_location" fallback="Roxas City, Capiz Philippines" as="span" />
+            <EditableField section="countdown" field="event_location" fallback="Roxas City, Capiz Philippines" as="span" label="Event Location" />
           </p>
         </div>
       </section>
@@ -800,19 +835,19 @@ function HomeInner() {
           {/* Card 1: About */}
           <div
             className="reveal-up stagger-1 premium-card scroll-lift bg-linear-to-b from-[#F5F6FA] to-white p-8 rounded-lg border border-gray-100"
-            style={{ ["--scroll-y" as any]: `${(1 - contentScroll.progress) * 30}px` }}
+            style={{ ["--scroll-y" as any]: `${parallaxEnabled ? (1 - contentScroll.progress) * 30 : 0}px` }}
           >
             <div className="premium-icon w-16 h-16 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm ring-1 ring-[#D5A54D]/20">
               <svg className="w-8 h-8 text-[#1D3D6D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
               </svg>
             </div>
-            <EditableField section="about_card" field="title" fallback="ABOUT THE SYMPOSIUM" as="h3" className="text-xl font-bold text-[#0B2A4A] mb-4" />
+            <EditableField section="about_card" field="title" fallback="ABOUT THE SYMPOSIUM" as="h3" label="Card Title" className="text-xl font-bold text-[#0B2A4A] mb-4 block" />
             <div className="premium-accent w-10 h-1 bg-[#D5A54D] mb-6 rounded-full"></div>
-            <EditableField section="about_card" field="paragraph1" fallback="The 3rd International Agri-Life & Bioresource Sciences Symposium brings together researchers, faculty members, students, scientists, government representatives, industry partners, and other stakeholders from the Philippines and abroad." as="p" className="text-gray-600 text-justify mb-6" multiline />
-            <EditableField section="about_card" field="paragraph2" fallback="Through research presentations, scientific discussions, and collaborative activities, the symposium provides a platform for sharing knowledge and advancing innovative and sustainable solutions in agriculture, life sciences, and bioresource sciences." as="p" className="text-gray-600 text-justify mb-6" multiline />
+            <EditableField section="about_card" field="paragraph1" fallback="The 3rd International Agri-Life & Bioresource Sciences Symposium brings together researchers, faculty members, students, scientists, government representatives, industry partners, and other stakeholders from the Philippines and abroad." as="p" label="Paragraph 1" className="text-gray-600 text-justify mb-6 block" multiline />
+            <EditableField section="about_card" field="paragraph2" fallback="Through research presentations, scientific discussions, and collaborative activities, the symposium provides a platform for sharing knowledge and advancing innovative and sustainable solutions in agriculture, life sciences, and bioresource sciences." as="p" label="Paragraph 2" className="text-gray-600 text-justify mb-6 block" multiline />
             <a href="/about" className="premium-link">
-              <EditableField section="about_card" field="link_text" fallback="Read More" as="span" />
+              <EditableField section="about_card" field="link_text" fallback="Read More" as="span" label="Link Text" />
               <span className="arrow" aria-hidden="true">→</span>
             </a>
           </div>
@@ -820,81 +855,192 @@ function HomeInner() {
           {/* Card 2: Announcements */}
           <div
             className="reveal-up stagger-2 premium-card scroll-lift bg-white border border-gray-200 p-8 rounded-lg"
-            style={{ ["--scroll-y" as any]: `${(1 - contentScroll.progress) * 20}px` }}
+            style={{ ["--scroll-y" as any]: `${parallaxEnabled ? (1 - contentScroll.progress) * 20 : 0}px` }}
           >
-            <EditableField section="announcements" field="title" fallback="ANNOUNCEMENTS" as="h3" className="text-xl font-bold text-[#0B2A4A] mb-4" />
+            <EditableField section="announcements" field="title" fallback="ANNOUNCEMENTS" as="h3" label="Section Title" className="text-xl font-bold text-[#0B2A4A] mb-4 block" />
             <div className="premium-accent w-10 h-1 bg-[#D5A54D] mb-6 rounded-full"></div>
 
             <EditableList
               section="announcements"
+              title="Announcements List"
+              subtitle="Manage event announcements and deadlines"
+              itemLabel="Announcement"
               fallback={fallbackAnnouncements}
               emptyItem={{
-                month: "MMM", day: "00", category: "CATEGORY",
-                title: "New announcement", description: "Description here",
-                link_text: "Learn more", link_url: "/",
+                month: "MMM",
+                day: "00",
+                category: "CATEGORY",
+                title: "New announcement",
+                description: "Description here",
+                link_text: "Learn more",
+                link_url: "/",
               }}
-              renderItem={(item, index, editing, onUpdate) => (
-                <div className={`announcement-row flex gap-4 ${index < 2 ? "border-b border-gray-200 pb-4 mb-4" : ""}`}>
-                  <div className="ann-date flex flex-col items-center">
-                    {editing ? (
-                      <>
-                        <input type="text" value={item.month || ""} onChange={(e) => onUpdate({ ...item, month: e.target.value })} className="w-14 text-center border rounded text-sm" />
-                        <input type="text" value={item.day || ""} onChange={(e) => onUpdate({ ...item, day: e.target.value })} className="w-14 text-center border rounded text-lg font-bold mt-1" />
-                      </>
-                    ) : (
-                      <>
-                        <span className="text-xl font-bold text-[#1D3D6D]">{item.month}</span>
-                        <span className="text-2xl font-bold text-[#0B2A4A]">{item.day}</span>
-                      </>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    {editing ? (
-                      <div className="space-y-1">
-                        <input type="text" value={item.category || ""} onChange={(e) => onUpdate({ ...item, category: e.target.value })} placeholder="Category" className="w-full border rounded px-2 py-1 text-xs" />
-                        <input type="text" value={item.title || ""} onChange={(e) => onUpdate({ ...item, title: e.target.value })} placeholder="Title" className="w-full border rounded px-2 py-1 text-sm font-semibold" />
-                        <textarea value={item.description || ""} onChange={(e) => onUpdate({ ...item, description: e.target.value })} placeholder="Description" className="w-full border rounded px-2 py-1 text-xs" rows={2} />
-                        <input type="text" value={item.link_text || ""} onChange={(e) => onUpdate({ ...item, link_text: e.target.value })} placeholder="Link text" className="w-full border rounded px-2 py-1 text-xs" />
-                        <input type="text" value={item.link_url || ""} onChange={(e) => onUpdate({ ...item, link_url: e.target.value })} placeholder="Link URL" className="w-full border rounded px-2 py-1 text-xs" />
+              renderItem={(item, index, editing, onUpdate) =>
+                editing ? (
+                  <div className="p-3.5 bg-white space-y-3">
+                    {/* Date & Category Row */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+                          Month (e.g. OCT)
+                        </label>
+                        <input
+                          type="text"
+                          value={item.month || ""}
+                          onChange={(e) =>
+                            onUpdate({ ...item, month: e.target.value.toUpperCase() })
+                          }
+                          placeholder="OCT"
+                          maxLength={4}
+                          className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-bold text-[#1D3D6D] focus:border-[#D5A54D] focus:ring-1 focus:ring-[#D5A54D] outline-none"
+                        />
                       </div>
-                    ) : (
-                      <>
-                        <p className="ann-category text-xs font-bold text-[#D5A54D] uppercase mb-1">{item.category}</p>
-                        <p className="font-semibold text-[#0B2A4A] mb-1">{item.title}</p>
-                        <p className="text-sm text-justify text-gray-500">{item.description}</p>
-                        <a href={item.link_url} className="premium-link mt-3 text-sm">
-                          {item.link_text}
-                          <span className="arrow" aria-hidden="true">→</span>
-                        </a>
-                      </>
-                    )}
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+                          Day (e.g. 05)
+                        </label>
+                        <input
+                          type="text"
+                          value={item.day || ""}
+                          onChange={(e) => onUpdate({ ...item, day: e.target.value })}
+                          placeholder="05"
+                          maxLength={3}
+                          className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-bold text-[#0B2A4A] focus:border-[#D5A54D] focus:ring-1 focus:ring-[#D5A54D] outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+                          Category / Tag
+                        </label>
+                        <input
+                          type="text"
+                          value={item.category || ""}
+                          onChange={(e) => onUpdate({ ...item, category: e.target.value })}
+                          placeholder="CALL FOR ABSTRACTS"
+                          className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-bold text-[#D5A54D] uppercase focus:border-[#D5A54D] focus:ring-1 focus:ring-[#D5A54D] outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Announcement Title */}
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+                        Announcement Title
+                      </label>
+                      <input
+                        type="text"
+                        value={item.title || ""}
+                        onChange={(e) => onUpdate({ ...item, title: e.target.value })}
+                        placeholder="e.g. Abstract Submission Opens"
+                        className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm font-semibold text-[#0B2A4A] focus:border-[#D5A54D] focus:ring-1 focus:ring-[#D5A54D] outline-none"
+                      />
+                    </div>
+
+                    {/* Description */}
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+                        Description
+                      </label>
+                      <textarea
+                        value={item.description || ""}
+                        onChange={(e) => onUpdate({ ...item, description: e.target.value })}
+                        placeholder="Detailed information for this announcement..."
+                        rows={2}
+                        className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs text-gray-700 leading-relaxed focus:border-[#D5A54D] focus:ring-1 focus:ring-[#D5A54D] outline-none"
+                      />
+                    </div>
+
+                    {/* Link Text and Link URL */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+                          Link / Button Text
+                        </label>
+                        <input
+                          type="text"
+                          value={item.link_text || ""}
+                          onChange={(e) => onUpdate({ ...item, link_text: e.target.value })}
+                          placeholder="e.g. View Call for Abstracts"
+                          className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-semibold text-[#1D3D6D] focus:border-[#D5A54D] focus:ring-1 focus:ring-[#D5A54D] outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+                          Link URL / Destination
+                        </label>
+                        <input
+                          type="text"
+                          value={item.link_url || ""}
+                          onChange={(e) => onUpdate({ ...item, link_url: e.target.value })}
+                          placeholder="e.g. /abstract-submission"
+                          className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs text-gray-600 font-mono focus:border-[#D5A54D] focus:ring-1 focus:ring-[#D5A54D] outline-none"
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div
+                    className={`announcement-row flex gap-4 ${
+                      index < 2 ? "border-b border-gray-200 pb-4 mb-4" : ""
+                    }`}
+                  >
+                    <div className="ann-date flex flex-col items-center">
+                      <span className="text-xl font-bold text-[#1D3D6D]">{item.month}</span>
+                      <span className="text-2xl font-bold text-[#0B2A4A]">{item.day}</span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="ann-category text-xs font-bold text-[#D5A54D] uppercase mb-1">
+                        {item.category}
+                      </p>
+                      <p className="font-semibold text-[#0B2A4A] mb-1">{item.title}</p>
+                      <p className="text-sm text-justify text-gray-500">{item.description}</p>
+                      <a href={item.link_url} className="premium-link mt-3 text-sm">
+                        {item.link_text}
+                        <span className="arrow" aria-hidden="true">
+                          →
+                        </span>
+                      </a>
+                    </div>
+                  </div>
+                )
+              }
             />
           </div>
 
           {/* Card 3: WHO SHOULD ATTEND */}
           <div
             className="reveal-up stagger-3 premium-card scroll-lift bg-linear-to-b from-[#F5F6FA] to-white p-8 rounded-lg border border-gray-100"
-            style={{ ["--scroll-y" as any]: `${(1 - contentScroll.progress) * 10}px` }}
+            style={{ ["--scroll-y" as any]: `${parallaxEnabled ? (1 - contentScroll.progress) * 10 : 0}px` }}
           >
             <div className="premium-icon w-16 h-16 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm ring-1 ring-[#D5A54D]/20">
               <svg className="w-8 h-8 text-[#1D3D6D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
             </div>
-            <EditableField section="attendees_card" field="title" fallback="WHO SHOULD ATTEND" as="h3" className="text-xl font-bold text-[#0B2A4A] mb-4" />
+            <EditableField section="attendees_card" field="title" fallback="WHO SHOULD ATTEND" as="h3" label="Card Title" className="text-xl font-bold text-[#0B2A4A] mb-4 block" />
             <div className="premium-accent w-10 h-1 bg-[#D5A54D] mb-6 rounded-full"></div>
-            <EditableField section="attendees_card" field="description" fallback="The symposium welcomes members of the academic, scientific, government, and industry communities who are interested in advancing research, innovation, and collaboration in agri-life and bioresource sciences." as="p" className="text-gray-600 text-justify mb-4" multiline />
+            <EditableField section="attendees_card" field="description" fallback="The symposium welcomes members of the academic, scientific, government, and industry communities who are interested in advancing research, innovation, and collaboration in agri-life and bioresource sciences." as="p" label="Description" className="text-gray-600 text-justify mb-4 block" multiline />
             <ul className="space-y-2 mb-6">
               <EditableList
                 section="attendees"
+                title="Attendees List"
+                itemLabel="Attendee Group"
                 fallback={fallbackAttendees}
                 emptyItem={{ text: "New attendee type" }}
                 renderItem={(item, index, editing, onUpdate) =>
                   editing ? (
-                    <input type="text" value={item.text || ""} onChange={(e) => onUpdate({ ...item, text: e.target.value })} className="w-full border rounded px-2 py-1 text-sm" />
+                    <div className="p-3 bg-white">
+                      <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+                        Attendee Category / Role
+                      </label>
+                      <input
+                        type="text"
+                        value={item.text || ""}
+                        onChange={(e) => onUpdate({ ...item, text: e.target.value })}
+                        placeholder="e.g. Researchers & Scientists"
+                        className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs text-gray-800 font-medium focus:border-[#D5A54D] focus:ring-1 focus:ring-[#D5A54D] outline-none"
+                      />
+                    </div>
                   ) : (
                     <li className="attendee-item flex items-center gap-3 text-gray-700 text-sm">
                       <FaCheckCircle className="text-[#D5A54D] text-sm shrink-0" />
@@ -905,7 +1051,7 @@ function HomeInner() {
               />
             </ul>
             <a href="/scientific-tracks" className="premium-link">
-              <EditableField section="attendees_card" field="link_text" fallback="See Who Can Participate" as="span" />
+              <EditableField section="attendees_card" field="link_text" fallback="See Who Can Participate" as="span" label="Link Text" />
               <span className="arrow" aria-hidden="true">→</span>
             </a>
           </div>
@@ -913,7 +1059,6 @@ function HomeInner() {
       </section>
 
       <Footer />
-      <AdminToolbar />
     </div>
   );
 }
