@@ -69,14 +69,7 @@ export const Sidebar = () => (
       <NavItem icon={<FaHome />} label="Dashboard" href="/dashboard" />
       <NavItem icon={<FaFileAlt />} label="Pages" href="/admin" />
       <NavItem icon={<FaCalendarAlt />} label="News & Events" href="/admin/news-events" />
-      <NavItem icon={<FaFlask />} label="Scientific Program" href="/admin/scientific-program" />
-      <NavItem icon={<FaUserPlus />} label="Registration Details" href="/admin/registration" />
-      <NavItem icon={<FaFilePdf />} label="Presentation Guidelines" href="/admin/guidelines" />
-      <NavItem icon={<FaMapMarkedAlt />} label="Venue Map" href="/admin/venue-map" />
-      <NavItem icon={<FaUniversity />} label="Partner Institutions" href="/admin/partners" />
-      <NavItem icon={<FaImages />} label="Media Library" href="/admin/media" />
       <NavItem icon={<FaUsers />} label="Users & Roles" href="/admin/users-roles" />
-      <NavItem icon={<FaCog />} label="Settings" href="/admin/settings" />
     </nav>
 
     {/* Bottom info card */}
