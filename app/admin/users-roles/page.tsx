@@ -1,13 +1,10 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  FaHome, FaChevronRight, FaSearch, FaUser, FaUserShield,
-  FaUserTie, FaTrash, FaEdit, FaSave, FaTimes, FaEllipsisH,
-} from "react-icons/fa";
-
+import {FaHome, FaChevronRight, FaSearch, FaUser, FaUserShield, FaUserTie, FaTrash, FaEdit, FaSave, FaTimes, } from "react-icons/fa";
 import { Sidebar } from "@/app/admin/admin-components/Sidebar";
 import { AdminHeader } from "@/app/admin/admin-components/AdminHeader";
+import { apiFetch } from "../../lib/api";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
@@ -47,7 +44,7 @@ export default function UsersAndRolesPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/api/admin/users`, {
+      const res = await apiFetch(`${API_BASE}/api/admin/users`, {
         headers: { Authorization: `Bearer ${token()}` },
       });
       if (!res.ok) {
@@ -94,7 +91,7 @@ export default function UsersAndRolesPage() {
   const saveEdit = async (id: number) => {
     setSavingId(id);
     try {
-      const res = await fetch(`${API_BASE}/api/admin/users/${id}`, {
+      const res = await apiFetch(`${API_BASE}/api/admin/users/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -125,7 +122,7 @@ export default function UsersAndRolesPage() {
     if (!confirm(`Delete ${user.full_name}? This cannot be undone.`)) return;
 
     try {
-      const res = await fetch(`${API_BASE}/api/admin/users/${user.id}`, {
+      const res = await apiFetch(`${API_BASE}/api/admin/users/${user.id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token()}` },
       });

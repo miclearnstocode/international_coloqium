@@ -5,6 +5,7 @@ import Footer from "../../components/Footer";
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { FaSpinner, FaEye, FaDownload, FaCheck, FaTimes, FaFilePdf, FaList, FaSync, FaSearch, FaUniversity, FaEnvelope, FaPhone, FaUser, FaMapMarkerAlt, FaMicrophone, FaImage, FaCity, FaFolderOpen, FaFileAlt, FaExclamationTriangle, FaCheckCircle, FaTimesCircle, FaHourglassHalf } from "react-icons/fa";
+import { apiFetch } from "../../lib/api";
 
 export default function StaffDashboardPage() {
   const router = useRouter();
@@ -105,7 +106,7 @@ export default function StaffDashboardPage() {
         return;
       }
 
-      const res = await fetch("http://localhost:5000/api/staff/submissions", {
+      const res = await apiFetch("/api/staff/submissions", {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${accessToken}`
@@ -116,7 +117,7 @@ export default function StaffDashboardPage() {
         // Try to refresh token
         const refreshToken = localStorage.getItem("refresh_token");
         if (refreshToken) {
-          const refreshRes = await fetch("http://localhost:5000/api/refresh", {
+          const refreshRes = await apiFetch("/api/refresh", {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${refreshToken}`
@@ -128,7 +129,7 @@ export default function StaffDashboardPage() {
             localStorage.setItem("access_token", refreshData.access_token);
             
             // Retry with new token
-            const retryRes = await fetch("http://localhost:5000/api/staff/submissions", {
+            const retryRes = await apiFetch("/api/staff/submissions", {
               method: "GET",
               headers: {
                 "Authorization": `Bearer ${refreshData.access_token}`
@@ -183,7 +184,7 @@ export default function StaffDashboardPage() {
         return;
       }
 
-      const res = await fetch(`http://localhost:5000/api/staff/submissions/${submissionId}/status`, {
+      const res = await apiFetch(`/api/staff/submissions/${submissionId}/status`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -195,7 +196,7 @@ export default function StaffDashboardPage() {
       if (res.status === 401 || res.status === 422) {
         const refreshToken = localStorage.getItem("refresh_token");
         if (refreshToken) {
-          const refreshRes = await fetch("http://localhost:5000/api/refresh", {
+          const refreshRes = await apiFetch("/api/refresh", {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${refreshToken}`
@@ -207,7 +208,7 @@ export default function StaffDashboardPage() {
             localStorage.setItem("access_token", refreshData.access_token);
             
             // Retry with new token
-            const retryRes = await fetch(`http://localhost:5000/api/staff/submissions/${submissionId}/status`, {
+            const retryRes = await apiFetch(`/api/staff/submissions/${submissionId}/status`, {
               method: "PUT",
               headers: {
                 "Content-Type": "application/json",

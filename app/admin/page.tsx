@@ -1,30 +1,16 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import {
-  FaHome,
-  FaChevronRight,
-  FaChevronLeft,
-  FaSearch,
-  FaFilter,
-  FaChevronDown,
-  FaPlus,
-  FaEllipsisH,
-} from "react-icons/fa";
-
+import {FaHome, FaChevronRight, FaChevronLeft, FaSearch, FaFilter, FaChevronDown, FaPlus, FaEllipsisH,} from "react-icons/fa";
 import { Sidebar } from "@/app/admin/admin-components/Sidebar";
 import { AdminHeader } from "@/app/admin/admin-components/AdminHeader";
 import { FilterTab } from "@/app/admin/admin-components/FilterTab";
-import {
-  PAGES,
-  hasStructure,
-  PageDefinition,
-  SectionDefinition,
-} from "@/app/admin/content-structures";
+import {PAGES, hasStructure, PageDefinition, SectionDefinition,} from "@/app/admin/content-structures";
 import { PageDetailsView } from "@/app/admin/admin-components/PageDetailsView";
 import { ContentEditorView } from "@/app/admin/admin-components/ContentEditorView";
 import { getCategoryColor } from "@/app/admin/admin-components/utils";
 import { useConfirm } from "@/app/admin/admin-components/useConfirm";
+import { apiFetch } from "../lib/api";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
@@ -69,7 +55,7 @@ export default function AdminPages() {
       );
 
       try {
-        const res = await fetch(`${API_BASE}/api/content/${selectedPage.slug}`);
+        const res = await apiFetch(`${API_BASE}/api/content/${selectedPage.slug}`);
         if (!res.ok) throw new Error("Failed to fetch page content");
 
         const data: {
@@ -243,8 +229,7 @@ export default function AdminPages() {
       );
 
       if (updates.length > 0) {
-        const res = await fetch(
-          `${API_BASE}/api/admin/content/${selectedPage.slug}`,
+        const res = await apiFetch(`${API_BASE}/api/admin/content/${selectedPage.slug}`,
           {
             method: "PUT",
             headers: {
@@ -262,8 +247,7 @@ export default function AdminPages() {
 
       for (const section of draftContent) {
         if (!section.list) continue;
-        const res = await fetch(
-          `${API_BASE}/api/admin/content/${selectedPage.slug}/items/${section.list.key}`,
+        const res = await apiFetch(`${API_BASE}/api/admin/content/${selectedPage.slug}/items/${section.list.key}`,
           {
             method: "PUT",
             headers: {

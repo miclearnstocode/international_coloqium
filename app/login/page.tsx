@@ -6,6 +6,8 @@ import Link from "next/link";
 import { FaSignInAlt, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { apiFetch } from "../lib/api";
+
 
 export default function LoginPage() {
   const router = useRouter();
@@ -23,7 +25,7 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const res = await fetch("/api/login", {
+      const res = await apiFetch("/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

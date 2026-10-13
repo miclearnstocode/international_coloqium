@@ -11,6 +11,7 @@ import {
   FaFileAlt, FaMapMarkerAlt, FaMicrophone, FaImage, FaCity,
   FaArrowLeft, FaHourglassHalf, FaCheckCircle, FaTimesCircle, FaChevronRight
 } from "react-icons/fa";
+import { apiFetch } from "../lib/api";
 
 export default function AbstractSubmissionPage() {
   const router = useRouter();
@@ -116,7 +117,7 @@ export default function AbstractSubmissionPage() {
   useEffect(() => {
     const fetchSUCs = async () => {
       try {
-        const res = await fetch("/api/sucs");
+        const res = await apiFetch("/api/sucs");
         const data = await res.json();
         setSucs(data);
       } catch (error) {
@@ -136,7 +137,7 @@ export default function AbstractSubmissionPage() {
       const user = JSON.parse(userStr);
       const userId = user.id;
       
-      const res = await fetch(`/api/my-submissions/${userId}`);
+      const res = await apiFetch(`/api/my-submissions/${userId}`);
       if (res.ok) {
         const data = await res.json();
         setMySubmissions(data);
@@ -186,7 +187,7 @@ export default function AbstractSubmissionPage() {
         co_authors: undefined
       };
 
-      const res = await fetch("http://localhost:5000/api/abstracts/preview", {
+      const res = await apiFetch("/api/abstracts/preview", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(submissionData)
@@ -351,7 +352,7 @@ export default function AbstractSubmissionPage() {
         sender_id: userId
       };
 
-      const res = await fetch("http://localhost:5000/api/abstracts/submit", {
+      const res = await apiFetch("/api/abstracts/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(submissionData)

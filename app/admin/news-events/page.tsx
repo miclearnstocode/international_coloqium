@@ -22,6 +22,7 @@ import {
 import { Sidebar } from "@/app/admin/admin-components/Sidebar";
 import { AdminHeader } from "@/app/admin/admin-components/AdminHeader";
 import { useConfirm } from "@/app/admin/admin-components/useConfirm";
+import { apiFetch } from "../../lib/api";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
@@ -102,7 +103,7 @@ export default function AdminNewsEvents() {
             ? localStorage.getItem("access_token")
             : null;
 
-        const res = await fetch(`${API_BASE}/api/admin/events`, {
+        const res = await apiFetch(`${API_BASE}/api/admin/events`, {
           method: "GET",
           headers: {
             Accept: "application/json",
@@ -235,7 +236,7 @@ export default function AdminNewsEvents() {
         })),
       };
 
-      const res = await fetch(`${API_BASE}/api/admin/events/bulk-save`, {
+      const res = await apiFetch(`${API_BASE}/api/admin/events/bulk-save`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

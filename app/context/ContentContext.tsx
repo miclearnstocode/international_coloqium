@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo, ReactNode, } from "react";
+import { apiFetch } from "../lib/api";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
@@ -69,7 +70,7 @@ export function ContentProvider({
   // ===== Fetch page content =====
   const fetchContent = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/content/${pageSlug}`);
+      const res = await apiFetch(`/api/content/${pageSlug}`);
       if (res.ok) {
         const data = await res.json();
         setContent(data.content || {});
@@ -140,7 +141,7 @@ export function ContentProvider({
     }
 
     try {
-      const res = await fetch(`${API_BASE}/api/auth/me`, {
+      const res = await apiFetch(`/api/auth/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -242,7 +243,7 @@ export function ContentProvider({
     );
 
     if (updates.length > 0) {
-      const res = await fetch(`${API_BASE}/api/admin/content/${pageSlug}`, {
+      const res = await apiFetch(`${API_BASE}/api/admin/content/${pageSlug}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
