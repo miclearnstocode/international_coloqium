@@ -8,11 +8,7 @@ from datetime import timedelta
 import os, traceback
 
 from routes import ALL_BLUEPRINTS
-from models import (
-    db,
-    User,
-    SUC,
-)
+from models import (db, User, SUC,)
 
 load_dotenv()
 MAIL_SERVER = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
@@ -21,6 +17,7 @@ MAIL_USERNAME = os.getenv('MAIL_USERNAME')
 MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
 MAIL_FROM = os.getenv('MAIL_FROM', MAIL_USERNAME)
 MAIL_FROM_NAME = os.getenv('MAIL_FROM_NAME', 'Symposium Portal')
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['JWT_SECRET_KEY'] =  os.getenv('JWT_SECRET_KEY')
@@ -34,7 +31,7 @@ jwt = JWTManager(app)
 
 # CORS configuration
 CORS(app, 
-     origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5000", "http://127.0.0.1:5000"],
+     origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5000", "http://127.0.0.1:5000", "https://capsusymposium.capsu.edu.ph"],
      supports_credentials=True,
      allow_headers=["Content-Type", "Authorization", "Accept", "X-Requested-With"],
      expose_headers=["Content-Type", "Authorization"],
@@ -237,4 +234,4 @@ def get_current_user():
         return jsonify({"detail": str(e)}), 500
     
 if __name__ == '__main__':
-    app.run(debug=True, port=5000, host='127.0.0.1')
+    app.run(debug=False, port=5000, host='127.0.0.1', use_reloader=False)
