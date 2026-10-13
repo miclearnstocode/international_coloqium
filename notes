@@ -13,3 +13,6 @@ echo "backend/rdesystem-secret.json" >> .gitignore
 /Applications/MAMP/Library/bin/mysql80/bin/mysql -u root -p
 
 Hyber62nate11
+
+restart the server
+~/repositories/international_coloqium/backend/flask_ctl.sh restarts

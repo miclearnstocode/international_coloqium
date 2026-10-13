@@ -116,7 +116,7 @@ export default function AbstractSubmissionPage() {
   useEffect(() => {
     const fetchSUCs = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:5000/api/sucs");
+        const res = await fetch("/api/sucs");
         const data = await res.json();
         setSucs(data);
       } catch (error) {
@@ -136,7 +136,7 @@ export default function AbstractSubmissionPage() {
       const user = JSON.parse(userStr);
       const userId = user.id;
       
-      const res = await fetch(`http://127.0.0.1:5000/api/my-submissions/${userId}`);
+      const res = await fetch(`/api/my-submissions/${userId}`);
       if (res.ok) {
         const data = await res.json();
         setMySubmissions(data);

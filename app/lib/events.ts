@@ -12,7 +12,7 @@ export type PublicEvent = {
 };
 
 const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
+  process.env.NEXT_PUBLIC_API_URL ?? "";
 
 // ── Simple in-memory cache so Header + Footer only hit the API once per page load ──
 let cache: { data: PublicEvent[]; ts: number } | null = null;

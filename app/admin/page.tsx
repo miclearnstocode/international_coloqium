@@ -26,7 +26,7 @@ import { ContentEditorView } from "@/app/admin/admin-components/ContentEditorVie
 import { getCategoryColor } from "@/app/admin/admin-components/utils";
 import { useConfirm } from "@/app/admin/admin-components/useConfirm";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 const splitFieldKey = (key: string) =>
   key.includes(".") ? key.split(".").slice(1).join(".") : key;

@@ -23,7 +23,7 @@ import { Sidebar } from "@/app/admin/admin-components/Sidebar";
 import { AdminHeader } from "@/app/admin/admin-components/AdminHeader";
 import { useConfirm } from "@/app/admin/admin-components/useConfirm";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 // ── Event type ──
 type EventItem = {
