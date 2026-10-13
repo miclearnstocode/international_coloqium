@@ -1,16 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  useRef,
-  useMemo,
-  ReactNode,
-} from "react";
-import { useSearchParams } from "next/navigation";
+import { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo, ReactNode, } from "react";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
 
@@ -48,9 +38,15 @@ export function ContentProvider({
   pageSlug: string;
   children: ReactNode;
 }) {
-  const searchParams = useSearchParams();
-  const wantsEdit = searchParams?.get("edit") === "1";
-  const wantsPreview = searchParams?.get("preview") === "1";
+  const [wantsEdit, setWantsEdit] = useState(false);
+  const [wantsPreview, setWantsPreview] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    setWantsEdit(params.get("edit") === "1");
+    setWantsPreview(params.get("preview") === "1");
+  }, []);
 
   const [content, setContent] = useState<Record<string, Record<string, string>>>({});
   const [items, setItems] = useState<Record<string, any[]>>({});
