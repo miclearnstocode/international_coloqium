@@ -151,13 +151,16 @@ export default function ContactPage() {
   };
 
   const countries = [
-    "Select your country", "Philippines", "Japan", "United States", "United Kingdom",
-    "Australia", "Canada", "Germany", "France", "Italy", "Spain", "South Korea",
-    "China", "India", "Indonesia", "Malaysia", "Thailand", "Vietnam", "Singapore",
-    "New Zealand", "Netherlands", "Sweden", "Norway", "Denmark", "Switzerland",
-    "Belgium", "Austria", "Greece", "Portugal", "Ireland", "Brazil", "Mexico",
-    "South Africa", "Egypt", "Saudi Arabia", "United Arab Emirates", "Qatar",
-    "Kuwait", "Oman", "Bahrain", "Other"
+    "Select your country",
+    "Philippines", "Japan", "South Korea", "China", "India", "Indonesia",
+    "Malaysia", "Thailand", "Vietnam", "Singapore", "Cambodia", "Laos",
+    "Myanmar", "Brunei", "Timor-Leste", "Mongolia", "North Korea",
+    "Bangladesh", "Pakistan", "Sri Lanka", "Nepal", "Bhutan", "Maldives",
+    "Afghanistan", "Kazakhstan", "Uzbekistan", "Turkmenistan", "Kyrgyzstan",
+    "Tajikistan", "Iran", "Iraq", "Syria", "Lebanon", "Jordan", "Israel",
+    "Palestine", "Saudi Arabia", "Yemen", "Oman", "United Arab Emirates",
+    "Qatar", "Bahrain", "Kuwait", "Turkey", "Cyprus", "Georgia", "Armenia",
+    "Azerbaijan", "Other"
   ];
 
   const inquiryTypes = [
