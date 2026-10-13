@@ -155,12 +155,6 @@ body {
   background: rgba(6, 182, 212, 0.1) !important;
 }
 
-/* ==========================================================================
-   IN-PAGE EDITING OUTLINES
-   These rules use !important to guarantee they win over Tailwind utility
-   classes (e.g. outline-none / focus:outline-none) which are injected into
-   @layer utilities and can otherwise suppress these styles in Tailwind v4.
-   ========================================================================== */
 
 body.editing [data-editable] {
   outline: 1.5px dashed rgba(213, 165, 77, 0.5) !important;
@@ -187,4 +181,90 @@ body.editing [data-editable]:focus {
 /* Prevent hover-lift on interactive editing wrappers */
 body.editing [data-editable]:focus-visible {
   outline: 2px solid #D5A54D !important;
+}
+
+@keyframes stepPulse {
+  0% {
+    transform: scale(1.14);
+    background-color: #FBF3E0;
+    border-color: #D5A54D;
+    box-shadow:
+      0 0 0 8px rgba(213, 165, 77, 0.14),
+      0 12px 28px -10px rgba(213, 165, 77, 0.55);
+    color: #8B6F47;
+  }
+  5% {
+    transform: scale(1.14);
+    background-color: #FBF3E0;
+    border-color: #D5A54D;
+    box-shadow:
+      0 0 0 8px rgba(213, 165, 77, 0.14),
+      0 12px 28px -10px rgba(213, 165, 77, 0.55);
+    color: #8B6F47;
+  }
+  5.01%, 100% {
+    transform: scale(1);
+    background-color: #ffffff;
+    border-color: #f4f4f5;
+    box-shadow: 0 1px 2px rgba(11, 42, 74, 0.04);
+    color: #0A2540;
+  }
+}
+
+@keyframes numPulse {
+  0% {
+    transform: scale(1.18);
+    background: linear-gradient(135deg, #D5A54D, #F0C674);
+  }
+  5% {
+    transform: scale(1.18);
+    background: linear-gradient(135deg, #D5A54D, #F0C674);
+  }
+  5.01%, 100% {
+    transform: scale(1);
+    background: #0A2540;
+  }
+}
+
+.process-icon.animate-step {
+  animation: stepPulse 10s linear infinite;
+}
+.process-num.animate-step {
+  animation: numPulse 10s linear infinite;
+}
+
+/* Negative delays → all steps share one clock, order is deterministic:
+   1 → 2 → 3 → 4 → 5 → loop  (never skips or reorders)               */
+.process-step:nth-child(1) .process-icon.animate-step,
+.process-step:nth-child(1) .process-num.animate-step {
+  animation-delay: 0s;
+}
+.process-step:nth-child(2) .process-icon.animate-step,
+.process-step:nth-child(2) .process-num.animate-step {
+  animation-delay: -8s;
+}
+.process-step:nth-child(3) .process-icon.animate-step,
+.process-step:nth-child(3) .process-num.animate-step {
+  animation-delay: -6s;
+}
+.process-step:nth-child(4) .process-icon.animate-step,
+.process-step:nth-child(4) .process-num.animate-step {
+  animation-delay: -4s;
+}
+.process-step:nth-child(5) .process-icon.animate-step,
+.process-step:nth-child(5) .process-num.animate-step {
+  animation-delay: -2s;
+}
+
+/* Pause the highlight while hovering any step */
+.process-step:hover .process-icon.animate-step,
+.process-step:hover .process-num.animate-step {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .process-icon.animate-step,
+  .process-num.animate-step {
+    animation: none !important;
+  }
 }

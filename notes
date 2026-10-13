@@ -16,3 +16,40 @@ Hyber62nate11
 
 restart the server
 ~/repositories/international_coloqium/backend/flask_ctl.sh restarts
+
+
+cd ~/repositories/international_coloqium
+\cp -Rf out/* ~/public_html/
+\cp -Rf out/.[!.]* ~/public_html/ 2>/dev/null
+
+to start the backend
+nohup venv/bin/gunicorn app:app \
+  --bind 127.0.0.1:5100 \
+  --workers 2 \
+  --timeout 120 \
+  --access-logfile ~/logs/flask-access.log \
+  --error-logfile ~/logs/flask-error.log \
+  --pid ~/logs/flask.pid \
+  --daemon
+
+
+sleep 3
+
+echo "=== 1. Port 5100 ==="
+ss -tlnp | grep 5100
+
+echo
+echo "=== 2. Process ==="
+ps aux | grep "gunicorn.*5100" | grep -v grep
+
+echo
+echo "=== 3. Direct curl ==="
+curl -i -s http://127.0.0.1:5100/ | head -20
+
+echo
+echo "=== 4. Error log (last 25 lines) ==="
+tail -25 ~/logs/flask-error.log
+
+echo
+echo "=== 5. Access log (last 5 lines) ==="
+tail -5 ~/logs/flask-access.log

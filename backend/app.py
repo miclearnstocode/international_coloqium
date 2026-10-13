@@ -234,4 +234,4 @@ def get_current_user():
         return jsonify({"detail": str(e)}), 500
     
 if __name__ == '__main__':
-    app.run(debug=False, port=5000, host='127.0.0.1', use_reloader=False)
+    app.run(debug=False, port=5100, host='127.0.0.1', use_reloader=False)
