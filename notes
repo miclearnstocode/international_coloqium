@@ -53,3 +53,17 @@ tail -25 ~/logs/flask-error.log
 echo
 echo "=== 5. Access log (last 5 lines) ==="
 tail -5 ~/logs/flask-access.log
+
+
+Deploy Frontend Changes
+cd ~/repositories/international_coloqium
+git pull
+
+# Rebuild AND deploy in one shot
+~/deploy.sh
+
+Restart backend after editing
+cd ~/repositories/international_coloqium
+git pull
+
+~/restart-backend.sh

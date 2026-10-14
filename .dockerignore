@@ -1,0 +1,15 @@
+node_modules
+.next
+out
+out.zip
+.venv
+backend
+.git
+.gitignore
+*.md
+notes
+researchdb.sql
+.env.local
+.env.production
+tsconfig.tsbuildinfo
+README.md
