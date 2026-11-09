@@ -283,7 +283,6 @@ function HomeInner() {
   // Parallax translations — disabled while editing so text doesn't drift under the caret
   const parallaxEnabled = !canEdit;
   const heroParallax = parallaxEnabled ? (heroScroll.progress - 0.5) * -80 : 0;
-  const videoParallax = parallaxEnabled ? (heroScroll.progress - 0.5) * -140 : 0;
   const orbParallax = parallaxEnabled ? (heroScroll.progress - 0.5) * 60 : 0;
   const ringParallax = parallaxEnabled ? (heroScroll.progress - 0.5) * 120 : 0;
 
@@ -508,7 +507,6 @@ function HomeInner() {
         .attendee-item svg { transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s ease; }
         .attendee-item:hover svg { transform: scale(1.2) rotate(8deg); color: #b8892f; }
 
-        .video-orb { filter: drop-shadow(0 0 60px rgba(29, 61, 109, 0.25)); }
         .scroll-lift {
           will-change: transform;
           transform: translate3d(0, var(--scroll-y, 0px), 0);
@@ -568,17 +566,7 @@ function HomeInner() {
           <span className="absolute top-1/2 -right-1 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#1D3D6D]" />
         </div>
 
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          className="video-orb absolute -right-57.5 top-1/2 w-400 h-400 opacity-40 lg:opacity-70 pointer-events-none z-0 object-contain"
-          style={{ transform: `translateY(calc(-50% + ${videoParallax}px))` }}
-        >
-          <source src="/videos/global.mp4" type="video/mp4" />
-        </video>
+
 
         <div className="relative z-10 mx-auto max-w-350 px-8 py-12 lg:py-16 min-h-150">
           <div className="relative">

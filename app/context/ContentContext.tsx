@@ -127,17 +127,25 @@ export function ContentProvider({
     }
   }, [pageSlug, wantsPreview]);
 
-  // ===== Verify admin role =====
+  // ===== Verify admin role (cached in sessionStorage to avoid repeated API calls) =====
   const verifyAdmin = useCallback(async () => {
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("access_token")
-        : null;
+    if (typeof window === "undefined") return false;
+
+    const token = localStorage.getItem("access_token");
 
     if (!token) {
       console.debug("[ContentContext] verifyAdmin: no token in localStorage");
+      sessionStorage.removeItem("_adminVerified");
       setIsSuperAdmin(false);
       return false;
+    }
+
+    // Return cached result for the same token within the session
+    const cached = sessionStorage.getItem("_adminVerified");
+    if (cached !== null) {
+      const isAdmin = cached === "1";
+      setIsSuperAdmin(isAdmin);
+      return isAdmin;
     }
 
     try {
@@ -153,12 +161,14 @@ export function ContentProvider({
         console.debug(
           `[ContentContext] role="${user.role}" → resolveIsAdmin=${isAdmin}`
         );
+        sessionStorage.setItem("_adminVerified", isAdmin ? "1" : "0");
         setIsSuperAdmin(isAdmin);
         return isAdmin;
       } else {
         console.warn(
           `[ContentContext] /api/auth/me returned ${res.status} — treating as non-admin`
         );
+        sessionStorage.setItem("_adminVerified", "0");
       }
     } catch (err) {
       console.error("[ContentContext] verifyAdmin fetch error:", err);

@@ -525,26 +525,13 @@ export default function AboutPage() {
             >
               <div className="bg-linear-to-br from-[#1D3D6D]/5 to-[#D5A54D]/5 rounded-2xl p-8 border border-gray-200">
                 <div className="relative h-64 rounded-xl overflow-hidden shadow-lg">
-                  <Image 
-                    src="/images/tracks/about-symposium.jpg" 
-                    alt="About Symposium" 
-                    fill
-                    className="object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                      const parent = target.parentElement;
-                      if (parent) {
-                        parent.innerHTML = `
-                          <div class="flex flex-col items-center justify-center h-full bg-linear-to-br from-[#1D3D6D] to-[#0B2A4A] text-white p-30 text-center rounded-xl">
-                            <h3 class="text-xl font-bold">Symposium Theme</h3>
-                            <p class="text-sm opacity-80 mt-2">Converging Frontiers in Agri-Life and Bioresource Sciences: <br />
-Science, Innovation, and Collaboration for a Resilient and Sustainable Future</p>
-                          </div>
-                        `;
-                      }
-                    }}
-                  />
+                  <div className="flex flex-col items-center justify-center h-full bg-gradient-to-br from-[#1D3D6D] to-[#0B2A4A] text-white p-8 text-center rounded-xl">
+                    <h3 className="text-xl font-bold">Symposium Theme</h3>
+                    <p className="text-sm opacity-80 mt-2">
+                      Converging Frontiers in Agri-Life and Bioresource Sciences:<br />
+                      Science, Innovation, and Collaboration for a Resilient and Sustainable Future
+                    </p>
+                  </div>
                 </div>
                 <div className="absolute -bottom-4 -right-4 bg-[#D5A54D] text-white p-4 rounded-xl shadow-lg">
                   <FaUsers className="text-3xl" />

@@ -49,6 +49,7 @@ export const AdminHeader = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
     localStorage.removeItem("user");
+    sessionStorage.removeItem("_adminVerified");
     router.push("/login");
   };
 

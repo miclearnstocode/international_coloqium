@@ -331,8 +331,8 @@ export default function PresentationGuidelinesPage() {
           <Image
             src="/images/guideline.png"
             alt="Presentation Guidelines"
-            width={500}
-            height={300}
+            width={1448}
+            height={1086}
             priority
             className="w-full max-w-none h-auto object-contain"
           />

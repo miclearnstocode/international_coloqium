@@ -232,6 +232,10 @@ def get_current_user():
     except Exception as e:
         traceback.print_exc()
         return jsonify({"detail": str(e)}), 500
-    
+
+@app.route("/health", methods=["GET"])
+def health():
+    return {"status": "ok"}, 200
+
 if __name__ == '__main__':
-    app.run(debug=False, port=5100, host='127.0.0.1', use_reloader=False)
+    app.run(debug=False, port=5200, host='127.0.0.1', use_reloader=False)

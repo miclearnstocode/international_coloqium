@@ -443,11 +443,15 @@ export default function RegistrationPage() {
               className="hidden md:flex justify-end items-center"
               style={{ transform: `translateY(${(heroScroll.progress - 0.5) * -30}px)` }}
             >
-              <img
-                src="/images/registration-clipboard.png"
-                alt="Registration"
-                className="w-100 object-contain drop-shadow-xl"
-              />
+              <div className="relative w-80 h-80 drop-shadow-xl">
+                <Image
+                  src="/images/illustration.png"
+                  alt="Registration Illustration"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
             </div>
           </div>
         </div>

@@ -392,7 +392,7 @@ export default function HotelMapping() {
           style={{ transform: `translateY(calc(-50% + ${(heroScroll.progress - 0.5) * -30}px))` }}
         >
           <Image
-            src="/images/mapping2.png"
+            src="/images/event_image.png"
             alt="Hotel & Mapping Illustration"
             width={2200}
             height={500}
