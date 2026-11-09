@@ -410,9 +410,10 @@ export default function ProgramPage() {
           style={{ transform: `translateY(${(heroScroll.progress - 0.5) * -40}px)` }}
         >
           <Image 
-            src="/images/globe.jpg" 
+            src="https://res.cloudinary.com/xbloqjom/image/upload/v1794214702/globe.jpg" 
             alt="World Map" 
             fill 
+            loading="eager"
             className="object-cover object-right opacity-20"
           />
           <div className="absolute top-1/4 right-1/4 w-4 h-4 bg-[#F5A623] rounded-full shadow-lg"></div>

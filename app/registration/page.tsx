@@ -415,9 +415,24 @@ export default function RegistrationPage() {
           className="absolute top-0 left-0 w-96 h-96 bg-linear-to-br from-[#D5A54D]/8 to-transparent rounded-full blur-3xl -translate-y-1/3 -translate-x-1/4 pointer-events-none"
         />
 
+        {/* Floating image — subtle scroll parallax (Aligned like Hotel & Mapping) */}
+        <div
+          className="hidden md:block absolute top-1/2 right-8 w-[45%] pointer-events-none z-10"
+          style={{ transform: `translateY(calc(-50% + ${(heroScroll.progress - 0.5) * -30}px))` }}
+        >
+          <Image
+            src="https://res.cloudinary.com/xbloqjom/image/upload/v1794213907/illustration2.png"
+            alt="Registration Illustration"
+            width={2200}
+            height={500}
+            className="w-full h-auto object-contain opacity-60"
+            priority
+          />
+        </div>
+
         <div
           ref={heroReveal.ref}
-          className="max-w-350 mx-auto px-8 py-16 relative z-10"
+          className="max-w-350 mx-auto px-8 py-16 relative z-20"
         >
           <div className="flex items-center gap-2 text-sm text-zinc-500 mb-8 reveal-up">
             <Link href="/" className="hover:text-[#F5A623] transition-colors">
@@ -427,32 +442,15 @@ export default function RegistrationPage() {
             <span className="text-[#0A2540] font-medium">Registration</span>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h1 className="text-5xl font-bold text-[#0A2540] mb-4 reveal-up stagger-1">
-                Registration
-              </h1>
-              <div className="w-16 h-1 gold-underline mb-6 reveal-up stagger-2 rounded-full"></div>
-              <p className="text-lg text-zinc-600 leading-relaxed reveal-up stagger-3">
-                Join researchers, innovators, and professionals from around the world and be part of the International Colloquium 2025.
-              </p>
-            </div>
-
-            {/* Registration Image — subtle scroll parallax */}
-            <div
-              className="hidden md:flex justify-end items-center"
-              style={{ transform: `translateY(${(heroScroll.progress - 0.5) * -30}px)` }}
-            >
-              <div className="relative w-80 h-80 drop-shadow-xl">
-                <Image
-                  src="/images/illustration.png"
-                  alt="Registration Illustration"
-                  fill
-                  className="object-contain"
-                  priority
-                />
-              </div>
-            </div>
+          {/* Changed to max-w-xl so the text doesn't collide with the absolute image on large screens */}
+          <div className="max-w-xl">
+            <h1 className="text-5xl font-bold text-[#0A2540] mb-4 reveal-up stagger-1">
+              Registration
+            </h1>
+            <div className="w-16 h-1 gold-underline mb-6 reveal-up stagger-2 rounded-full"></div>
+            <p className="text-lg text-zinc-600 leading-relaxed reveal-up stagger-3">
+              Join researchers, innovators, and professionals from around the world and be part of the International Colloquium 2025.
+            </p>
           </div>
         </div>
       </section>

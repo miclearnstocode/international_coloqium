@@ -392,7 +392,7 @@ export default function HotelMapping() {
           style={{ transform: `translateY(calc(-50% + ${(heroScroll.progress - 0.5) * -30}px))` }}
         >
           <Image
-            src="/images/event_image.png"
+            src="https://res.cloudinary.com/xbloqjom/image/upload/v1794209289/event_image.png"
             alt="Hotel & Mapping Illustration"
             width={2200}
             height={500}

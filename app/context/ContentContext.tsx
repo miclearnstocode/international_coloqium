@@ -253,7 +253,7 @@ export function ContentProvider({
     );
 
     if (updates.length > 0) {
-      const res = await apiFetch(`${API_BASE}/api/admin/content/${pageSlug}`, {
+      const res = await apiFetch(`/api/admin/content/${pageSlug}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

@@ -473,7 +473,7 @@ export default function AboutPage() {
             About the Symposium
           </h1>
           <div className="w-16 h-1 gold-underline mb-6 reveal-up stagger-2 rounded-full"></div>
-          <p className="text-xl text-gray-600 max-w-2xl leading-relaxed font-semibold reveal-up stagger-3">
+          <p className="text-lg text-gray-600 max-w-2xl leading-relaxed reveal-up stagger-3">
             Advancing research. Building partnerships. Creating science-based solutions for a resilient and sustainable future.
           </p>
         </div>

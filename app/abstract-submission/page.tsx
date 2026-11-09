@@ -367,7 +367,7 @@ export default function FullabstractSubmission() {
           style={{ transform: `translateY(calc(-50% + ${(heroScroll.progress - 0.5) * -30}px))` }}
         >
           <img
-            src="/images/laptop2.png"
+            src="https://res.cloudinary.com/xbloqjom/image/upload/v1794214243/laptop2.png"
             alt="Laptop Submission"
             width={500}
             height={300}

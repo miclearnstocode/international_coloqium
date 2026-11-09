@@ -329,7 +329,7 @@ export default function PresentationGuidelinesPage() {
           style={{ transform: `translateY(calc(-50% + ${(heroScroll.progress - 0.5) * -30}px))` }}
         >
           <Image
-            src="/images/guideline.png"
+            src="https://res.cloudinary.com/xbloqjom/image/upload/v1794214407/guideline.png"
             alt="Presentation Guidelines"
             width={1448}
             height={1086}

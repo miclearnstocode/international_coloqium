@@ -12,8 +12,6 @@ import { getCategoryColor } from "@/app/admin/admin-components/utils";
 import { useConfirm } from "@/app/admin/admin-components/useConfirm";
 import { apiFetch } from "../lib/api";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
-
 const splitFieldKey = (key: string) =>
   key.includes(".") ? key.split(".").slice(1).join(".") : key;
 
@@ -55,7 +53,7 @@ export default function AdminPages() {
       );
 
       try {
-        const res = await apiFetch(`${API_BASE}/api/content/${selectedPage.slug}`);
+        const res = await apiFetch(`/api/content/${selectedPage.slug}`);
         if (!res.ok) throw new Error("Failed to fetch page content");
 
         const data: {
@@ -229,7 +227,7 @@ export default function AdminPages() {
       );
 
       if (updates.length > 0) {
-        const res = await apiFetch(`${API_BASE}/api/admin/content/${selectedPage.slug}`,
+        const res = await apiFetch(`/api/admin/content/${selectedPage.slug}`,
           {
             method: "PUT",
             headers: {
@@ -247,7 +245,7 @@ export default function AdminPages() {
 
       for (const section of draftContent) {
         if (!section.list) continue;
-        const res = await apiFetch(`${API_BASE}/api/admin/content/${selectedPage.slug}/items/${section.list.key}`,
+        const res = await apiFetch(`/api/admin/content/${selectedPage.slug}/items/${section.list.key}`,
           {
             method: "PUT",
             headers: {
