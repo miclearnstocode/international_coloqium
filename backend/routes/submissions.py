@@ -5,6 +5,7 @@ from werkzeug.utils import secure_filename
 from google_drive import upload_file_to_drive
 from models import db, AbstractSubmission, SUC
 from utils.pdf import generate_abstract_pdf
+from utils.decorators import staff_required
 
 submissions_bp = Blueprint('submissions', __name__)
 
@@ -256,6 +257,7 @@ def preview_abstract():
 
 
 @submissions_bp.route('/api/staff/submissions', methods=['GET', 'OPTIONS'])
+@staff_required
 def get_all_submissions():
     if request.method == 'OPTIONS':
         return jsonify({})
@@ -287,6 +289,7 @@ def get_all_submissions():
 
 
 @submissions_bp.route('/api/staff/submissions/<int:submission_id>/status', methods=['PUT', 'OPTIONS'])
+@staff_required
 def update_submission_status(submission_id):
     if request.method == 'OPTIONS':
         return jsonify({})
@@ -310,9 +313,12 @@ def update_submission_status(submission_id):
 
 
 @submissions_bp.route('/api/my-submissions/<int:user_id>', methods=['GET', 'OPTIONS'])
+@jwt_required()
 def get_my_submissions(user_id):
     if request.method == 'OPTIONS':
         return jsonify({})
+    if str(get_jwt_identity()) != str(user_id):
+        return jsonify({"detail": "You can only view your own submissions"}), 403
     try:
         submissions = AbstractSubmission.query.filter_by(sender_id=user_id).order_by(AbstractSubmission.created_at.desc()).all()
         result = [{

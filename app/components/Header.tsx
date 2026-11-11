@@ -124,7 +124,7 @@ export default function Header() {
           <Link href="/" className="relative shrink-0 group z-10">
             <div className="relative h-24 w-24 rounded-full overflow-hidden border-4 border-[#D5A54D] bg-white shadow-md transition-transform duration-300 group-hover:scale-105 group-hover:shadow-lg">
               <Image
-                src="/images/mainlogo.png"
+                src="https://res.cloudinary.com/xbloqjom/image/upload/v1794366926/logo.png"
                 alt="Symposium Logo"
                 fill
                 className="object-cover scale-110"
@@ -164,7 +164,7 @@ export default function Header() {
 
         {/* ── Navigation ── */}
         <ul
-          className="hidden lg:flex items-center gap-5 text-sm font-medium text-gray-600 relative"
+          className="hidden lg:flex items-center gap-1 text-sm font-medium text-gray-600 relative"
           onMouseLeave={() => setHover((h) => ({ ...h, visible: false }))}
         >
           <span
@@ -207,7 +207,7 @@ export default function Header() {
               >
                 <Link
                   href={item.href}
-                  className={`relative whitespace-nowrap px-2 py-1.5 transition-colors duration-200 z-10 ${
+                  className={`relative whitespace-nowrap px-1.5 py-1.5 transition-colors duration-200 z-10 ${
                     isActive
                       ? "text-[#1D3D6D] font-semibold"
                       : "text-gray-600 hover:text-[#0B2A4A]"

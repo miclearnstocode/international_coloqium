@@ -6,12 +6,9 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { 
   FaEnvelope, FaPhone, FaMapMarkerAlt, FaRegPaperPlane, 
-  FaCheckCircle, FaArrowRight, FaUser, FaBuilding, 
-  FaGlobe, FaTag, FaComment, FaShieldAlt,
-  FaUsers, FaHandshake, FaUniversity, FaRegBuilding,
-  FaClipboardList, FaMoneyBillWave, FaTruck, FaPlane,
-  FaCalendarAlt, FaFileAlt, FaMicrophone, FaQrcode,
-  FaClock, FaInfoCircle, FaUserFriends, FaRegEnvelope
+  FaCheckCircle, FaArrowRight, FaShieldAlt,
+  FaHandshake, FaUniversity, FaRegBuilding,
+  FaClipboardList, FaMobile, FaInfoCircle
 } from "react-icons/fa";
 
 // ===== Reusable scroll-reveal hook =====
@@ -117,6 +114,10 @@ export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
+  // ===== Progressive disclosure state =====
+  const [formOpen, setFormOpen] = useState(false);
+  const [formVisible, setFormVisible] = useState(false);
+
   // Reveal hooks
   const heroReveal = useInView<HTMLDivElement>();
   const introReveal = useInView<HTMLDivElement>();
@@ -148,6 +149,17 @@ export default function ContactPage() {
         message: ''
       });
     }, 1500);
+  };
+
+  // Open / close handlers for the form
+  const openForm = () => {
+    setFormOpen(true);
+    requestAnimationFrame(() => setFormVisible(true));
+  };
+
+  const closeForm = () => {
+    setFormVisible(false);
+    setTimeout(() => setFormOpen(false), 350);
   };
 
   const countries = [
@@ -425,7 +437,7 @@ export default function ContactPage() {
                 { icon: <FaRegBuilding className="text-[#D5A54D] text-lg" />, title: "Symposium Secretariat", sub: "3rd International Agri-Life & Bioresource Sciences Symposium" },
                 { icon: <FaUniversity className="text-[#D5A54D] text-lg" />, title: "Capiz State University", sub: "Roxas City, Capiz, Philippines" },
                 { icon: <FaEnvelope className="text-[#D5A54D] text-lg" />, title: "Email", sub: "internationalsymposium@capsu.edu.ph", href: "mailto:internationalsymposium@capsu.edu.ph" },
-                { icon: <FaPhone className="text-[#D5A54D] text-lg" />, title: "Telephone", sub: "To be announced" },
+                { icon: <FaPhone className="text-[#D5A54D] text-lg" />, title: "Phone / Telephone", sub: "+63 927 477 8024 / (036) 522 9756" },
               ].map((item, idx) => (
                 <div key={idx} className={`intro-item flex items-center gap-3 reveal-up stagger-${idx + 1}`}>
                   {item.icon}
@@ -478,8 +490,12 @@ export default function ContactPage() {
                   </a>
                 </div>
                 <div className="info-row flex items-center gap-2">
+                  <FaMobile className="text-[#D5A54D] text-sm shrink-0" />
+                  <span className="text-gray-500">+63 927 477 8024</span>
+                </div>
+                <div className="info-row flex items-center gap-2">
                   <FaPhone className="text-[#D5A54D] text-sm shrink-0" />
-                  <span className="text-gray-500">To be announced</span>
+                  <span className="text-gray-500">(036) 522 9756</span>
                 </div>
               </div>
             </div>
@@ -511,8 +527,12 @@ export default function ContactPage() {
                   <span className="text-gray-500">internationalsymposium@capsu.edu.ph</span>
                 </div>
                 <div className="info-row flex items-center gap-2">
+                  <FaMobile className="text-[#D5A54D] text-sm shrink-0" />
+                  <span className="text-gray-500">+63 927 477 8024</span>
+                </div>
+                <div className="info-row flex items-center gap-2">
                   <FaPhone className="text-[#D5A54D] text-sm shrink-0" />
-                  <span className="text-gray-500">To be announced</span>
+                  <span className="text-gray-500">(036) 522 9756</span>
                 </div>
               </div>
             </div>
@@ -584,7 +604,8 @@ export default function ContactPage() {
                   <div className="space-y-5">
                     {[
                       { icon: <FaEnvelope />, title: "Email", sub: "internationalsymposium@capsu.edu.ph", href: "mailto:internationalsymposium@capsu.edu.ph" },
-                      { icon: <FaPhone />, title: "Telephone", sub: "To be announced" },
+                      { icon: <FaMobile />, title: "Mobile / Phone", sub: "+63 927 477 8024" },
+                      { icon: <FaPhone />, title: "Telephone", sub: "(036) 522 9756" },
                       { icon: <FaMapMarkerAlt />, title: "Address", sub: "Capiz State University\nRoxas City, Capiz, Philippines" },
                     ].map((item, idx) => (
                       <div
@@ -621,7 +642,30 @@ export default function ContactPage() {
             {/* Right: Contact Form */}
             <div className="lg:col-span-3 reveal-right">
               <div className="premium-card bg-white rounded-xl border border-zinc-200 p-8">
-                {isSubmitted ? (
+                {/* ============ INITIAL: SEND MESSAGE TRIGGER ============ */}
+                {!formOpen && (
+                  <div className="text-center py-16 px-4">
+                    <div className="w-20 h-20 bg-linear-to-br from-[#1D3D6D] to-[#0A2540] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-[#0A2540]/20">
+                      <FaRegPaperPlane className="text-white text-3xl rotate-[-20deg]" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-[#0A2540] mb-2">
+                      Send Us a Message
+                    </h3>
+                    <p className="text-gray-600 text-sm max-w-md mx-auto mb-8 leading-relaxed">
+                      Have a specific question? Click below to open the inquiry form and
+                      reach the Symposium Secretariat.
+                    </p>
+                    <button
+                      onClick={openForm}
+                      className="premium-btn inline-flex items-center justify-center gap-2 bg-linear-to-r from-[#1D3D6D] to-[#16305a] text-white px-8 py-3.5 rounded-lg font-semibold text-sm tracking-wide transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
+                    >
+                      SEND MESSAGE <FaRegPaperPlane className="rotate-[-20deg]" />
+                    </button>
+                  </div>
+                )}
+
+                {/* ============ SUCCESS STATE ============ */}
+                {formOpen && isSubmitted && (
                   <div className="text-center py-12">
                     <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                       <FaCheckCircle className="text-green-600 text-4xl" />
@@ -631,16 +675,43 @@ export default function ContactPage() {
                       Thank you for your message. We will get back to you as soon as possible.
                     </p>
                     <button
-                      onClick={() => setIsSubmitted(false)}
+                      onClick={() => {
+                        setIsSubmitted(false);
+                        closeForm();
+                      }}
                       className="mt-4 text-[#1D3D6D] font-semibold hover:text-[#D5A54D] transition-colors"
                     >
                       Send another message
                     </button>
                   </div>
-                ) : (
-                  <form onSubmit={handleSubmit} className="space-y-4">
+                )}
+
+                {/* ============ EXPANDED FORM ============ */}
+                {formOpen && !isSubmitted && (
+                  <form
+                    onSubmit={handleSubmit}
+                    className={`space-y-4 transition-all duration-300 ease-out ${
+                      formVisible
+                        ? "opacity-100 translate-y-0"
+                        : "opacity-0 translate-y-3 pointer-events-none"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <h3 className="text-xl font-bold text-[#0A2540]">Inquiry Form</h3>
+                        <div className="w-10 h-1 gold-underline mt-2 rounded-full"></div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={closeForm}
+                        className="text-xs font-semibold text-zinc-500 hover:text-[#D5A54D] transition-colors"
+                      >
+                        ← Back
+                      </button>
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="reveal-up stagger-1">
+                      <div>
                         <label className="block text-sm font-semibold text-[#0A2540] mb-1">
                           Full Name <span className="text-red-500">*</span>
                         </label>
@@ -654,7 +725,7 @@ export default function ContactPage() {
                           className="premium-input w-full px-4 py-2 border border-zinc-300 rounded-lg focus:outline-none text-sm"
                         />
                       </div>
-                      <div className="reveal-up stagger-2">
+                      <div>
                         <label className="block text-sm font-semibold text-[#0A2540] mb-1">
                           Email Address <span className="text-red-500">*</span>
                         </label>
@@ -671,7 +742,7 @@ export default function ContactPage() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="reveal-up stagger-1">
+                      <div>
                         <label className="block text-sm font-semibold text-[#0A2540] mb-1">
                           Institution / Organization
                         </label>
@@ -680,11 +751,11 @@ export default function ContactPage() {
                           name="institution"
                           value={formData.institution}
                           onChange={handleChange}
-                          placeholder="Enter your university, agency, company, or organization"
+                          placeholder="Enter your university, agency, company, or org"
                           className="premium-input w-full px-4 py-2 border border-zinc-300 rounded-lg focus:outline-none text-sm"
                         />
                       </div>
-                      <div className="reveal-up stagger-2">
+                      <div>
                         <label className="block text-sm font-semibold text-[#0A2540] mb-1">
                           Country <span className="text-red-500">*</span>
                         </label>
@@ -702,7 +773,7 @@ export default function ContactPage() {
                       </div>
                     </div>
 
-                    <div className="reveal-up stagger-3">
+                    <div>
                       <label className="block text-sm font-semibold text-[#0A2540] mb-1">
                         Inquiry Type <span className="text-red-500">*</span>
                       </label>
@@ -719,7 +790,7 @@ export default function ContactPage() {
                       </select>
                     </div>
 
-                    <div className="reveal-up stagger-4">
+                    <div>
                       <label className="block text-sm font-semibold text-[#0A2540] mb-1">Subject</label>
                       <input
                         type="text"
@@ -731,7 +802,7 @@ export default function ContactPage() {
                       />
                     </div>
 
-                    <div className="reveal-up stagger-5">
+                    <div>
                       <label className="block text-sm font-semibold text-[#0A2540] mb-1">
                         Message <span className="text-red-500">*</span>
                       </label>
@@ -749,7 +820,7 @@ export default function ContactPage() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="premium-btn w-full bg-linear-to-r from-[#1D3D6D] to-[#16305a] text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl flex items-center justify-center gap-2 disabled:opacity-70 reveal-up stagger-5"
+                      className="premium-btn w-full bg-linear-to-r from-[#1D3D6D] to-[#16305a] text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl flex items-center justify-center gap-2 disabled:opacity-70"
                     >
                       {isSubmitting ? (
                         <>
@@ -766,20 +837,15 @@ export default function ContactPage() {
                       )}
                     </button>
 
-                    <div className="premium-card reveal-up stagger-6 mt-4 p-4 bg-[#F8FAFC] rounded-lg border border-zinc-200">
+                    {/* Privacy disclaimer — link removed */}
+                    <div className="mt-4 p-4 bg-[#F8FAFC] rounded-lg border border-zinc-200">
                       <div className="flex items-start gap-2">
                         <FaShieldAlt className="text-[#D5A54D] text-sm mt-0.5 shrink-0" />
-                        <p className="text-xs text-gray-600">
-                          By submitting this form, you agree that the information you provide may be used by the Symposium Secretariat to respond to your inquiry and provide relevant symposium-related assistance.
+                        <p className="text-xs text-gray-600 leading-relaxed">
+                          By submitting this form, you agree that the information you provide
+                          may be used by the Symposium Secretariat to respond to your inquiry
+                          and provide relevant symposium-related assistance.
                         </p>
-                      </div>
-                      <div className="mt-2">
-                        <Link
-                          href="#"
-                          className="text-xs text-[#1D3D6D] hover:text-[#D5A54D] transition-colors font-semibold"
-                        >
-                          View Privacy Notice →
-                        </Link>
                       </div>
                     </div>
                   </form>
