@@ -63,7 +63,7 @@ export default function Footer() {
           <Link href="/" className="relative flex items-center">
             <div className="relative h-14 w-14 overflow-hidden rounded-full border-2 border-[#D5A54D]">
               <Image
-                src="https://res.cloudinary.com/xbloqjom/image/upload/v1794366926/logo.png"
+                src="https://res.cloudinary.com/xbloqjom/image/upload/v1794390273/logo3.png"
                 alt="Symposium Logo"
                 fill
                 className="object-cover"

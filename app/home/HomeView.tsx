@@ -5,11 +5,16 @@ import Link from "next/link";
 import Image from "next/image";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
-import { FaCalendarAlt, FaMapMarkerAlt, FaCheckCircle } from "react-icons/fa";
+import { 
+  FaCheckCircle, 
+  FaFileAlt, 
+  FaUser, 
+  FaCalendarAlt, 
+  FaMapMarkerAlt 
+} from "react-icons/fa";
 import { ContentProvider, useContent } from "@/app/context/ContentContext";
 import EditableField from "@/app/components/EditableField";
 import EditableList from "@/app/components/EditableList";
-
 
 // ===== Reusable scroll-reveal hook =====
 function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
@@ -32,7 +37,7 @@ function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
   return { ref, inView };
 }
 
-// ===== Scroll progress hook (0 → 1 as element passes through viewport) =====
+// ===== Scroll progress hook =====
 function useScrollProgress<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);
   const [progress, setProgress] = useState(0);
@@ -130,27 +135,42 @@ function AnimatedNumber({ value, className }: { value: number; className?: strin
   return <span className={className}>{display.toString().padStart(2, "0")}</span>;
 }
 
+// ===== Fluid hero scale =====
+// The hero is laid out with absolute pixel positions designed for a 1920px-wide
+// viewport. On narrower desktop/laptop screens we scale the whole hero down
+// proportionally so the layout stays identical instead of overlapping.
+const HERO_DESIGN_WIDTH = 1920; // width the hero was designed at
+const HERO_SCALE_MIN_VIEWPORT = 1024; // below this (tablet/mobile) use the normal responsive layout
+
+function useHeroScale() {
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const update = () => {
+      const w = document.documentElement.clientWidth; // excludes scrollbar
+      if (w < HERO_SCALE_MIN_VIEWPORT) setScale(1);
+      else setScale(Math.min(1, w / HERO_DESIGN_WIDTH));
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
+  return scale;
+}
+
 function HomeInner() {
   const { isEditMode, isSuperAdmin } = useContent();
-
   const canEdit = isEditMode && isSuperAdmin;
 
   const [timeLeft, setTimeLeft] = useState({
-    days: 82,
+    days: 119,
     hours: 14,
-    minutes: 36,
-    seconds: 48,
+    minutes: 35,
+    seconds: 20,
   });
 
   const [countdownPulse, setCountdownPulse] = useState(false);
-
-  // ===== Splash / docking state =====
-  type Phase = "splash" | "docking" | "docked";
-  const [phase, setPhase] = useState<Phase>(canEdit ? "docked" : "splash");
-  const [showBackdrop, setShowBackdrop] = useState(!canEdit);
-  const [delta, setDelta] = useState<{ x: number; y: number } | null>(null);
-
-  const dockRef = useRef<HTMLDivElement | null>(null);
 
   // Countdown ticker
   useEffect(() => {
@@ -170,80 +190,20 @@ function HomeInner() {
     return () => clearInterval(id);
   }, []);
 
-  // When entering edit mode, skip the splash animation immediately
-  useEffect(() => {
-    if (canEdit) {
-      setPhase("docked");
-      setShowBackdrop(false);
-    }
-  }, [canEdit]);
-
-  // ===== Measure delta between viewport center and dock position =====
-  useEffect(() => {
-    if (canEdit) return; // skip splash logic entirely while editing
-
-    const measure = () => {
-      const dock = dockRef.current;
-      if (!dock) return false;
-
-      const viewportCx = window.innerWidth / 2;
-      const viewportCy = window.innerHeight / 2;
-
-      const dockRect = dock.getBoundingClientRect();
-      const dockCx = dockRect.left + dockRect.width / 2;
-      const dockCy = dockRect.top + dockRect.height / 2;
-
-      setDelta({
-        x: viewportCx - dockCx,
-        y: viewportCy - dockCy,
-      });
-      return true;
-    };
-
-    if (!measure()) {
-      const raf = requestAnimationFrame(measure);
-      return () => cancelAnimationFrame(raf);
-    }
-  }, [canEdit]);
-
-  // ===== Auto-dock after splash is shown =====
-  useEffect(() => {
-    if (canEdit) return;
-    if (phase !== "splash" || !delta) return;
-    const t = setTimeout(() => {
-      setPhase("docking");
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setPhase("docked");
-          setShowBackdrop(false);
-        });
-      });
-    }, 2600);
-    return () => clearTimeout(t);
-  }, [phase, delta, canEdit]);
-
-  const dismissSplash = () => {
-    if (phase !== "splash") return;
-    setPhase("docking");
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        setPhase("docked");
-        setShowBackdrop(false);
-      });
-    });
-  };
-
   const formatNumber = (num: number) => num.toString().padStart(2, "0");
 
   // Reveal hooks
   const heroReveal = useInView<HTMLDivElement>();
-  const countdownReveal = useInView<HTMLDivElement>();
   const contentReveal = useInView<HTMLDivElement>();
 
   // Scroll progress hooks (parallax)
   const heroScroll = useScrollProgress<HTMLElement>();
-  const countdownScroll = useScrollProgress<HTMLElement>();
+  const heroScale = useHeroScale();
   const contentScroll = useScrollProgress<HTMLElement>();
+
+  // Parallax translations — disabled while editing
+  const parallaxEnabled = !canEdit;
+  const heroParallax = parallaxEnabled ? (heroScroll.progress - 0.5) * -20 : 0;
 
   // ===== Fallback lists =====
   const fallbackAnnouncements = [
@@ -281,52 +241,22 @@ function HomeInner() {
     { text: "Industry & Development Partners" },
   ];
 
-  // Parallax translations — disabled while editing so text doesn't drift under the caret
-  const parallaxEnabled = !canEdit;
-  const heroParallax = parallaxEnabled ? (heroScroll.progress - 0.5) * -80 : 0;
-  const videoParallax = parallaxEnabled ? (heroScroll.progress - 0.5) * -140 : 0;
-  const orbParallax = parallaxEnabled ? (heroScroll.progress - 0.5) * 60 : 0;
-  const ringParallax = parallaxEnabled ? (heroScroll.progress - 0.5) * 120 : 0;
-
   return (
     <div className="flex flex-col min-h-screen bg-[#F5F6FA] font-sans text-[#0B2A4A] overflow-x-hidden">
       <ScrollProgressBar />
-
-      {/* ===== Splash backdrop (view mode only) ===== */}
-      {!canEdit && (
-        <div
-          aria-hidden
-          onClick={dismissSplash}
-          className={`fixed inset-0 z-95 bg-[#0B2A4A]/40 backdrop-blur-sm transition-opacity duration-500 ${
-            showBackdrop ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
-        />
-      )}
 
       <style jsx global>{`
         @keyframes floatSlow {
           0%, 100% { transform: translateY(0) rotate(0deg); }
           50% { transform: translateY(-18px) rotate(3deg); }
         }
-        @keyframes floatSlower {
-          0%, 100% { transform: translateY(0) rotate(0deg); }
-          50% { transform: translateY(20px) rotate(-3deg); }
-        }
-        @keyframes glowPulse {
-          0%, 100% { opacity: 0.55; transform: scale(1); }
-          50% { opacity: 0.85; transform: scale(1.06); }
-        }
         @keyframes shimmerLine {
-          0% { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
-        }
-        @keyframes gentleSpin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+          0% { background-position: -200% 100%; }
+          100% { background-position: 200% 100%; }
         }
         @keyframes tickPulse {
           0% { transform: scale(1); }
-          35% { transform: scale(1.12); }
+          35% { transform: scale(1.1); color: #F0C674; }
           100% { transform: scale(1); }
         }
         @keyframes fadeSlideUp {
@@ -341,22 +271,9 @@ function HomeInner() {
           from { opacity: 0; transform: translateX(24px); }
           to { opacity: 1; transform: translateX(0); }
         }
-        @keyframes badgePop {
-          0% { opacity: 0; transform: scale(0.85) translateY(8px); }
-          60% { opacity: 1; transform: scale(1.04) translateY(-2px); }
-          100% { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        @keyframes splashIn {
-          0% { opacity: 0; transform: scale(0.86) translateY(20px); }
-          60% { opacity: 1; transform: scale(1.02) translateY(-4px); }
-          100% { opacity: 1; transform: scale(1) translateY(0); }
-        }
 
         .float-slow { animation: floatSlow 9s ease-in-out infinite; }
-        .float-slower { animation: floatSlower 11s ease-in-out infinite; }
-        .glow-pulse { animation: glowPulse 6s ease-in-out infinite; }
 
-        /* ===== Reveal base state ===== */
         .reveal-up { opacity: 0; transform: translateY(28px); }
         .reveal-left { opacity: 0; transform: translateX(-24px); }
         .reveal-right { opacity: 0; transform: translateX(24px); }
@@ -368,9 +285,6 @@ function HomeInner() {
         .reveal-up.in-view { animation: fadeSlideUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .reveal-left.in-view { animation: fadeSlideInLeft 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .reveal-right.in-view { animation: fadeSlideInRight 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-
-        .badge-pop { animation: badgePop 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
-        .splash-in { animation: splashIn 700ms cubic-bezier(0.22, 1, 0.36, 1) both; }
 
         .stagger-1 { animation-delay: 0.10s; }
         .stagger-2 { animation-delay: 0.22s; }
@@ -384,72 +298,38 @@ function HomeInner() {
           background-size: 200% 100%;
           animation: shimmerLine 4s linear infinite;
         }
+        
         .tick-pulse { animation: tickPulse 0.35s ease-out; }
 
-        /* ===== Premium card — layered hover ===== */
+        /* ===== Premium card ===== */
         .premium-card {
           position: relative;
           isolation: isolate;
-          background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+          background: #ffffff;
           transition:
             transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
             box-shadow 0.55s cubic-bezier(0.22, 1, 0.36, 1),
             border-color 0.4s ease;
           box-shadow:
-            0 1px 2px rgba(11, 42, 74, 0.04),
-            0 8px 20px -12px rgba(11, 42, 74, 0.10);
-        }
-        .premium-card::before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          border-radius: inherit;
-          padding: 1px;
-          background: linear-gradient(135deg, rgba(213,165,77,0) 0%, rgba(213,165,77,0) 50%, rgba(213,165,77,0) 100%);
-          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-          -webkit-mask-composite: xor;
-          mask-composite: exclude;
-          transition: background 0.55s ease;
-          pointer-events: none;
-          z-index: 2;
-        }
-        .premium-card::after {
-          content: "";
-          position: absolute;
-          inset: -1px;
-          border-radius: inherit;
-          background: radial-gradient(120% 80% at 50% 0%, rgba(213,165,77,0.18) 0%, rgba(213,165,77,0) 60%);
-          opacity: 0;
-          transition: opacity 0.55s ease;
-          pointer-events: none;
-          z-index: -1;
+            0 4px 6px -1px rgba(11, 42, 74, 0.05),
+            0 10px 15px -3px rgba(11, 42, 74, 0.05);
         }
         .premium-card:hover {
-          transform: translateY(-10px);
+          transform: translateY(-5px);
           border-color: rgba(213, 165, 77, 0.35);
           box-shadow:
-            0 2px 4px rgba(11, 42, 74, 0.05),
-            0 12px 24px -10px rgba(11, 42, 74, 0.16),
-            0 32px 60px -20px rgba(11, 42, 74, 0.22),
-            0 0 0 1px rgba(213, 165, 77, 0.05);
+            0 10px 25px -5px rgba(11, 42, 74, 0.1),
+            0 20px 40px -10px rgba(11, 42, 74, 0.15);
         }
-        .premium-card:hover::before {
-          background: linear-gradient(135deg, rgba(213,165,77,0.9) 0%, rgba(29,61,109,0.35) 50%, rgba(213,165,77,0.9) 100%);
-        }
-        .premium-card:hover::after { opacity: 1; }
 
         .premium-icon {
-          transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.5s ease, background-color 0.5s ease;
+          transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.5s ease;
         }
         .premium-card:hover .premium-icon {
           transform: scale(1.08) rotate(-6deg);
           box-shadow: 0 0 0 6px rgba(213,165,77,0.10), 0 8px 20px -8px rgba(213,165,77,0.45);
         }
-        .premium-card:hover .premium-icon svg {
-          transform: scale(1.08);
-          transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
+        
         .premium-accent {
           position: relative;
           overflow: hidden;
@@ -509,19 +389,10 @@ function HomeInner() {
         .attendee-item svg { transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s ease; }
         .attendee-item:hover svg { transform: scale(1.2) rotate(8deg); color: #b8892f; }
 
-        .video-orb { filter: drop-shadow(0 0 60px rgba(29, 61, 109, 0.25)); }
         .scroll-lift {
           will-change: transform;
           transform: translate3d(0, var(--scroll-y, 0px), 0);
           transition: transform 0.15s linear;
-        }
-
-        /* ===== Suppress hover-lift animations while editing ===== */
-        body.editing .premium-card:hover {
-          transform: none;
-          box-shadow:
-            0 1px 2px rgba(11, 42, 74, 0.04),
-            0 8px 20px -12px rgba(11, 42, 74, 0.10);
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -536,239 +407,317 @@ function HomeInner() {
 
       <Header />
 
-      {/* ================= HERO ================= */}
-      <main
-        ref={heroScroll.ref}
-        className="flex-1 relative overflow-hidden bg-linear-to-br from-[#E8EEF9] via-[#EAF1FA] to-[#DCE6F5]"
-      >
-        {/* --- Background Elements --- */}
-        <div
-          className="absolute top-0 right-0 w-150 h-150 bg-[#E3EAF5] rounded-full opacity-60 -translate-y-1/2 translate-x-1/3 float-slow pointer-events-none z-0"
-          style={{ transform: `translate(33%, -50%) translateY(${orbParallax}px)` }}
-        />
-        <div
-          className="absolute bottom-0 left-0 w-100 h-100 bg-[#E3EAF5] rounded-full opacity-40 translate-y-1/2 -translate-x-1/4 float-slower pointer-events-none z-0"
-          style={{ transform: `translate(-25%, 50%) translateY(${-orbParallax}px)` }}
-        />
-        <div
-          aria-hidden
-          className="absolute inset-0 pointer-events-none z-0"
-          style={{
-            background:
-              "radial-gradient(60% 55% at 75% 40%, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 70%)",
-          }}
-        />
-        <div
-          aria-hidden
-          className="hidden lg:block absolute -right-40 top-1/2 w-130 h-130 rounded-full border border-[#D5A54D]/25 z-0"
-          style={{
-            animation: "gentleSpin 40s linear infinite",
-            transform: `translateY(calc(-50% + ${ringParallax}px))`,
-          }}
-        >
-          <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-[#D5A54D]" />
-          <span className="absolute top-1/2 -right-1 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#1D3D6D]" />
-        </div>
-
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          className="video-orb absolute -right-20 lg:-right-30 top-1/2 w-200 h-200 lg:w-300 lg:h-300 opacity-40 lg:opacity-60 pointer-events-none z-0 object-contain"
-          style={{ transform: `translateY(calc(-50% + ${videoParallax}px))` }}
-        >
-          <source src="https://res.cloudinary.com/xbloqjom/video/upload/v1794216653/global.mp4" type="video/mp4" />
-        </video>
-
-        {/* --- Main Container --- */}
-        <div className="relative z-10 mx-auto max-w-350 px-8 py-12 lg:py-16 min-h-150">
-          
-          {/* Poster Image - Absolute positioned to prevent affecting other divs */}
-          <div
-            ref={heroReveal.ref}
-            className={`absolute top-150 left-6 lg:left-12 -translate-y-1/2 z-20 w-full max-w-225 h-[80vh] max-h-150 ${
-              heroReveal.inView ? "in-view" : ""
-            }`}
-            style={{ 
-              transform: `translateY(calc(-50% + ${heroParallax * 0.15}px))` 
-            }}
-          >
-            {/* The inner container manages the poster size & button positioning */}
-            <div className="reveal-up relative group w-full h-full">
-              
-              {/* Poster */}
-              <div className="relative w-full h-full bg-transparent">
-                <Image
-                  src="https://res.cloudinary.com/xbloqjom/image/upload/v1794373540/poster2.png"
-                  alt="3rd International Agri-Life & Bioresource Sciences Symposium Poster"
-                  fill
-                  priority
-                  className="object-contain object-left" // Keeps it aligned to the left within its bounds
-                />
-              </div>
-
-              {/* Learn More Button - Floats exactly over the bottom of the poster */}
-              {/* We use absolute positioning relative to the poster's visual bottom */}
-              <div className="absolute bottom-4 left-4 z-30">
-                <Link
-                  href="/about"
-                  className="premium-btn inline-flex items-center gap-2 bg-linear-to-r from-[#1D3D6D] to-[#16305a] text-white px-6 py-3 rounded-md font-semibold shadow-xl hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300 backdrop-blur-sm bg-opacity-90"
-                >
-                  <EditableField
-                    section="Hero Section"
-                    field="cta_text"
-                    fallback="Learn More"
-                    as="span"
-                    label="CTA Text"
-                  />
-                  <span aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-1">→</span>
-                </Link>
-              </div>
-
-            </div>
-          </div>
-
-        </div>
-
-        {/* ===== The floating / docking card ===== */}
-        <div
-          className="hidden md:block absolute top-40 right-0 lg:right-32 xl:right-64 z-30"
-          style={{
-            transform:
-              !canEdit && phase === "splash" && delta
-                ? `translate(${delta.x}px, ${delta.y}px)`
-                : `translateY(${heroParallax * 0.4}px)`,
-            transition:
-              !canEdit && phase === "docking"
-                ? "transform 3000ms cubic-bezier(0.22, 1, 0.36, 1)"
-                : "none",
-            willChange: "transform",
-          }}
-        >
-          <div
-            ref={dockRef}
-            className={`premium-card bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl p-8 w-105 border border-gray-100 relative ${
-              !canEdit && phase === "splash" ? "splash-in" : ""
-            }`}
-          >
-            <button
-              aria-label="Dismiss"
-              onClick={dismissSplash}
-              className="absolute top-4 right-4 text-gray-400 hover:text-[#1D3D6D] transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-            </button>
-
-            <div className="flex justify-center mb-5 relative">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#D5A54D" className="w-14 h-14 glow-pulse">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 1 1 0-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 0 1-1.44-4.282m3.102.069a18.03 18.03 0 0 1-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 0 1 8.835 2.535M10.34 6.66a23.847 23.847 0 0 0 8.835-2.535m0 0A23.74 23.74 0 0 0 18.795 3m.38 1.125a23.91 23.91 0 0 1 1.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 0 0 1.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 0 1 0 3.46" />
-              </svg>
-              <div className="absolute -left-6 top-2 text-[#D5A54D] text-xs float-slow">✦</div>
-              <div className="absolute -right-4 top-4 text-[#1D3D6D] text-xs float-slower">✦</div>
-              <div className="absolute left-2 bottom-0 text-[#1D3D6D] text-[8px]">✦</div>
-              <div className="absolute right-0 bottom-2 text-[#D5A54D] text-[8px]">✦</div>
-            </div>
-
-            <EditableField
-              section="announcement_card"
-              field="title"
-              fallback="3rd International Agri-Life & Bioresource Science Symposium"
-              as="h2"
-              label="Card Title"
-              className="text-center text-xl font-bold mb-2 text-[#D5A54D] block"
-              multiline
-            />
-
-            <EditableField
-              section="announcement_card"
-              field="description"
-              fallback="Join researchers, scientists, educators, students, industry partners, and institutional leaders from the Philippines and around the world for three days of scientific exchange, interdisciplinary dialogue, and international collaboration."
-              as="p"
-              label="Card Description"
-              className="text-center text-gray-800 text-xs mb-6 leading-relaxed block"
-              multiline
-            />
-
-            <div className="flex justify-center">
-              <a
-                href="/program"
-                className="premium-btn bg-linear-to-r from-[#1D3D6D] to-[#16305a] text-white px-6 py-2.5 rounded-md font-semibold text-sm shadow-md transition-all duration-300 hover:-translate-y-0.5"
-              >
-                <EditableField
-                  section="announcement_card"
-                  field="button_text"
-                  fallback="View Event Details"
-                  as="span"
-                  label="Button Text"
-                />
-              </a>
-            </div>
-          </div>
-        </div>
-      </main>
-
-      {/* ================= COUNTDOWN ================= */}
+      {/* ================= HERO & COUNTDOWN MERGED ================= */}
       <section
-        ref={countdownScroll.ref}
-        className="relative bg-white py-16 border-b border-gray-200 overflow-hidden"
+        ref={heroScroll.ref}
+        className="relative pt-4 pb-12 lg:pt-8 lg:pb-16 overflow-hidden border-b border-gray-200 lg:min-h-187.5 flex flex-col justify-center"
+        style={heroScale < 1 ? { zoom: heroScale } : undefined}
       >
-        <div
-          aria-hidden
-          className="absolute inset-0 pointer-events-none opacity-60"
-          style={{
-            background:
-              "radial-gradient(50% 60% at 50% 0%, rgba(213,165,77,0.08) 0%, rgba(255,255,255,0) 70%)",
-          }}
-        />
-        <div ref={countdownReveal.ref} className={`relative mx-auto max-w-7xl px-6 ${countdownReveal.inView ? "in-view" : ""}`}>
-          <div className="text-center mb-12 reveal-up">
-            <EditableField
-              section="countdown"
-              field="title"
-              fallback="SYMPOSIUM COUNTDOWN"
-              as="h2"
-              label="Section Title"
-              className="text-3xl font-bold text-[#0B2A4A] mb-2 block"
-            />
-            <div className="w-24 h-1 gold-underline mx-auto rounded-full"></div>
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="https://res.cloudinary.com/xbloqjom/image/upload/v1794383950/background.jpg"
+            alt="Symposium Background"
+            fill
+            priority
+            className="object-cover object-center"
+          />
+          {/* Subtle overlay to ensure text and cards remain readable */}
+          <div className="absolute inset-0 bg-white/30"></div>
+        </div>
+
+        {/* ===== LOGO ===== */}
+        <div className="absolute -top-8 left-10 lg:-top-12 lg:left-30 z-10 w-64 md:w-96 lg:w-125 pointer-events-none">
+          <Image
+            src="https://res.cloudinary.com/xbloqjom/image/upload/v1794390154/isda2.png"
+            alt="Symposium Logo"
+            width={1000}
+            height={1000}
+            className="w-full h-auto object-contain drop-shadow-xl"
+            priority
+          />
+        </div>
+
+        {/* ===== TEXT & THEME BESIDE LOGO ===== */}
+        <div className="absolute top-8 left-70 md:left-100 lg:top-12 lg:left-135 z-10 flex flex-row items-center gap-4 lg:gap-6 pointer-events-none">
+          
+          {/* Left Side: Main Titles */}
+          <div className="leading-[1.05] shrink-0">
+            <h1 className="text-2xl md:text-4xl lg:text-[2.75rem] font-black text-[#1A5E20] tracking-tight">
+              INTERNATIONAL
+            </h1>
+            <h1 className="text-3xl md:text-5xl lg:text-[3.5rem] font-black text-[#0B1C2C] tracking-tighter drop-shadow-sm leading-[1.1] my-0.5">
+              AGRI-LIFE &<br/>
+              BIORESOURCE<br/>
+              SCIENCE
+            </h1>
+            <h1 className="text-xl md:text-3xl lg:text-[2.25rem] font-bold text-[#76B947] tracking-[0.15em] mt-1">
+              SYMPOSIUM
+            </h1>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-            {[
-              { key: "days" as const, label: "Days", offset: 24, iconPath: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" },
-              { key: "hours" as const, label: "Hours", offset: 18, iconPath: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
-              { key: "minutes" as const, label: "Minutes", offset: 12, iconPath: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
-              { key: "seconds" as const, label: "Seconds", offset: 6, iconPath: "M12 6v6l4 2m-4-8a9 9 0 100 18 9 9 0 000-18z" },
-            ].map((c, i) => (
-              <div
-                key={c.key}
-                className={`reveal-up stagger-${i + 1} premium-card scroll-lift bg-linear-to-b from-[#F5F6FA] to-white rounded-xl p-8 flex flex-col items-center justify-center shadow-sm border border-gray-100`}
-                style={{ ["--scroll-y" as any]: `${parallaxEnabled ? (1 - countdownScroll.progress) * c.offset : 0}px` }}
-              >
-                <svg className="w-10 h-10 text-[#1D3D6D] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d={c.iconPath} />
-                </svg>
-                {c.key === "seconds" ? (
-                  <span className={`text-5xl font-bold text-[#0B2A4A] tabular-nums inline-block ${countdownPulse ? "tick-pulse" : ""}`}>
-                    {formatNumber(timeLeft.seconds)}
-                  </span>
-                ) : (
-                  <AnimatedNumber value={timeLeft[c.key]} className="text-5xl font-bold text-[#0B2A4A] tabular-nums" />
-                )}
-                <span className="text-sm font-semibold text-gray-500 mt-2 uppercase tracking-wider">{c.label}</span>
-              </div>
-            ))}
+          {/* Vertical Divider Line */}
+          <div className="hidden md:block w-[2px] h-24 lg:h-32 bg-[#76B947]/40 shrink-0"></div>
+
+          {/* Right Side: Theme */}
+          <div className="flex flex-col justify-center max-w-[280px] md:max-w-[320px] lg:max-w-[380px]">
+            {/* Theme Badge */}
+            <div className="bg-[#76B947] text-white text-[10px] md:text-xs font-bold px-3 py-1 rounded-full w-max mb-2 tracking-wider">
+              THEME:
+            </div>
+            
+            {/* Theme Title */}
+            <h2 className="text-[#0B1C2C] font-bold text-sm md:text-base lg:text-lg leading-tight mb-1">
+              Converging Frontiers in Agri-Life and Bioresource Sciences:
+            </h2>
+            
+            {/* Theme Description */}
+            <p className="text-[#0B1C2C] text-[10px] md:text-xs lg:text-sm leading-snug">
+              Science, Innovation, and Collaboration for a Resilient and Sustainable Future
+            </p>
           </div>
 
-          <p className="reveal-up stagger-5 text-center font-semibold text-gray-700">
-            <EditableField section="countdown" field="event_date" fallback="March 11-13, 2027" as="span" label="Event Date" />
-            <span className="mx-2 text-gray-300">|</span>
-            <EditableField section="countdown" field="event_location" fallback="Roxas City, Capiz Philippines" as="span" label="Event Location" />
+        </div>
+
+        {/* ===== FLOATING CALL FOR ABSTRACTS CARD ===== */}
+        <div className="hidden md:flex absolute top-10 right-10 lg:right-20 z-20 w-72 lg:w-85 bg-white/95 backdrop-blur-md rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white/60 p-5 flex-col items-center text-center pointer-events-auto overflow-hidden">
+          
+          {/* Decorative Top Banner */}
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-linear-to-r from-[#F0C674] via-[#D5A54D] to-[#F0C674]"></div>
+
+          {/* Close Button */}
+          <button className="absolute top-3 right-4 text-gray-400 hover:text-gray-700 transition-colors">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          {/* Custom "CALL FOR ABSTRACT" Icon Graphic */}
+          <div className="mt-4 mb-4 flex items-center justify-center gap-1.5 w-full">
+            
+            {/* Left Megaphone */}
+            <div className="relative flex items-center justify-center shrink-0">
+               {/* Sound waves */}
+               <svg className="absolute -top-2 -left-1 w-4 h-4 text-[#5c9a26] rotate-[-30deg]" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
+               </svg>
+               <svg className="absolute -top-1 right-0 w-3 h-3 text-[#5c9a26] rotate-20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
+               </svg>
+               
+               {/* Megaphone Body */}
+               <svg className="w-10 h-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M19 4L5 8V16L19 20V4Z" fill="#7cb342" stroke="#33691e" strokeWidth="1.5" strokeLinejoin="round"/>
+                  <path d="M2 10V14" stroke="#33691e" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M10 16V22" stroke="#33691e" strokeWidth="2" strokeLinecap="round"/>
+               </svg>
+            </div>
+
+            {/* Green Pill Banner */}
+            <div className="bg-[#4b8e18] rounded-md px-3 py-1 shadow-sm border border-[#33691e]/30 flex flex-col items-center justify-center transform -rotate-2">
+              <span className="text-white font-black text-[10px] tracking-widest leading-none mb-0.5">CALL FOR</span>
+              <span className="text-white font-black text-sm tracking-wider leading-none">ABSTRACT</span>
+            </div>
+
+            {/* Right Sound Lines */}
+            <div className="flex flex-col gap-1 ml-0.5 shrink-0">
+              <div className="w-3 h-0.5 bg-[#5c9a26] rotate-30 rounded-full"></div>
+              <div className="w-2.5 h-0.5 bg-[#5c9a26] rotate-45 rounded-full"></div>
+            </div>
+            
+          </div>
+
+          {/* Title Context */}
+          <p className="text-[#0B2A4A] font-bold text-sm leading-tight mb-2">
+            3rd International Agri-Life &<br/>Bioresource Science Symposium
           </p>
+
+          {/* Gold Underline */}
+          <div className="w-3/5 h-0.5 bg-[#F0C674] mb-4"></div>
+
+          {/* Description */}
+          <p className="text-gray-600 text-[11px] leading-relaxed mb-5 px-1">
+            Submit your research and share your scientific contributions with experts, educators, and industry leaders from the Philippines and around the world.
+          </p>
+
+          {/* CTA Button */}
+          <Link
+            href="/abstract-submission"
+            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-full bg-[#0A5C0A] hover:bg-[#084a08] text-white text-xs font-bold shadow-md hover:-translate-y-0.5 transition-all duration-300"
+          >
+            Submit Abstract →
+          </Link>
+
+        </div>
+
+
+        <div
+          ref={heroReveal.ref}
+          className={`relative z-10 mx-auto max-w-350 px-4 lg:px-8 ${
+            heroReveal.inView ? "in-view" : ""
+          }`}
+          style={{ transform: `translateY(${heroParallax * 0.1}px)` }}
+        >
+          
+          {/* 1. Spacer for Top Wide Banner */}
+          <div className="w-full h-24 md:h-40 mb-6"></div>
+
+          {/* ===== Wrapper Div to move them down ===== */}
+          <div className="relative top-35">
+            
+            {/* 2. Information & Date Bar - Overlapping cleanly */}
+            <div className="reveal-up stagger-1 bg-white/95 backdrop-blur-md w-[96%] max-w-325 mx-auto rounded-2xl shadow-[0_12px_40px_rgb(0,0,0,0.12)] border border-white/50 -mt-16 relative z-20 py-4 px-6 md:px-8 flex flex-col xl:flex-row items-center justify-between gap-4 overflow-x-auto">
+              
+              {/* Left Side: Deadlines, Dates & Venue */}
+              <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8 w-full whitespace-nowrap">
+                
+                {/* Abstract Submission & Registration */}
+                <div className="flex flex-col items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 text-[#1b5e20]">
+                    <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span className="text-sm font-bold text-[#0A2540] leading-tight text-center">
+                      Abstract Submission<br/>and Registration
+                    </span>
+                  </div>
+                  <div className="bg-[#0A5C0A] text-white text-[12px] font-bold px-4 py-1 rounded-full tracking-wider shadow-sm">
+                    NOVEMBER 16, 2026
+                  </div>
+                </div>
+
+                <div className="hidden md:block w-px h-10 bg-gray-200 shrink-0"></div>
+
+                {/* Abstract Submission Deadline */}
+                <div className="flex flex-col items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 text-[#1b5e20]">
+                    <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span className="text-xs font-bold text-[#0A2540] leading-tight text-center">
+                      Abstract Submission<br/>Deadline
+                    </span>
+                  </div>
+                  <div className="bg-[#0A5C0A] text-white text-[12px] font-bold px-4 py-1 rounded-full tracking-wider shadow-sm">
+                    JANUARY 20, 2027
+                  </div>
+                </div>
+
+                <div className="hidden md:block w-px h-10 bg-gray-200 shrink-0"></div>
+
+                {/* Event Dates */}
+                <div className="flex items-center gap-2 text-[#1b5e20]">
+                  <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <div className="flex flex-col">
+                    <span className="text-[14px] font-bold tracking-widest uppercase leading-none mb-0.5">March</span>
+                    <span className="text-sm font-bold leading-none text-[#0A2540]">11–13, 2027</span>
+                  </div>
+                </div>
+
+                <div className="hidden md:block w-px h-10 bg-gray-200 shrink-0"></div>
+
+                {/* Venue */}
+                <div className="flex items-center gap-2">
+                  <svg className="w-6 h-6 text-[#1b5e20] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <div className="text-left">
+                    <p className="text-[14px] font-bold text-[#0A2540] leading-tight mb-0.5">
+                      Paradise Garden Resort<br/>Hotel & Convention Center
+                    </p>
+                    <p className="text-[12px] text-gray-500 leading-tight">
+                      Manoc-Manoc, Boracay Island,<br/>Malay, Aklan, Philippines
+                    </p>
+                  </div>
+                </div>
+
+                <div className="hidden xl:block w-px h-10 bg-gray-200 shrink-0"></div>
+
+                {/* Right Side: Co-Host Logos */}
+                <div className="flex items-center gap-2">
+                  <p className="text-[14px] font-bold text-[#0A2540] uppercase tracking-wider">CO-HOST:</p>
+                  <div className="flex items-center gap-1">
+                    <div className="relative w-15 h-15 rounded-full overflow-hidden border border-gray-200 bg-white">
+                       <Image src="https://res.cloudinary.com/xbloqjom/image/upload/v1794368585/hiroshima-logo.webp" alt="Co-host 1" fill className="object-contain p-0.5" />
+                    </div>
+                    <div className="relative w-15 h-15 rounded-full overflow-hidden border border-gray-200 bg-white">
+                       <Image src="https://res.cloudinary.com/xbloqjom/image/upload/v1794368684/vsu-logo.png" alt="Co-host 2" fill className="object-contain p-0.5" />
+                    </div>
+                    <div className="relative w-15 h-15 rounded-full overflow-hidden border border-gray-200 bg-white">
+                       <Image src="https://res.cloudinary.com/xbloqjom/image/upload/v1794368844/usc-logo.svg" alt="Co-host 3" fill className="object-contain p-0.5" />
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            {/* 3. Action Buttons */}
+            <div className="reveal-up stagger-2 flex flex-wrap items-center justify-center gap-4 mt-12">
+              <Link
+                href="/abstract-submission"
+                className="flex items-center gap-2 px-6 py-3 rounded-full font-bold text-sm text-[#0A2540] bg-[#F0C674] hover:bg-[#E5B65A] shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+              >
+                <FaFileAlt /> Submit Abstract →
+              </Link>
+              <Link
+                href="/registration"
+                className="flex items-center gap-2 px-6 py-3 rounded-full font-bold text-sm text-white bg-[#0B2A4A] hover:bg-[#153A61] shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+              >
+                <FaUser /> Register Now →
+              </Link>
+              <Link
+                href="/program"
+                className="flex items-center gap-2 px-6 py-3 rounded-full font-bold text-sm text-[#0A2540] bg-white/90 backdrop-blur-sm border border-gray-300 hover:bg-white shadow-md hover:-translate-y-0.5 transition-all duration-300"
+              >
+                <FaCalendarAlt /> View Program →
+              </Link>
+            </div>
+
+            {/* 4. Integrated Countdown Bar */}
+            <div className="reveal-up stagger-3 mt-16 w-[90%] max-w-250 mx-auto bg-[#0B2A4A]/95 backdrop-blur-sm rounded-full py-4 px-6 md:px-12 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6 border-b-4 border-[#D5A54D]">
+              
+              {/* Countdown Label */}
+              <div className="flex items-center gap-3">
+                <div className="bg-white/10 p-2 rounded-lg">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div className="text-white">
+                  <p className="text-sm font-bold tracking-widest text-[#D5A54D]">SYMPOSIUM</p>
+                  <p className="text-lg font-bold tracking-wider">COUNTDOWN</p>
+                </div>
+              </div>
+
+              {/* Timer Blocks */}
+              <div className="flex items-center gap-4 md:gap-8 divide-x divide-white/20">
+                {[
+                  { key: "days" as const, label: "Days" },
+                  { key: "hours" as const, label: "Hours" },
+                  { key: "minutes" as const, label: "Minutes" },
+                  { key: "seconds" as const, label: "Seconds" },
+                ].map((c, i) => (
+                  <div key={c.key} className={`flex flex-col items-center px-4 md:px-6 ${i === 0 ? 'pl-0' : ''}`}>
+                    {c.key === "seconds" ? (
+                      <span className={`text-3xl md:text-4xl font-bold text-[#F0C674] tabular-nums inline-block ${countdownPulse ? "tick-pulse" : ""}`}>
+                        {formatNumber(timeLeft.seconds)}
+                      </span>
+                    ) : (
+                      <AnimatedNumber value={timeLeft[c.key]} className="text-3xl md:text-4xl font-bold text-[#F0C674] tabular-nums" />
+                    )}
+                    <span className="text-[10px] md:text-xs font-semibold text-gray-300 mt-1 uppercase tracking-wider">{c.label}</span>
+                  </div>
+                ))}
+              </div>
+
+            </div>
+
+          </div>
+
         </div>
       </section>
 
@@ -789,7 +738,7 @@ function HomeInner() {
         >
           {/* Card 1: About */}
           <div
-            className="reveal-up stagger-1 premium-card scroll-lift bg-linear-to-b from-[#F5F6FA] to-white p-8 rounded-lg border border-gray-100"
+            className="reveal-up stagger-1 premium-card scroll-lift bg-linear-to-b from-[#F8FAFC] to-white p-8 rounded-xl border border-gray-100"
             style={{ ["--scroll-y" as any]: `${parallaxEnabled ? (1 - contentScroll.progress) * 30 : 0}px` }}
           >
             <div className="premium-icon w-16 h-16 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm ring-1 ring-[#D5A54D]/20">
@@ -809,7 +758,7 @@ function HomeInner() {
 
           {/* Card 2: Announcements */}
           <div
-            className="reveal-up stagger-2 premium-card scroll-lift bg-white border border-gray-200 p-8 rounded-lg"
+            className="reveal-up stagger-2 premium-card scroll-lift bg-white border border-gray-200 p-8 rounded-xl shadow-sm"
             style={{ ["--scroll-y" as any]: `${parallaxEnabled ? (1 - contentScroll.progress) * 20 : 0}px` }}
           >
             <EditableField section="announcements" field="title" fallback="ANNOUNCEMENTS" as="h3" label="Section Title" className="text-xl font-bold text-[#0B2A4A] mb-4 block" />
@@ -833,127 +782,52 @@ function HomeInner() {
               renderItem={(item, index, editing, onUpdate) =>
                 editing ? (
                   <div className="p-3.5 bg-white space-y-3">
-                    {/* Date & Category Row */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                       <div>
-                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
-                          Month (e.g. OCT)
-                        </label>
-                        <input
-                          type="text"
-                          value={item.month || ""}
-                          onChange={(e) =>
-                            onUpdate({ ...item, month: e.target.value.toUpperCase() })
-                          }
-                          placeholder="OCT"
-                          maxLength={4}
-                          className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-bold text-[#1D3D6D] focus:border-[#D5A54D] focus:ring-1 focus:ring-[#D5A54D] outline-none"
-                        />
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Month</label>
+                        <input type="text" value={item.month || ""} onChange={(e) => onUpdate({ ...item, month: e.target.value.toUpperCase() })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-bold text-[#1D3D6D] focus:border-[#D5A54D] outline-none" />
                       </div>
                       <div>
-                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
-                          Day (e.g. 05)
-                        </label>
-                        <input
-                          type="text"
-                          value={item.day || ""}
-                          onChange={(e) => onUpdate({ ...item, day: e.target.value })}
-                          placeholder="05"
-                          maxLength={3}
-                          className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-bold text-[#0B2A4A] focus:border-[#D5A54D] focus:ring-1 focus:ring-[#D5A54D] outline-none"
-                        />
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Day</label>
+                        <input type="text" value={item.day || ""} onChange={(e) => onUpdate({ ...item, day: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-bold text-[#0B2A4A] focus:border-[#D5A54D] outline-none" />
                       </div>
                       <div>
-                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
-                          Category / Tag
-                        </label>
-                        <input
-                          type="text"
-                          value={item.category || ""}
-                          onChange={(e) => onUpdate({ ...item, category: e.target.value })}
-                          placeholder="CALL FOR ABSTRACTS"
-                          className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-bold text-[#D5A54D] uppercase focus:border-[#D5A54D] focus:ring-1 focus:ring-[#D5A54D] outline-none"
-                        />
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Category</label>
+                        <input type="text" value={item.category || ""} onChange={(e) => onUpdate({ ...item, category: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-bold text-[#D5A54D] uppercase focus:border-[#D5A54D] outline-none" />
                       </div>
                     </div>
-
-                    {/* Announcement Title */}
                     <div>
-                      <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
-                        Announcement Title
-                      </label>
-                      <input
-                        type="text"
-                        value={item.title || ""}
-                        onChange={(e) => onUpdate({ ...item, title: e.target.value })}
-                        placeholder="e.g. Abstract Submission Opens"
-                        className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm font-semibold text-[#0B2A4A] focus:border-[#D5A54D] focus:ring-1 focus:ring-[#D5A54D] outline-none"
-                      />
+                      <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Title</label>
+                      <input type="text" value={item.title || ""} onChange={(e) => onUpdate({ ...item, title: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm font-semibold text-[#0B2A4A] focus:border-[#D5A54D] outline-none" />
                     </div>
-
-                    {/* Description */}
                     <div>
-                      <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
-                        Description
-                      </label>
-                      <textarea
-                        value={item.description || ""}
-                        onChange={(e) => onUpdate({ ...item, description: e.target.value })}
-                        placeholder="Detailed information for this announcement..."
-                        rows={2}
-                        className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs text-gray-700 leading-relaxed focus:border-[#D5A54D] focus:ring-1 focus:ring-[#D5A54D] outline-none"
-                      />
+                      <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Description</label>
+                      <textarea value={item.description || ""} onChange={(e) => onUpdate({ ...item, description: e.target.value })} rows={2} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs text-gray-700 focus:border-[#D5A54D] outline-none" />
                     </div>
-
-                    {/* Link Text and Link URL */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       <div>
-                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
-                          Link / Button Text
-                        </label>
-                        <input
-                          type="text"
-                          value={item.link_text || ""}
-                          onChange={(e) => onUpdate({ ...item, link_text: e.target.value })}
-                          placeholder="e.g. View Call for Abstracts"
-                          className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-semibold text-[#1D3D6D] focus:border-[#D5A54D] focus:ring-1 focus:ring-[#D5A54D] outline-none"
-                        />
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Link Text</label>
+                        <input type="text" value={item.link_text || ""} onChange={(e) => onUpdate({ ...item, link_text: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-semibold text-[#1D3D6D] focus:border-[#D5A54D] outline-none" />
                       </div>
                       <div>
-                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
-                          Link URL / Destination
-                        </label>
-                        <input
-                          type="text"
-                          value={item.link_url || ""}
-                          onChange={(e) => onUpdate({ ...item, link_url: e.target.value })}
-                          placeholder="e.g. /abstract-submission"
-                          className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs text-gray-600 font-mono focus:border-[#D5A54D] focus:ring-1 focus:ring-[#D5A54D] outline-none"
-                        />
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Link URL</label>
+                        <input type="text" value={item.link_url || ""} onChange={(e) => onUpdate({ ...item, link_url: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs text-gray-600 font-mono focus:border-[#D5A54D] outline-none" />
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div
-                    className={`announcement-row flex gap-4 ${
-                      index < 2 ? "border-b border-gray-200 pb-4 mb-4" : ""
-                    }`}
-                  >
+                  <div className={`announcement-row flex gap-4 ${index < 2 ? "border-b border-gray-200 pb-4 mb-4" : ""}`}>
                     <div className="ann-date flex flex-col items-center">
                       <span className="text-xl font-bold text-[#1D3D6D]">{item.month}</span>
                       <span className="text-2xl font-bold text-[#0B2A4A]">{item.day}</span>
                     </div>
                     <div className="flex-1">
-                      <p className="ann-category text-xs font-bold text-[#D5A54D] uppercase mb-1">
-                        {item.category}
-                      </p>
+                      <p className="ann-category text-xs font-bold text-[#D5A54D] uppercase mb-1">{item.category}</p>
                       <p className="font-semibold text-[#0B2A4A] mb-1">{item.title}</p>
                       <p className="text-sm text-justify text-gray-500">{item.description}</p>
                       <a href={item.link_url} className="premium-link mt-3 text-sm">
                         {item.link_text}
-                        <span className="arrow" aria-hidden="true">
-                          →
-                        </span>
+                        <span className="arrow" aria-hidden="true">→</span>
                       </a>
                     </div>
                   </div>
@@ -964,7 +838,7 @@ function HomeInner() {
 
           {/* Card 3: WHO SHOULD ATTEND */}
           <div
-            className="reveal-up stagger-3 premium-card scroll-lift bg-linear-to-b from-[#F5F6FA] to-white p-8 rounded-lg border border-gray-100"
+            className="reveal-up stagger-3 premium-card scroll-lift bg-linear-to-b from-[#F8FAFC] to-white p-8 rounded-xl border border-gray-100"
             style={{ ["--scroll-y" as any]: `${parallaxEnabled ? (1 - contentScroll.progress) * 10 : 0}px` }}
           >
             <div className="premium-icon w-16 h-16 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm ring-1 ring-[#D5A54D]/20">
@@ -985,16 +859,8 @@ function HomeInner() {
                 renderItem={(item, index, editing, onUpdate) =>
                   editing ? (
                     <div className="p-3 bg-white">
-                      <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
-                        Attendee Category / Role
-                      </label>
-                      <input
-                        type="text"
-                        value={item.text || ""}
-                        onChange={(e) => onUpdate({ ...item, text: e.target.value })}
-                        placeholder="e.g. Researchers & Scientists"
-                        className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs text-gray-800 font-medium focus:border-[#D5A54D] focus:ring-1 focus:ring-[#D5A54D] outline-none"
-                      />
+                      <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Attendee Category</label>
+                      <input type="text" value={item.text || ""} onChange={(e) => onUpdate({ ...item, text: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs text-gray-800 font-medium focus:border-[#D5A54D] outline-none" />
                     </div>
                   ) : (
                     <li className="attendee-item flex items-center gap-3 text-gray-700 text-sm">

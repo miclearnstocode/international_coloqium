@@ -421,7 +421,7 @@ export default function RegistrationPage() {
           style={{ transform: `translateY(calc(-50% + ${(heroScroll.progress - 0.5) * -30}px))` }}
         >
           <Image
-            src="https://res.cloudinary.com/xbloqjom/image/upload/v1794213907/illustration2.png"
+            src="https://res.cloudinary.com/xbloqjom/image/upload/v1794368626/illustration2.png"
             alt="Registration Illustration"
             width={2200}
             height={500}

@@ -3,223 +3,172 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-import {
-  fetchPublicEvents,
-  pickFeaturedEvent,
-  formatDateRange,
-  type PublicEvent,
-} from "@/app/lib/events";
+import { useEffect, useState } from "react";
 
-// Fallback values shown if no event is in the DB yet
-const FALLBACK = {
-  titleLine1: "3rd International",
-  titleLine2: "Agri-Life & Bioresource",
-  titleLine3: "Science Symposium",
-  dateRange: "March 10–13, 2027",
-  location: "Roxas City, Philippines",
-};
-
-/**
- * Break a long event title into up to 3 lines for the header layout.
- * Example: "3rd International Agri-Life & Bioresource Science Symposium"
- *   → ["3rd International", "Agri-Life & Bioresource", "Science Symposium"]
- */
-function splitTitle(title: string): [string, string, string] {
-  const clean = title.replace(/\s+/g, " ").trim();
-  if (!clean) return ["", "", ""];
-
-  const words = clean.split(" ");
-  if (words.length <= 3) return [clean, "", ""];
-
-  // Greedy 3-way split — roughly balanced by word count
-  const per = Math.ceil(words.length / 3);
-  const l1 = words.slice(0, per).join(" ");
-  const l2 = words.slice(per, per * 2).join(" ");
-  const l3 = words.slice(per * 2).join(" ");
-  return [l1, l2, l3];
-}
+const navItems = [
+  { label: "Home", href: "/" },
+  { label: "About", href: "/about" },
+  { label: "Program", href: "/program" },
+  { label: "Scientific Tracks", href: "/scientific-tracks" },
+  { label: "Abstract Submission", href: "/abstract-submission" },
+  { label: "Registration", href: "/registration" },
+  { label: "Guidelines", href: "/presentation-guidelines" },
+  { label: "Partner Institutions", href: "/partner-institutions" },
+  { label: "Hotel & Mapping", href: "/hotel-mapping" },
+  { label: "Contact Us", href: "/contact-us" },
+];
 
 export default function Header() {
   const pathname = usePathname();
-  const [event, setEvent] = useState<PublicEvent | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-  const navItems = [
-    { label: "Home", href: "/" },
-    { label: "About", href: "/about" },
-    { label: "Program", href: "/program" },
-    { label: "Scientific Tracks", href: "/scientific-tracks" },
-    { label: "Abstract Submission", href: "/abstract-submission" },
-    { label: "Registration", href: "/registration" },
-    { label: "Guidelines", href: "/presentation-guidelines" },
-    { label: "Partner Institutions", href: "/partner-institutions" },
-    { label: "Hotel & Mapping", href: "/hotel-mapping" },
-    { label: "Contact Us", href: "/contact-us" },
-  ];
-
-  // Refs to each nav item so we can measure positions
-  const itemRefs = useRef<(HTMLLIElement | null)[]>([]);
-  const [underline, setUnderline] = useState({
-    left: 0,
-    width: 0,
-    visible: false,
-  });
-  const [hover, setHover] = useState({
-    left: 0,
-    width: 0,
-    visible: false,
-  });
-
-  // ── Load featured event ──
+  // Close the mobile menu when the route changes
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const events = await fetchPublicEvents();
-      if (cancelled) return;
-      setEvent(pickFeaturedEvent(events));
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  // ── Animated underline ──
-  useEffect(() => {
-    const update = () => {
-      const activeIndex = navItems.findIndex((item) => item.href === pathname);
-      const el = itemRefs.current[activeIndex];
-      if (el) {
-        setUnderline({
-          left: el.offsetLeft,
-          width: el.offsetWidth,
-          visible: true,
-        });
-      } else {
-        setUnderline((u) => ({ ...u, visible: false }));
-      }
-    };
-
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setMenuOpen(false);
   }, [pathname]);
 
-  // ── Derived header values ──
-  const [line1, line2, line3] = event
-    ? splitTitle(event.title)
-    : [FALLBACK.titleLine1, FALLBACK.titleLine2, FALLBACK.titleLine3];
-
-  const dateRange = event
-    ? formatDateRange(event.date, event.endDate) || FALLBACK.dateRange
-    : FALLBACK.dateRange;
-
-  const location = event?.location?.trim() || FALLBACK.location;
+  // Subtle shadow once the page is scrolled
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-100">
-      <nav className="mx-auto flex max-w-350 items-center justify-between px-8 py-4">
-        {/* ── Logo + Title ── */}
-        <div className="relative flex items-center gap-6 shrink-0 pl-2">
-          <Link href="/" className="relative shrink-0 group z-10">
-            <div className="relative h-24 w-24 rounded-full overflow-hidden border-4 border-[#D5A54D] bg-white shadow-md transition-transform duration-300 group-hover:scale-105 group-hover:shadow-lg">
-              <Image
-                src="https://res.cloudinary.com/xbloqjom/image/upload/v1794366926/logo.png"
-                alt="Symposium Logo"
-                fill
-                className="object-cover scale-110"
-                priority
-              />
-            </div>
-          </Link>
-
-          <div className="relative flex flex-col leading-tight z-20">
-            {line1 && (
-              <span className="text-base font-bold tracking-wider text-[#0B2A4A] whitespace-nowrap">
-                {line1}
-              </span>
-            )}
-            {line2 && (
-              <span className="text-base font-bold tracking-wider text-[#0B2A4A] whitespace-nowrap">
-                {line2}
-              </span>
-            )}
-            {line3 && (
-              <span className="text-sm font-semibold tracking-wider text-[#0B2A4A] whitespace-nowrap">
-                {line3}
-              </span>
-            )}
-            {dateRange && (
-              <span className="text-xs text-[#D5A54D] font-medium whitespace-nowrap mt-1">
-                {dateRange}
-              </span>
-            )}
-            {location && (
-              <span className="text-xs text-[#D5A54D] font-medium whitespace-nowrap">
-                {location}
-              </span>
-            )}
+    <header
+      className={`sticky top-0 z-50 border-b transition-all duration-300 ${
+        scrolled
+          ? "bg-white/90 backdrop-blur-md border-gray-200/80 shadow-[0_4px_24px_-8px_rgba(11,42,74,0.18)]"
+          : "bg-white/95 backdrop-blur-sm border-gray-100"
+      }`}
+    >
+      <nav
+        className="mx-auto flex w-full max-w-[1280px] items-center justify-center max-xl:justify-between"
+        style={{
+          // Fluid spacing: shrinks smoothly on laptop screens
+          paddingInline: "clamp(1rem, 2vw, 2rem)",
+          paddingBlock: "clamp(0.6rem, 0.7vw, 0.85rem)",
+          gap: "clamp(1rem, 2vw, 2.5rem)",
+        }}
+      >
+        {/* ── Logo ── */}
+        <Link href="/" aria-label="Symposium home" className="group shrink-0">
+          <div
+            className="relative rounded-full overflow-hidden bg-white ring-2 ring-[#D5A54D] ring-offset-2 ring-offset-white shadow-md transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg"
+            style={{
+              width: "clamp(2.5rem, 3vw, 3.75rem)",
+              height: "clamp(2.5rem, 3vw, 3.75rem)",
+            }}
+          >
+            <Image
+              src="https://res.cloudinary.com/xbloqjom/image/upload/v1794390273/logo3.png"
+              alt="Symposium Logo"
+              fill
+              className="object-cover scale-110"
+              priority
+            />
           </div>
-        </div>
+        </Link>
 
-        {/* ── Navigation ── */}
+        {/* ── Desktop navigation ── */}
         <ul
-          className="hidden lg:flex items-center gap-1 text-sm font-medium text-gray-600 relative"
-          onMouseLeave={() => setHover((h) => ({ ...h, visible: false }))}
+          className="hidden xl:flex items-center font-semibold"
+          style={{
+            fontSize: "clamp(0.72rem, 0.75vw, 0.875rem)",
+            gap: "clamp(0rem, 0.2vw, 0.35rem)",
+          }}
         >
-          <span
-            aria-hidden
-            className="absolute top-1/2 -translate-y-1/2 h-9 rounded-md bg-[#0B2A4A]/5 transition-all duration-300 ease-out pointer-events-none"
-            style={{
-              left: hover.left,
-              width: hover.width,
-              opacity: hover.visible ? 1 : 0,
-            }}
-          />
-
-          <span
-            aria-hidden
-            className="absolute bottom-0 h-0.5 rounded-full bg-[#D5A54D] transition-all duration-300 ease-out pointer-events-none"
-            style={{
-              left: underline.left,
-              width: underline.width,
-              opacity: underline.visible ? 1 : 0,
-            }}
-          />
-
-          {navItems.map((item, idx) => {
+          {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
-              <li
-                key={item.label}
-                ref={(el) => {
-                  itemRefs.current[idx] = el;
-                }}
-                className="relative"
-                onMouseEnter={(e) => {
-                  const el = e.currentTarget;
-                  setHover({
-                    left: el.offsetLeft,
-                    width: el.offsetWidth,
-                    visible: true,
-                  });
-                }}
-              >
+              <li key={item.href}>
                 <Link
                   href={item.href}
-                  className={`relative whitespace-nowrap px-1.5 py-1.5 transition-colors duration-200 z-10 ${
+                  aria-current={isActive ? "page" : undefined}
+                  className={`group relative block whitespace-nowrap rounded-lg px-[0.7em] py-[0.55em] transition-colors duration-200 ${
                     isActive
-                      ? "text-[#1D3D6D] font-semibold"
-                      : "text-gray-600 hover:text-[#0B2A4A]"
+                      ? "text-[#0B2A4A]"
+                      : "text-gray-500 hover:text-[#0B2A4A] hover:bg-[#0B2A4A]/5"
                   }`}
                 >
                   {item.label}
+                  {/* Gold indicator */}
+                  <span
+                    aria-hidden
+                    className={`absolute left-[0.7em] right-[0.7em] -bottom-0.5 h-0.5 rounded-full bg-[#D5A54D] origin-center transition-transform duration-300 ${
+                      isActive
+                        ? "scale-x-100"
+                        : "scale-x-0 group-hover:scale-x-50"
+                    }`}
+                  />
                 </Link>
               </li>
             );
           })}
         </ul>
+
+        {/* ── Mobile / tablet menu button ── */}
+        <button
+          type="button"
+          className="xl:hidden inline-flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 text-[#0B2A4A] hover:bg-gray-50 transition-colors"
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
+          aria-controls="mobile-nav"
+          onClick={() => setMenuOpen((o) => !o)}
+        >
+          <svg
+            className="h-6 w-6"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            viewBox="0 0 24 24"
+          >
+            {menuOpen ? (
+              <path d="M6 6l12 12M18 6L6 18" />
+            ) : (
+              <path d="M4 7h16M4 12h16M4 17h16" />
+            )}
+          </svg>
+        </button>
       </nav>
+
+      {/* ── Mobile / tablet panel ── */}
+      <div
+        id="mobile-nav"
+        className={`xl:hidden grid transition-[grid-template-rows] duration-300 ease-out ${
+          menuOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <ul className="mx-auto max-w-[1280px] px-4 pb-4 pt-1 grid gap-1 sm:grid-cols-2">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    aria-current={isActive ? "page" : undefined}
+                    tabIndex={menuOpen ? 0 : -1}
+                    className={`flex items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                      isActive
+                        ? "bg-[#0B2A4A] text-white"
+                        : "text-[#0B2A4A] hover:bg-[#0B2A4A]/5"
+                    }`}
+                  >
+                    {item.label}
+                    {isActive && (
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#F0C674]" />
+                    )}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </div>
     </header>
   );
 }

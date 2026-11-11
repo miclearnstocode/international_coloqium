@@ -390,7 +390,7 @@ export default function ScientificTracks() {
           style={{ transform: `translateY(${(heroScroll.progress - 0.5) * -30}px)` }}
         >
           <img
-            src="/images/earth.png"
+            src="https://res.cloudinary.com/xbloqjom/image/upload/v1794368582/earth.png"
             alt=""
             className="w-full h-full object-cover object-right opacity-20"
           />
