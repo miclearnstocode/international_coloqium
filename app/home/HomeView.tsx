@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type RefObject } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Header from "@/app/components/Header";
@@ -135,6 +135,332 @@ function AnimatedNumber({ value, className }: { value: number; className?: strin
   return <span className={className}>{display.toString().padStart(2, "0")}</span>;
 }
 
+// ===== Confetti (canvas, no dependencies) =====
+function Confetti({ duration = 4500, onDone }: { duration?: number; onDone?: () => void }) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const resize = () => {
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    const colors = ["#F0C674", "#D5A54D", "#76B947", "#1A5E20", "#0B2A4A", "#4FC3F7", "#FFFFFF"];
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+
+    type P = {
+      x: number; y: number; vx: number; vy: number;
+      w: number; h: number; rot: number; vr: number;
+      color: string; round: boolean; tilt: number; tiltSpeed: number;
+    };
+
+    const make = (x: number, y: number, angle: number, spread: number, power: number): P => {
+      const a = angle + (Math.random() - 0.5) * spread;
+      const v = power * (0.55 + Math.random() * 0.6);
+      return {
+        x, y,
+        vx: Math.cos(a) * v,
+        vy: Math.sin(a) * v,
+        w: 6 + Math.random() * 7,
+        h: 4 + Math.random() * 6,
+        rot: Math.random() * Math.PI * 2,
+        vr: (Math.random() - 0.5) * 0.4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        round: Math.random() < 0.25,
+        tilt: Math.random() * Math.PI * 2,
+        tiltSpeed: 0.1 + Math.random() * 0.2,
+      };
+    };
+
+    const particles: P[] = [];
+    // Two cannons from the bottom corners + a burst from the center
+    for (let i = 0; i < 90; i++) particles.push(make(0, H, -Math.PI / 3, 0.9, 26));
+    for (let i = 0; i < 90; i++) particles.push(make(W, H, (-2 * Math.PI) / 3, 0.9, 26));
+    for (let i = 0; i < 70; i++) particles.push(make(W / 2, H * 0.45, -Math.PI / 2, Math.PI * 1.6, 15));
+
+    const start = performance.now();
+    let last = start;
+    let raf = 0;
+
+    const tick = (now: number) => {
+      const dt = Math.min((now - last) / 16.67, 3); // normalized to 60fps
+      last = now;
+      const elapsed = now - start;
+      const fade = elapsed > duration - 1200 ? Math.max(0, (duration - elapsed) / 1200) : 1;
+
+      ctx.clearRect(0, 0, W, H);
+      for (const p of particles) {
+        p.vx *= 0.985;
+        p.vy = p.vy * 0.985 + 0.38 * dt; // gravity
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.rot += p.vr * dt;
+        p.tilt += p.tiltSpeed * dt;
+
+        ctx.save();
+        ctx.globalAlpha = fade;
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.scale(1, Math.cos(p.tilt)); // flutter effect
+        ctx.fillStyle = p.color;
+        if (p.round) {
+          ctx.beginPath();
+          ctx.arc(0, 0, p.w / 2.2, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        }
+        ctx.restore();
+      }
+
+      if (elapsed < duration) raf = requestAnimationFrame(tick);
+      else onDone?.();
+    };
+    raf = requestAnimationFrame(tick);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", resize);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      aria-hidden
+      className="fixed inset-0 z-[110] pointer-events-none"
+      style={{ width: "100vw", height: "100vh" }}
+    />
+  );
+}
+
+// ===== Call-for-abstract popup (shows on every page load) =====
+// Opens centered, auto-closes after 4s by flying into the hero card's position.
+const POPUP_AUTO_CLOSE_MS = 4000;
+
+function AbstractPopup({
+  targetRef,
+  onDone,
+}: {
+  targetRef: RefObject<HTMLElement | null>;
+  onDone: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [confetti, setConfetti] = useState(false);
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  const backdropRef = useRef<HTMLDivElement | null>(null);
+  const closingRef = useRef(false);
+  const autoCloseRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const closeRef = useRef<() => void>(() => {});
+
+  const clearAuto = () => {
+    if (autoCloseRef.current) clearTimeout(autoCloseRef.current);
+    autoCloseRef.current = null;
+  };
+
+  // Close immediately (used when navigating away via the button)
+  const instantClose = () => {
+    if (closingRef.current) return;
+    closingRef.current = true;
+    clearAuto();
+    setOpen(false);
+    onDone();
+  };
+
+  // Close by docking the card into the hero card's spot
+  closeRef.current = () => {
+    if (closingRef.current) return;
+    closingRef.current = true;
+    clearAuto();
+
+    const card = cardRef.current;
+    const backdrop = backdropRef.current;
+    const finish = () => {
+      setOpen(false);
+      onDone();
+    };
+    if (!card) return finish();
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return finish();
+
+    backdrop?.animate([{ opacity: 1 }, { opacity: 0 }], {
+      duration: 700,
+      easing: "ease-out",
+      fill: "forwards",
+    });
+
+    const r = card.getBoundingClientRect();
+    const t = targetRef.current?.getBoundingClientRect();
+
+    let anim: Animation;
+    if (t && t.width > 0 && t.height > 0) {
+      // Fly + shrink into the hero card's rectangle
+      const scale = Math.min(t.width / r.width, t.height / r.height);
+      const dx = t.left + (t.width - r.width * scale) / 2 - r.left;
+      const dy = t.top + (t.height - r.height * scale) / 2 - r.top;
+      card.style.transformOrigin = "top left";
+      anim = card.animate(
+        [
+          { transform: "translate(0px, 0px) scale(1)" },
+          { transform: `translate(${dx}px, ${dy}px) scale(${scale})` },
+        ],
+        { duration: 800, easing: "cubic-bezier(0.65, 0, 0.35, 1)", fill: "forwards" }
+      );
+    } else {
+      // No hero card on this screen size (mobile) — just fade out
+      anim = card.animate(
+        [
+          { opacity: 1, transform: "scale(1)" },
+          { opacity: 0, transform: "scale(0.9)" },
+        ],
+        { duration: 300, easing: "ease-in", fill: "forwards" }
+      );
+    }
+    anim.onfinish = finish;
+  };
+
+  // Open shortly after every load/reload, then auto-close after 4s
+  useEffect(() => {
+    const openTimer = setTimeout(() => {
+      setOpen(true);
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (!reduceMotion) setConfetti(true);
+      autoCloseRef.current = setTimeout(() => closeRef.current(), POPUP_AUTO_CLOSE_MS);
+    }, 600);
+    return () => {
+      clearTimeout(openTimer);
+      clearAuto();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Escape closes + lock page scroll while open
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeRef.current();
+    };
+    window.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [open]);
+
+  return (
+    <>
+      <style>{`
+        @keyframes popupBackdrop { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes popupPop {
+          0%   { opacity: 0; transform: scale(0.8) translateY(24px); }
+          60%  { opacity: 1; transform: scale(1.04) translateY(0); }
+          100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes popupWiggle {
+          0%, 100% { transform: rotate(-2deg); }
+          50% { transform: rotate(2deg); }
+        }
+        .popup-backdrop { animation: popupBackdrop 0.3s ease-out both; }
+        .popup-card { animation: popupPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+        .popup-badge { animation: popupWiggle 2.4s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .popup-backdrop, .popup-card, .popup-badge { animation: none; }
+        }
+      `}</style>
+
+      {confetti && <Confetti onDone={() => setConfetti(false)} />}
+
+      {open && (
+        <div
+          ref={backdropRef}
+          className="popup-backdrop fixed inset-0 z-[100] flex items-center justify-center bg-[#0B2A4A]/50 backdrop-blur-sm p-4"
+          onClick={() => closeRef.current()}
+        >
+          <div
+            ref={cardRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Call for abstract"
+            onClick={(e) => e.stopPropagation()}
+            className="popup-card relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-[0_30px_80px_rgba(0,0,0,0.35)] border border-white/60 px-8 pt-10 pb-8 flex flex-col items-center text-center"
+          >
+            <div className="absolute top-0 left-0 right-0 h-2 bg-linear-to-r from-[#F0C674] via-[#D5A54D] to-[#F0C674]" />
+
+            <button
+              type="button"
+              onClick={() => closeRef.current()}
+              aria-label="Close"
+              className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Call for abstract graphic */}
+            <div className="mb-5 flex items-center justify-center gap-2">
+              <div className="relative flex items-center justify-center shrink-0">
+                <svg className="absolute -top-3 -left-2 w-5 h-5 text-[#5c9a26] -rotate-30" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
+                </svg>
+                <svg className="absolute -top-2 right-0 w-4 h-4 text-[#5c9a26] rotate-20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
+                </svg>
+                <svg className="w-14 h-14 drop-shadow-sm" viewBox="0 0 24 24" fill="none">
+                  <path d="M19 4L5 8V16L19 20V4Z" fill="#7cb342" stroke="#33691e" strokeWidth="1.5" strokeLinejoin="round" />
+                  <path d="M2 10V14" stroke="#33691e" strokeWidth="2" strokeLinecap="round" />
+                  <path d="M10 16V22" stroke="#33691e" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </div>
+
+              <div className="popup-badge bg-[#4b8e18] rounded-lg px-4 py-1.5 shadow-md border border-[#33691e]/30 flex flex-col items-center justify-center">
+                <span className="text-white font-black text-xs tracking-widest leading-none mb-1">CALL FOR</span>
+                <span className="text-white font-black text-xl tracking-wider leading-none">ABSTRACT</span>
+              </div>
+
+              <div className="flex flex-col gap-1.5 ml-1 shrink-0">
+                <div className="w-4 h-0.5 bg-[#5c9a26] rotate-30 rounded-full" />
+                <div className="w-3.5 h-0.5 bg-[#5c9a26] rotate-45 rounded-full" />
+              </div>
+            </div>
+
+            <p className="text-[#0B2A4A] font-bold text-lg leading-tight mb-3">
+              3rd International Agri-Life &amp;<br />Bioresource Science Symposium
+            </p>
+            <div className="w-3/5 h-0.5 bg-[#F0C674] mb-4" />
+
+            <p className="text-gray-600 text-sm leading-relaxed mb-6">
+              Submit your research and share your scientific contributions with experts, educators, and industry leaders from the Philippines and around the world.
+            </p>
+
+            <Link
+              href="/abstract-submission"
+              onClick={() => instantClose()}
+              className="flex items-center justify-center gap-2 w-full py-3 rounded-full bg-[#0A5C0A] hover:bg-[#084a08] text-white text-sm font-bold shadow-md hover:-translate-y-0.5 transition-all duration-300"
+            >
+              Submit Abstract →
+            </Link>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 // ===== Fluid hero scale =====
 // The hero is laid out with absolute pixel positions designed for a 1920px-wide
 // viewport. On narrower desktop/laptop screens we scale the whole hero down
@@ -199,6 +525,8 @@ function HomeInner() {
   // Scroll progress hooks (parallax)
   const heroScroll = useScrollProgress<HTMLElement>();
   const heroScale = useHeroScale();
+  const heroCardRef = useRef<HTMLDivElement | null>(null);
+  const [popupDone, setPopupDone] = useState(false);
   const contentScroll = useScrollProgress<HTMLElement>();
 
   // Parallax translations — disabled while editing
@@ -244,6 +572,7 @@ function HomeInner() {
   return (
     <div className="flex flex-col min-h-screen bg-[#F5F6FA] font-sans text-[#0B2A4A] overflow-x-hidden">
       <ScrollProgressBar />
+      <AbstractPopup targetRef={heroCardRef} onDone={() => setPopupDone(true)} />
 
       <style jsx global>{`
         @keyframes floatSlow {
@@ -480,7 +809,7 @@ function HomeInner() {
         </div>
 
         {/* ===== FLOATING CALL FOR ABSTRACTS CARD ===== */}
-        <div className="hidden md:flex absolute top-10 right-10 lg:right-20 z-20 w-72 lg:w-85 bg-white/95 backdrop-blur-md rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white/60 p-5 flex-col items-center text-center pointer-events-auto overflow-hidden">
+        <div ref={heroCardRef} className={`hidden md:flex absolute top-10 right-10 lg:right-20 z-20 w-72 lg:w-85 bg-white/95 backdrop-blur-md rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white/60 p-5 flex-col items-center text-center overflow-hidden transition-opacity duration-300 ${popupDone ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
           
           {/* Decorative Top Banner */}
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-linear-to-r from-[#F0C674] via-[#D5A54D] to-[#F0C674]"></div>
