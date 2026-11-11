@@ -130,15 +130,15 @@ export default function PartnerInstitutionsPage() {
   // ================= DATA =================
   const hostInstitution: Institution = {
     name: "Capiz State University",
-    logo: "/images/capsu-logo.png",
+    logo: "https://res.cloudinary.com/xbloqjom/image/upload/v1794368584/capsu-logo.png",
     role: "Implementing Institution",
     location: "Capiz, Philippines",
   };
 
   const coHosts: Institution[] = [
-    { name: "Hiroshima University", logo: "/images/hiroshima-logo.webp" },
-    { name: "Visayas State University", logo: "/images/vsu-logo.png", location: "Philippines" },
-    { name: "University of San Carlos", logo: "/images/usc-logo.svg", location: "Philippines" },
+    { name: "Hiroshima University", logo: "https://res.cloudinary.com/xbloqjom/image/upload/v1794368585/hiroshima-logo.webp" },
+    { name: "Visayas State University", logo: "https://res.cloudinary.com/xbloqjom/image/upload/v1794368684/vsu-logo.png", location: "Philippines" },
+    { name: "University of San Carlos", logo: "https://res.cloudinary.com/xbloqjom/image/upload/v1794368844/usc-logo.svg", location: "Philippines" },
   ];
 
   const institutionalPartners: Institution[] = [];

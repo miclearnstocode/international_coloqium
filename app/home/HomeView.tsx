@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import { FaCalendarAlt, FaMapMarkerAlt, FaCheckCircle } from "react-icons/fa";
@@ -540,17 +541,18 @@ function HomeInner() {
         ref={heroScroll.ref}
         className="flex-1 relative overflow-hidden bg-linear-to-br from-[#E8EEF9] via-[#EAF1FA] to-[#DCE6F5]"
       >
+        {/* --- Background Elements --- */}
         <div
-          className="absolute top-0 right-0 w-150 h-150 bg-[#E3EAF5] rounded-full opacity-60 -translate-y-1/2 translate-x-1/3 float-slow"
+          className="absolute top-0 right-0 w-150 h-150 bg-[#E3EAF5] rounded-full opacity-60 -translate-y-1/2 translate-x-1/3 float-slow pointer-events-none z-0"
           style={{ transform: `translate(33%, -50%) translateY(${orbParallax}px)` }}
         />
         <div
-          className="absolute bottom-0 left-0 w-100 h-100 bg-[#E3EAF5] rounded-full opacity-40 translate-y-1/2 -translate-x-1/4 float-slower"
+          className="absolute bottom-0 left-0 w-100 h-100 bg-[#E3EAF5] rounded-full opacity-40 translate-y-1/2 -translate-x-1/4 float-slower pointer-events-none z-0"
           style={{ transform: `translate(-25%, 50%) translateY(${-orbParallax}px)` }}
         />
         <div
           aria-hidden
-          className="absolute inset-0 pointer-events-none"
+          className="absolute inset-0 pointer-events-none z-0"
           style={{
             background:
               "radial-gradient(60% 55% at 75% 40%, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 70%)",
@@ -558,7 +560,7 @@ function HomeInner() {
         />
         <div
           aria-hidden
-          className="hidden lg:block absolute -right-40 top-1/2 w-130 h-130 rounded-full border border-[#D5A54D]/25"
+          className="hidden lg:block absolute -right-40 top-1/2 w-130 h-130 rounded-full border border-[#D5A54D]/25 z-0"
           style={{
             animation: "gentleSpin 40s linear infinite",
             transform: `translateY(calc(-50% + ${ringParallax}px))`,
@@ -574,94 +576,45 @@ function HomeInner() {
           muted
           playsInline
           preload="auto"
-          className="video-orb absolute -right-57.5 top-1/2 w-400 h-400 opacity-40 lg:opacity-70 pointer-events-none z-0 object-contain"
+          className="video-orb absolute -right-20 lg:-right-30 top-1/2 w-200 h-200 lg:w-300 lg:h-300 opacity-40 lg:opacity-60 pointer-events-none z-0 object-contain"
           style={{ transform: `translateY(calc(-50% + ${videoParallax}px))` }}
         >
           <source src="https://res.cloudinary.com/xbloqjom/video/upload/v1794216653/global.mp4" type="video/mp4" />
         </video>
 
+        {/* --- Main Container --- */}
         <div className="relative z-10 mx-auto max-w-350 px-8 py-12 lg:py-16 min-h-150">
-          <div className="relative">
-            <div
-              ref={heroReveal.ref}
-              className={`max-w-2xl ${heroReveal.inView ? "in-view" : ""}`}
-              style={{ transform: `translateY(${heroParallax * 0.15}px)` }}
-            >
-              <span className="reveal-up inline-block">
-                <EditableField
-                  section="Hero Section"
-                  field="welcome_badge"
-                  fallback="Welcome to"
-                  as="span"
-                  label="Welcome Badge"
-                  className="inline-block bg-linear-to-r from-[#E3D5C0] to-[#EFE3CF] text-[#8B6F47] text-xs font-bold uppercase tracking-widest px-5 py-2 rounded-sm mb-6 shadow-sm ring-1 ring-[#D5A54D]/30"
-                />
-              </span>
-
-              <div className="reveal-up stagger-1">
-                <EditableField
-                  section="Hero Section"
-                  field="title"
-                  fallback="3rd International Agri- Life & Bioresource Science Symposium"
-                  as="h1"
-                  label="Main Title"
-                  className="text-5xl lg:text-6xl font-bold leading-tight mb-6 text-[#0B2A4A] block"
-                  multiline
+          
+          {/* Poster Image - Absolute positioned to prevent affecting other divs */}
+          <div
+            ref={heroReveal.ref}
+            className={`absolute top-150 left-6 lg:left-12 -translate-y-1/2 z-20 w-full max-w-225 h-[80vh] max-h-150 ${
+              heroReveal.inView ? "in-view" : ""
+            }`}
+            style={{ 
+              transform: `translateY(calc(-50% + ${heroParallax * 0.15}px))` 
+            }}
+          >
+            {/* The inner container manages the poster size & button positioning */}
+            <div className="reveal-up relative group w-full h-full">
+              
+              {/* Poster */}
+              <div className="relative w-full h-full bg-transparent">
+                <Image
+                  src="https://res.cloudinary.com/xbloqjom/image/upload/v1794373540/poster2.png"
+                  alt="3rd International Agri-Life & Bioresource Sciences Symposium Poster"
+                  fill
+                  priority
+                  className="object-contain object-left" // Keeps it aligned to the left within its bounds
                 />
               </div>
 
-              <div className="reveal-up stagger-2">
-                <EditableField
-                  section="Hero Section"
-                  field="subtitle"
-                  fallback="Converging Frontiers in Agri-Life and Bioresource Sciences"
-                  as="p"
-                  label="Subtitle"
-                  className="text-[#D5A54D] text-xl lg:text-2xl font-semibold mb-3 block"
-                  multiline
-                />
-              </div>
-
-              <div className="reveal-up stagger-3">
-                <EditableField
-                  section="Hero Section"
-                  field="description"
-                  fallback="Science, Innovation & Collaboration for a Resilient and Sustainable Future"
-                  as="p"
-                  label="Description"
-                  className="text-gray-800 text-base lg:text-lg mb-8 max-w-md leading-relaxed block"
-                  multiline
-                />
-              </div>
-
-              <div className="reveal-up stagger-4 flex items-center gap-3 mb-3">
-                <FaCalendarAlt className="text-[#D5A54D] text-xl shrink-0" />
-                <EditableField
-                  section="Hero Section"
-                  field="event_date"
-                  fallback="March 11-13, 2027"
-                  as="p"
-                  label="Event Date"
-                  className="text-gray-800 text-xl lg:text-2xl font-semibold"
-                />
-              </div>
-
-              <div className="reveal-up stagger-5 flex items-center gap-3 mb-8">
-                <FaMapMarkerAlt className="text-[#D5A54D] text-xl shrink-0" />
-                <EditableField
-                  section="Hero Section"
-                  field="event_location"
-                  fallback="Roxas City, Capiz, Philippines"
-                  as="p"
-                  label="Event Location"
-                  className="text-gray-800 text-xl lg:text-2xl font-semibold"
-                />
-              </div>
-
-              <div className="reveal-up stagger-6">
+              {/* Learn More Button - Floats exactly over the bottom of the poster */}
+              {/* We use absolute positioning relative to the poster's visual bottom */}
+              <div className="absolute bottom-4 left-4 z-30">
                 <Link
                   href="/about"
-                  className="premium-btn inline-flex items-center gap-2 bg-linear-to-r from-[#1D3D6D] to-[#16305a] text-white px-6 py-3 rounded-md font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+                  className="premium-btn inline-flex items-center gap-2 bg-linear-to-r from-[#1D3D6D] to-[#16305a] text-white px-6 py-3 rounded-md font-semibold shadow-xl hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300 backdrop-blur-sm bg-opacity-90"
                 >
                   <EditableField
                     section="Hero Section"
@@ -673,13 +626,15 @@ function HomeInner() {
                   <span aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-1">→</span>
                 </Link>
               </div>
+
             </div>
           </div>
+
         </div>
 
         {/* ===== The floating / docking card ===== */}
         <div
-          className="hidden md:block absolute top-40 right-0 lg:right-32 xl:right-64 z-96"
+          className="hidden md:block absolute top-40 right-0 lg:right-32 xl:right-64 z-30"
           style={{
             transform:
               !canEdit && phase === "splash" && delta
