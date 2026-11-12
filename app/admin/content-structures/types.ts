@@ -2,7 +2,8 @@ export interface FieldDefinition {
     key: string;
     label: string;
     type: 'text' | 'textarea' | 'url' | 'image';
-    value: string;
+    value?: string;
+    placeholder?: string;
 }
 
 export interface ListDefinition {

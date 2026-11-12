@@ -4,7 +4,6 @@ import { createContext, useContext, useState, useEffect, useCallback, useRef, us
 import { apiFetch } from "../lib/api";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
-
 const DRAFT_STORAGE_KEY = "symposium_draft_content";
 
 interface ContentContextType {
@@ -20,15 +19,15 @@ interface ContentContextType {
   updateItems: (section: string, items: any[]) => void;
   saveContent: () => Promise<void>;
   refreshContent: () => Promise<void>;
+  getField: (key: string) => string;
+  getList: (key: string) => any[];
 }
 
 const ContentContext = createContext<ContentContextType | null>(null);
 
-/** Normalise whatever the backend sends as a role string into a canonical set. */
 function resolveIsAdmin(role: unknown): boolean {
   if (!role || typeof role !== "string") return false;
   const normalised = role.toLowerCase().replace(/[\s_-]/g, "");
-  // accept: "admin", "superadmin", "super_admin", "super-admin", "ADMIN", etc.
   return normalised === "admin" || normalised === "superadmin";
 }
 
@@ -56,18 +55,14 @@ export function ContentProvider({
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const [pendingFields, setPendingFields] = useState<
-    Record<string, Record<string, string>>
-  >({});
+  const [pendingFields, setPendingFields] = useState<Record<string, Record<string, string>>>({});
   const [pendingItems, setPendingItems] = useState<Record<string, any[]>>({});
 
-  // Refs so callbacks never become stale
   const pendingFieldsRef = useRef(pendingFields);
   const pendingItemsRef = useRef(pendingItems);
   useEffect(() => { pendingFieldsRef.current = pendingFields; }, [pendingFields]);
   useEffect(() => { pendingItemsRef.current = pendingItems; }, [pendingItems]);
 
-  // ===== Fetch page content =====
   const fetchContent = useCallback(async () => {
     try {
       const res = await apiFetch(`/api/content/${pageSlug}`);
@@ -83,7 +78,6 @@ export function ContentProvider({
     }
   }, [pageSlug]);
 
-  // ===== Load draft from localStorage (preview mode) =====
   const applyLocalDraft = useCallback(() => {
     if (!wantsPreview) return;
     try {
@@ -127,20 +121,17 @@ export function ContentProvider({
     }
   }, [pageSlug, wantsPreview]);
 
-  // ===== Verify admin role (cached in sessionStorage to avoid repeated API calls) =====
   const verifyAdmin = useCallback(async () => {
     if (typeof window === "undefined") return false;
 
     const token = localStorage.getItem("access_token");
 
     if (!token) {
-      console.debug("[ContentContext] verifyAdmin: no token in localStorage");
       sessionStorage.removeItem("_adminVerified");
       setIsSuperAdmin(false);
       return false;
     }
 
-    // Return cached result for the same token within the session
     const cached = sessionStorage.getItem("_adminVerified");
     if (cached !== null) {
       const isAdmin = cached === "1";
@@ -155,19 +146,11 @@ export function ContentProvider({
 
       if (res.ok) {
         const user = await res.json();
-        console.debug("[ContentContext] /api/auth/me response:", user);
-
         const isAdmin = resolveIsAdmin(user.role);
-        console.debug(
-          `[ContentContext] role="${user.role}" → resolveIsAdmin=${isAdmin}`
-        );
         sessionStorage.setItem("_adminVerified", isAdmin ? "1" : "0");
         setIsSuperAdmin(isAdmin);
         return isAdmin;
       } else {
-        console.warn(
-          `[ContentContext] /api/auth/me returned ${res.status} — treating as non-admin`
-        );
         sessionStorage.setItem("_adminVerified", "0");
       }
     } catch (err) {
@@ -178,20 +161,17 @@ export function ContentProvider({
     return false;
   }, []);
 
-  // ===== Boot: fetch content + verify admin + enable edit mode if ?edit=1 =====
   useEffect(() => {
     (async () => {
       await fetchContent();
       const admin = await verifyAdmin();
 
       if (admin && wantsEdit) {
-        console.debug("[ContentContext] Admin confirmed + ?edit=1 → enabling edit mode");
         setIsEditMode(true);
         return;
       }
       setIsEditMode(false);
 
-      // Non-admin: strip ?edit=1 from the URL so the page looks totally normal
       if (wantsEdit && typeof window !== "undefined") {
         const url = new URL(window.location.href);
         url.searchParams.delete("edit");
@@ -200,23 +180,19 @@ export function ContentProvider({
     })();
   }, [fetchContent, verifyAdmin, wantsEdit]);
 
-  // Apply draft AFTER content is fetched
   useEffect(() => {
     if (!loading) applyLocalDraft();
   }, [loading, applyLocalDraft]);
 
-  // ===== THE KEY BIT: toggle body.editing for the CSS =====
   useEffect(() => {
     if (typeof document === "undefined") return;
     const on = isEditMode && isSuperAdmin;
-    console.debug(`[ContentContext] body.editing → ${on} (isEditMode=${isEditMode}, isSuperAdmin=${isSuperAdmin})`);
     document.body.classList.toggle("editing", on);
     return () => {
       document.body.classList.remove("editing");
     };
   }, [isEditMode, isSuperAdmin]);
 
-  // ===== Field / list updates =====
   const updateField = useCallback((section: string, field: string, value: string) => {
     setContent((prev) => ({
       ...prev,
@@ -235,7 +211,6 @@ export function ContentProvider({
     setHasUnsavedChanges(true);
   }, []);
 
-  // ===== Save =====
   const saveContent = useCallback(async () => {
     const token = localStorage.getItem("access_token");
     if (!token) throw new Error("Not authenticated. Please login as admin.");
@@ -306,6 +281,34 @@ export function ContentProvider({
     });
   }, [isSuperAdmin, hasUnsavedChanges, fetchContent]);
 
+  // ==========================================
+  // THE FIX: Properly split "section.field" keys
+  // ==========================================
+  const getField = useCallback((key: string) => {
+    // 1. Check pending fields first
+    if (key.includes(".")) {
+      const [section, field] = key.split(".");
+      if (pendingFields[section]?.[field] !== undefined) return pendingFields[section][field];
+      if (content[section]?.[field] !== undefined) return content[section][field];
+    } else {
+      // Fallback for flat keys if they are used anywhere
+      for (const section of Object.values(pendingFields)) {
+        if (section[key] !== undefined) return section[key];
+      }
+      for (const section of Object.values(content)) {
+        if (section[key] !== undefined) return section[key];
+      }
+    }
+    
+    return "";
+  }, [content, pendingFields]);
+
+  const getList = useCallback((key: string) => {
+    if (pendingItems[key] !== undefined) return pendingItems[key];
+    if (items[key] !== undefined) return items[key];
+    return [];
+  }, [items, pendingItems]);
+
   const value = useMemo(
     () => ({
       content,
@@ -320,6 +323,8 @@ export function ContentProvider({
       updateItems,
       saveContent,
       refreshContent: fetchContent,
+      getField,
+      getList,
     }),
     [
       content,
@@ -334,6 +339,8 @@ export function ContentProvider({
       updateItems,
       saveContent,
       fetchContent,
+      getField,
+      getList,
     ]
   );
 

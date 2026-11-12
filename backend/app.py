@@ -76,7 +76,18 @@ with app.app_context():
 for bp in ALL_BLUEPRINTS:
     app.register_blueprint(bp)
 
-# Global Error Handler
+@app.before_request
+def handle_options():
+    if request.method == "OPTIONS":
+        return jsonify({}), 200
+
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+    return response
+
 @app.errorhandler(Exception)
 def handle_exception(e):
     traceback.print_exc()
@@ -91,7 +102,7 @@ def super_admin_required(fn):
             return jsonify({}), 200
 
         verify_jwt_in_request()
-        user_id = int(get_jwt_identity())      # ← cast back to int
+        user_id = int(get_jwt_identity())   
         user = User.query.get(user_id)
         if not user or user.role != 'admin':
             return jsonify({"detail": "Super admin access required"}), 403
