@@ -47,7 +47,6 @@ export default function Header() {
       <nav
         className="mx-auto flex w-full max-w-[1280px] items-center justify-center max-xl:justify-between"
         style={{
-          // Fluid spacing: shrinks smoothly on laptop screens
           paddingInline: "clamp(1rem, 2vw, 2rem)",
           paddingBlock: "clamp(0.6rem, 0.7vw, 0.85rem)",
           gap: "clamp(1rem, 2vw, 2.5rem)",
@@ -73,13 +72,8 @@ export default function Header() {
         </Link>
 
         {/* ── Desktop navigation ── */}
-        <ul
-          className="hidden xl:flex items-center font-semibold"
-          style={{
-            fontSize: "clamp(0.72rem, 0.75vw, 0.875rem)",
-            gap: "clamp(0rem, 0.2vw, 0.35rem)",
-          }}
-        >
+        {/* Changed to use standard Tailwind sizing with a tighter gap to prevent overflow */}
+        <ul className="hidden xl:flex items-center text-[13px] 2xl:text-sm font-semibold gap-0.5 2xl:gap-1">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -87,7 +81,7 @@ export default function Header() {
                 <Link
                   href={item.href}
                   aria-current={isActive ? "page" : undefined}
-                  className={`group relative block whitespace-nowrap rounded-lg px-[0.7em] py-[0.55em] transition-colors duration-200 ${
+                  className={`group relative block whitespace-nowrap rounded-lg px-2.5 py-2 transition-colors duration-200 ${
                     isActive
                       ? "text-[#0B2A4A]"
                       : "text-gray-500 hover:text-[#0B2A4A] hover:bg-[#0B2A4A]/5"
@@ -97,7 +91,7 @@ export default function Header() {
                   {/* Gold indicator */}
                   <span
                     aria-hidden
-                    className={`absolute left-[0.7em] right-[0.7em] -bottom-0.5 h-0.5 rounded-full bg-[#D5A54D] origin-center transition-transform duration-300 ${
+                    className={`absolute left-2.5 right-2.5 -bottom-0.5 h-0.5 rounded-full bg-[#D5A54D] origin-center transition-transform duration-300 ${
                       isActive
                         ? "scale-x-100"
                         : "scale-x-0 group-hover:scale-x-50"

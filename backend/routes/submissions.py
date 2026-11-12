@@ -116,11 +116,11 @@ def submit_abstract():
     try:
         data = request.get_json()
         
-        # Validate required fields (including new fields)
+        # REMOVED city_tour_option FROM required fields
         required_fields = [
             'selected_track', 'specific_track', 'research_title', 'author', 
             'presenter', 'email_address', 'university_agency', 'address',
-            'phone_number', 'presentation_type', 'city_tour_option', 'abstract', 'keywords'
+            'phone_number', 'presentation_type', 'abstract', 'keywords'
         ]
         for field in required_fields:
             if not data.get(field):
@@ -163,7 +163,7 @@ def submit_abstract():
         if not sender_id or sender_id == 0:
             return jsonify({"detail": "User authentication required. Please login again."}), 401
         
-        # Save to database with new fields
+        # Save to database (REMOVED city_tour_option)
         new_sub = AbstractSubmission(
             sender_id=sender_id,
             user_id=sender_id,
@@ -178,7 +178,6 @@ def submit_abstract():
             address=data.get('address'),
             phone_number=data.get('phone_number'),
             presentation_type=data.get('presentation_type'),
-            city_tour_option=data.get('city_tour_option'),
             abstract=data['abstract'],
             keywords=data['keywords'],
             abstract_drive_view_url=view_url,
@@ -219,7 +218,7 @@ def preview_abstract():
     try:
         data = request.get_json()
         
-        # Validate required fields
+        # REMOVED city_tour_option
         required_fields = [
             'selected_track', 'specific_track', 'research_title', 'author', 
             'presenter', 'email_address', 'university_agency', 'abstract', 'keywords'
@@ -253,7 +252,6 @@ def preview_abstract():
             os.remove(temp_file_path)
         traceback.print_exc()
         return jsonify({"detail": str(e)}), 500
-    
 
 
 @submissions_bp.route('/api/staff/submissions', methods=['GET', 'OPTIONS'])
@@ -275,18 +273,23 @@ def get_all_submissions():
             'presenter': s.presenter,
             'email_address': s.email_address,
             'university_agency': s.university_agency,
+            
+            # --- ADDED THESE THREE LINES ---
+            'address': s.address,
+            'phone_number': s.phone_number,
+            'presentation_type': s.presentation_type,
+            # -------------------------------
+            
             'abstract': s.abstract,
             'keywords': s.keywords,
-            'abstract_drive_view_url': s.abstract_drive_view_url,  # ← FIXED: was 'abstract_view_url'
-            'abstract_download_url': s.abstract_drive_download_url,  # ← FIXED: was 'abstract_download_url'
+            'abstract_drive_view_url': s.abstract_drive_view_url,
+            'abstract_download_url': s.abstract_drive_download_url,
             'status': s.status,
             'created_at': s.created_at.strftime('%Y-%m-%d %H:%M:%S') if s.created_at else None
         } for s in submissions]
         return jsonify(result), 200
     except Exception as e:
         return jsonify({"detail": str(e)}), 500
-
-
 
 @submissions_bp.route('/api/staff/submissions/<int:submission_id>/status', methods=['PUT', 'OPTIONS'])
 @staff_required
@@ -332,10 +335,17 @@ def get_my_submissions(user_id):
             'presenter': s.presenter,
             'email_address': s.email_address,
             'university_agency': s.university_agency,
+            
+            # --- ADDED THESE THREE LINES ---
+            'address': s.address,
+            'phone_number': s.phone_number,
+            'presentation_type': s.presentation_type,
+            # -------------------------------
+            
             'abstract': s.abstract,
             'keywords': s.keywords,
-            'abstract_drive_view_url': s.abstract_drive_view_url,  # ← FIXED
-            'abstract_drive_download_url': s.abstract_drive_download_url,  # ← FIXED
+            'abstract_drive_view_url': s.abstract_drive_view_url,
+            'abstract_drive_download_url': s.abstract_drive_download_url,
             'status': s.status,
             'created_at': s.created_at.strftime('%Y-%m-%d %H:%M:%S') if s.created_at else None
         } for s in submissions]

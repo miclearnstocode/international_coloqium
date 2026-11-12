@@ -8,7 +8,7 @@ import {
   FaPaperPlane, FaPhone, FaSpinner, FaPlus, FaTimes, FaUserPlus, FaUser,
   FaCheck, FaUniversity, FaSearch, FaChevronDown, FaPlusCircle, FaFilePdf,
   FaEye, FaDownload, FaSync, FaList, FaExclamationTriangle, FaFolderOpen,
-  FaFileAlt, FaMapMarkerAlt, FaMicrophone, FaImage, FaCity,
+  FaFileAlt, FaMapMarkerAlt, FaMicrophone, FaImage,
   FaArrowLeft, FaHourglassHalf, FaCheckCircle, FaTimesCircle, FaChevronRight
 } from "react-icons/fa";
 import { apiFetch } from "../lib/api";
@@ -17,7 +17,6 @@ export default function AbstractSubmissionPage() {
   const router = useRouter();
 
   // ===== PAGE VIEW STATE =====
-  // "landing" | "submit" | "submissions"
   const [view, setView] = useState<"landing" | "submit" | "submissions">("landing");
 
   const [loading, setLoading] = useState(false);
@@ -57,7 +56,6 @@ export default function AbstractSubmissionPage() {
     address: "",
     phone_number: "",
     presentation_type: "",
-    city_tour_option: "",
     abstract: "",
     keywords: ""
   });
@@ -149,12 +147,11 @@ export default function AbstractSubmissionPage() {
     }
   }, []);
 
-  // Fetch submissions on mount (for landing stats)
+  // Fetch submissions on mount
   useEffect(() => {
     fetchMySubmissions();
   }, [fetchMySubmissions]);
 
-  // Refetch when navigating to submissions view
   useEffect(() => {
     if (view === "submissions") {
       fetchMySubmissions();
@@ -165,7 +162,7 @@ export default function AbstractSubmissionPage() {
     const requiredFields = [
       'selected_track', 'specific_track', 'research_title', 'author',
       'presenter', 'email_address', 'university_agency', 'address',
-      'presentation_type', 'city_tour_option', 'abstract', 'keywords'
+      'presentation_type', 'abstract', 'keywords'
     ];
 
     const isComplete = requiredFields.every(field => data[field]?.trim());
@@ -205,7 +202,7 @@ export default function AbstractSubmissionPage() {
     }
   }, []);
 
-  // Auto-generate preview when keywords are filled
+  // Auto-generate preview when all required fields are filled
   useEffect(() => {
     if (formData.keywords.trim() &&
         formData.selected_track &&
@@ -217,7 +214,6 @@ export default function AbstractSubmissionPage() {
         formData.university_agency &&
         formData.address &&
         formData.presentation_type &&
-        formData.city_tour_option &&
         formData.abstract) {
 
       if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -383,18 +379,18 @@ export default function AbstractSubmissionPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'accepted': return 'bg-green-100 text-green-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
+      case 'pending': return 'bg-[#FEF9E7] text-yellow-800 border border-[#F0C674]/30';
+      case 'accepted': return 'bg-[#E9F5E1] text-[#1b5e20] border border-[#76B947]/30';
+      case 'rejected': return 'bg-[#FFF5F5] text-red-800 border border-red-200';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'pending': return <FaHourglassHalf className="text-yellow-600" />;
-      case 'accepted': return <FaCheckCircle className="text-green-600" />;
-      case 'rejected': return <FaTimesCircle className="text-red-600" />;
+      case 'pending': return <FaHourglassHalf className="text-[#D5A54D]" />;
+      case 'accepted': return <FaCheckCircle className="text-[#76B947]" />;
+      case 'rejected': return <FaTimesCircle className="text-red-500" />;
       default: return <FaExclamationTriangle className="text-gray-600" />;
     }
   };
@@ -448,7 +444,7 @@ export default function AbstractSubmissionPage() {
     if (loading) {
       return (
         <div className="flex flex-col items-center justify-center h-full text-center">
-          <FaSpinner className="animate-spin text-3xl text-[#0A2540] mb-4" />
+          <FaSpinner className="animate-spin text-3xl text-[#1D3D6D] mb-4" />
           <p className="text-zinc-500">Loading PDF...</p>
         </div>
       );
@@ -477,7 +473,7 @@ export default function AbstractSubmissionPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F7FB] font-sans text-[#0A2540] flex flex-col">
+    <div className="min-h-screen bg-linear-to-b from-white via-[#F8FBF5] to-white font-sans text-[#0A2540] flex flex-col">
       <Header />
 
       {/* Preview Modal */}
@@ -497,10 +493,10 @@ export default function AbstractSubmissionPage() {
               <iframe src={previewUrl} className="w-full h-150 border-0" title="PDF Preview" />
             </div>
             <div className="mt-4 flex justify-end gap-2">
-              <a href={previewUrl} download className="inline-flex items-center gap-2 px-4 py-2 bg-[#0A2540] text-white rounded-lg hover:bg-[#143b66]">
+              <a href={previewUrl} download className="inline-flex items-center gap-2 px-4 py-2 bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white rounded-lg hover:shadow-lg transition-all">
                 <FaDownload /> Download PDF
               </a>
-              <button onClick={() => setShowPreviewModal(false)} className="px-4 py-2 bg-zinc-200 text-zinc-700 rounded-lg hover:bg-zinc-300">
+              <button onClick={() => setShowPreviewModal(false)} className="px-4 py-2 bg-zinc-200 text-zinc-700 rounded-lg hover:bg-zinc-300 font-semibold transition-colors">
                 Close
               </button>
             </div>
@@ -510,119 +506,176 @@ export default function AbstractSubmissionPage() {
 
       {/* Submission Detail Modal with PDF Viewer */}
       {showSubmissionModal && viewingSubmission && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowSubmissionModal(false)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden">
-
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowSubmissionModal(false)} />
+          
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl h-[95vh] flex flex-col overflow-hidden">
+            
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 shrink-0">
-              <h3 className="text-xl font-bold text-[#0A2540] flex items-center gap-2">
-                <FaFolderOpen className="text-[#0A2540]" /> Submission Details
+            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 shrink-0 bg-[#F8FBF5]">
+              <h3 className="text-xl font-bold text-[#0A2540] flex items-center gap-2 tracking-tight">
+                <FaFolderOpen className="text-[#1D3D6D]" /> Submission Details
               </h3>
-              <button onClick={() => setShowSubmissionModal(false)} className="text-zinc-400 hover:text-zinc-600 transition-colors">
+              <button onClick={() => setShowSubmissionModal(false)} className="text-zinc-400 hover:text-zinc-600 transition-colors p-2 hover:bg-zinc-100 rounded-full">
                 <FaTimes className="text-xl" />
               </button>
             </div>
 
             {/* Modal Body */}
-            <div className="flex-1 overflow-hidden">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full p-6">
+            <div className="flex-1 overflow-hidden bg-white">
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-6 h-full p-6">
 
-                {/* Left Column - Scrollable Details */}
+                {/* Left Column - Scrollable Details (Card Layout) */}
                 <div className="overflow-y-auto pr-2 space-y-4 custom-scrollbar">
-                  <div>
-                    <h4 className="text-sm font-semibold text-zinc-500">Research Title</h4>
-                    <p className="text-[#0A2540]">{viewingSubmission.research_title}</p>
+                  
+                  {/* Card 1: General Info */}
+                  <div className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm">
+                    <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-4 flex items-center gap-2 border-b border-zinc-100 pb-3">
+                      <FaFileAlt className="text-[#76B947]" /> General Information
+                    </h4>
+                    <div className="space-y-5">
+                      <div>
+                        <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Research Title</p>
+                        <p className="text-[#0A2540] font-bold text-lg leading-snug">
+                          {viewingSubmission.research_title || <span className="text-zinc-400 italic font-normal text-base">Not provided</span>}
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Presentation Type</p>
+                          <p className="text-[#0A2540] flex items-center gap-2 text-base font-medium">
+                            {viewingSubmission.presentation_type === 'oral' ? (
+                              <><FaMicrophone className="text-[#1D3D6D]" /> Oral</>
+                            ) : (
+                              <><FaImage className="text-[#1D3D6D]" /> Poster</>
+                            )}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Status</p>
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(viewingSubmission.status)}`}>
+                            {getStatusIcon(viewingSubmission.status)}
+                            <span className="ml-1.5">{viewingSubmission.status?.charAt(0).toUpperCase() + viewingSubmission.status?.slice(1)}</span>
+                          </span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Track</p>
+                          <p className="text-[#0A2540] text-base font-medium">{viewingSubmission.selected_track || 'Not provided'}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Sub-Track</p>
+                          <p className="text-[#0A2540] text-base">{viewingSubmission.specific_track || 'Not provided'}</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-zinc-500">Authors</h4>
-                    <p className="text-[#0A2540]">{viewingSubmission.author}{viewingSubmission.co_author ? `, ${viewingSubmission.co_author}` : ''}</p>
+
+                  {/* Card 2: Authorship & Affiliation */}
+                  <div className="bg-[#F8FBF5] border border-[#76B947]/20 rounded-xl p-6 shadow-sm">
+                    <h4 className="text-xs font-bold text-[#1b5e20] uppercase tracking-widest mb-4 flex items-center gap-2 border-b border-[#76B947]/20 pb-3">
+                      <FaUser className="text-[#76B947]" /> Authorship
+                    </h4>
+                    <div className="space-y-5">
+                      <div>
+                        <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Author(s)</p>
+                        <p className="text-[#0A2540] text-base font-medium leading-relaxed">
+                          {viewingSubmission.author || <span className="text-zinc-400 italic font-normal">Not provided</span>}
+                          {viewingSubmission.co_author ? `, ${viewingSubmission.co_author}` : ''}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Presenter</p>
+                        <p className="text-[#0A2540] text-base">{viewingSubmission.presenter || <span className="text-zinc-400 italic">Not provided</span>}</p>
+                      </div>
+                      <div className="grid grid-cols-1 gap-5">
+                        <div>
+                          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">University / Agency</p>
+                          <p className="text-[#0A2540] text-base flex items-start gap-2">
+                            <FaUniversity className="text-zinc-400 text-sm mt-1 shrink-0" />
+                            <span>{viewingSubmission.university_agency || <span className="text-zinc-400 italic">Not provided</span>}</span>
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Address</p>
+                          <p className="text-[#0A2540] text-base flex items-start gap-2">
+                            <FaMapMarkerAlt className="text-zinc-400 text-sm mt-1 shrink-0" />
+                            <span>{viewingSubmission.address || <span className="text-zinc-400 italic">Not provided</span>}</span>
+                          </p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Email</p>
+                            <p className="text-[#0A2540] text-base break-all" title={viewingSubmission.email_address}>
+                              {viewingSubmission.email_address || <span className="text-zinc-400 italic">Not provided</span>}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Phone</p>
+                            <p className="text-[#0A2540] text-base flex items-center gap-2">
+                              <FaPhone className="text-zinc-400 text-sm shrink-0" />
+                              {viewingSubmission.phone_number || <span className="text-zinc-400 italic">Not provided</span>}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-zinc-500">Presenter</h4>
-                    <p className="text-[#0A2540]">{viewingSubmission.presenter}</p>
+
+                  {/* Card 3: Abstract & Keywords */}
+                  <div className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm">
+                    <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-4 flex items-center gap-2 border-b border-zinc-100 pb-3">
+                      <FaList className="text-[#1D3D6D]" /> Abstract & Keywords
+                    </h4>
+                    <div className="space-y-5">
+                      <div>
+                        <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Abstract</p>
+                        <p className="text-[#0A2540] text-base whitespace-pre-wrap leading-relaxed text-justify">
+                          {viewingSubmission.abstract || <span className="text-zinc-400 italic">Not provided</span>}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Keywords</p>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          {(viewingSubmission.keywords || '').split(',').map((kw: string, i: number) => {
+                            if (!kw.trim()) return null;
+                            return (
+                              <span key={i} className="inline-block bg-[#F2F9FF] text-[#1D3D6D] text-sm font-medium px-3 py-1 rounded-md border border-[#4FC3F7]/30">
+                                {kw.trim()}
+                              </span>
+                            );
+                          })}
+                          {(!viewingSubmission.keywords) && <span className="text-zinc-400 italic">Not provided</span>}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-zinc-500">Email</h4>
-                    <p className="text-[#0A2540]">{viewingSubmission.email_address}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-zinc-500">University/Agency</h4>
-                    <p className="text-[#0A2540]">{viewingSubmission.university_agency}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-zinc-500">Address</h4>
-                    <p className="text-[#0A2540] flex items-center gap-2">
-                      <FaMapMarkerAlt className="text-zinc-400 text-xs" />
-                      {viewingSubmission.address}
+
+                  {/* Submission Date */}
+                  <div className="text-center pt-2 pb-6">
+                    <p className="text-sm text-zinc-400 font-medium tracking-wide">
+                      Submitted on: {viewingSubmission.created_at || 'Unknown date'}
                     </p>
                   </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-zinc-500">Phone Number</h4>
-                    <p className="text-[#0A2540] flex items-center gap-2">
-                      <FaPhone className="text-zinc-400 text-xs" />
-                      {viewingSubmission.phone_number}
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-zinc-500">Presentation Type</h4>
-                    <p className="text-[#0A2540] flex items-center gap-2">
-                      {viewingSubmission.presentation_type === 'oral' ? (
-                        <FaMicrophone className="text-[#0A2540] text-xs" />
-                      ) : (
-                        <FaImage className="text-[#0A2540] text-xs" />
-                      )}
-                      {viewingSubmission.presentation_type === 'oral' ? 'Oral Presentation' : 'Poster Presentation'}
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-zinc-500">City Tour/Boracay Transfer</h4>
-                    <p className="text-[#0A2540] flex items-center gap-2">
-                      <FaCity className="text-zinc-400 text-xs" />
-                      {viewingSubmission.city_tour_option === 'option1' ? 'Option 1 (City Tour Only)' : 'Option 2 (City tour, and Boracay Transfer)'}
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-zinc-500">Track</h4>
-                    <p className="text-[#0A2540]">{viewingSubmission.selected_track}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-zinc-500">Sub-Track</h4>
-                    <p className="text-[#0A2540]">{viewingSubmission.specific_track}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-zinc-500">Status</h4>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(viewingSubmission.status)}`}>
-                      {getStatusIcon(viewingSubmission.status)}
-                      <span className="ml-1">{viewingSubmission.status.charAt(0).toUpperCase() + viewingSubmission.status.slice(1)}</span>
-                    </span>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-zinc-500">Abstract</h4>
-                    <p className="text-[#0A2540] whitespace-pre-wrap">{viewingSubmission.abstract}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-zinc-500">Keywords</h4>
-                    <p className="text-[#0A2540]">{viewingSubmission.keywords}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-zinc-500">Submission Date</h4>
-                    <p className="text-[#0A2540]">{viewingSubmission.created_at}</p>
-                  </div>
+
                 </div>
 
                 {/* Right Column - PDF Viewer */}
-                <div className="bg-zinc-100 rounded-lg p-4 flex flex-col h-full">
-                  <h4 className="text-sm font-semibold text-zinc-500 mb-3 flex items-center gap-2 shrink-0">
-                    <FaFileAlt className="text-[#0A2540]" /> Abstract PDF
-                  </h4>
-                  <div className="flex-1 min-h-0">
+                <div className="bg-[#F2F9FF] rounded-xl p-5 flex flex-col h-full border border-[#4FC3F7]/30 shadow-sm">
+                  <div className="flex items-center justify-between mb-4 shrink-0 border-b border-[#4FC3F7]/20 pb-3">
+                    <h4 className="text-sm font-bold text-[#1D3D6D] flex items-center gap-2 tracking-wide uppercase">
+                      <FaFileAlt /> Abstract PDF Viewer
+                    </h4>
+                  </div>
+                  <div className="flex-1 min-h-0 bg-white rounded-lg overflow-hidden shadow-inner border border-zinc-200">
                     {pdfViewerUrl ? (
                       <GoogleDriveViewer url={pdfViewerUrl} />
                     ) : (
-                      <div className="flex flex-col items-center justify-center h-full text-center">
+                      <div className="flex flex-col items-center justify-center h-full text-center p-6">
                         <FaFilePdf className="text-5xl text-zinc-300 mb-4" />
-                        <p className="text-zinc-500">No PDF file available for this submission.</p>
+                        <p className="text-zinc-500 font-medium text-lg">No PDF file available for this submission.</p>
+                        <p className="text-sm text-zinc-400 mt-2">The document may have been removed or failed to upload.</p>
                       </div>
                     )}
                   </div>
@@ -635,19 +688,19 @@ export default function AbstractSubmissionPage() {
               <div className="flex flex-wrap items-center justify-end gap-3">
                 {viewingSubmission.abstract_drive_view_url && (
                   <a href={viewingSubmission.abstract_drive_view_url} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-[#0A2540] text-white rounded-lg hover:bg-[#143b66] transition-colors">
-                    <FaEye /> Open in New Tab
+                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#0B2A4A] text-white font-bold text-sm tracking-wide rounded-lg hover:bg-[#153A61] transition-colors shadow-sm">
+                    <FaEye className="text-base" /> OPEN IN NEW TAB
                   </a>
                 )}
                 {viewingSubmission.abstract_download_url && (
                   <a href={viewingSubmission.abstract_download_url} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-200 text-zinc-700 rounded-lg hover:bg-zinc-300 transition-colors">
-                    <FaDownload /> Download PDF
+                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white font-bold text-sm tracking-wide rounded-lg hover:shadow-lg transition-all">
+                    <FaDownload className="text-base" /> DOWNLOAD PDF
                   </a>
                 )}
                 <button onClick={() => setShowSubmissionModal(false)}
-                  className="px-4 py-2 bg-zinc-200 text-zinc-700 rounded-lg hover:bg-zinc-300 transition-colors">
-                  Close
+                  className="px-6 py-2.5 bg-zinc-100 text-zinc-600 font-bold text-sm tracking-wide rounded-lg hover:bg-zinc-200 transition-colors">
+                  CLOSE
                 </button>
               </div>
             </div>
@@ -660,13 +713,13 @@ export default function AbstractSubmissionPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 text-center">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <FaCheck className="text-green-500 text-4xl" />
+            <div className="w-20 h-20 bg-[#E9F5E1] rounded-full flex items-center justify-center mx-auto mb-6">
+              <FaCheck className="text-[#0A5C0A] text-4xl" />
             </div>
             <h2 className="text-2xl font-bold text-[#0A2540] mb-3">Submission Successful!</h2>
             <p className="text-zinc-600 mb-4">Your abstract has been submitted successfully.</p>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-              <p className="text-sm text-blue-800">
+            <div className="bg-[#F2F9FF] border border-[#4FC3F7]/30 rounded-lg p-4 mb-6">
+              <p className="text-sm text-[#0A2540]">
                 <span className="font-semibold">Status:</span> {submittedData.status}
               </p>
             </div>
@@ -686,7 +739,7 @@ export default function AbstractSubmissionPage() {
             {/* Hero Header */}
             <div className="text-center">
               <h1 className="text-4xl font-bold text-[#0A2540] mb-4">Abstract Submission Portal</h1>
-              <div className="w-16 h-1 bg-[#D5A54D] mx-auto mb-6"></div>
+              <div className="w-16 h-1 bg-linear-to-r from-[#76B947] via-[#F0C674] to-[#D5A54D] mx-auto mb-6 rounded-full"></div>
               <p className="text-zinc-600 max-w-2xl mx-auto">
                 Submit your research abstract or track the status of your existing submissions.
               </p>
@@ -694,47 +747,47 @@ export default function AbstractSubmissionPage() {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-white rounded-xl shadow-sm border border-zinc-100 p-5">
+              <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-5">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-zinc-500 font-medium">Total</p>
                     <p className="text-3xl font-bold text-[#0A2540] mt-1">{stats.total}</p>
                   </div>
-                  <div className="w-12 h-12 bg-[#0A2540]/10 rounded-lg flex items-center justify-center">
-                    <FaList className="text-xl text-[#0A2540]" />
+                  <div className="w-12 h-12 bg-[#F2F9FF] rounded-lg flex items-center justify-center border border-[#4FC3F7]/20">
+                    <FaList className="text-xl text-[#1D3D6D]" />
                   </div>
                 </div>
               </div>
-              <div className="bg-white rounded-xl shadow-sm border border-zinc-100 p-5">
+              <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-5">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-zinc-500 font-medium">Pending</p>
                     <p className="text-3xl font-bold text-yellow-600 mt-1">{stats.pending}</p>
                   </div>
-                  <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                    <FaHourglassHalf className="text-xl text-yellow-600" />
+                  <div className="w-12 h-12 bg-[#FEF9E7] rounded-lg flex items-center justify-center border border-[#F0C674]/30">
+                    <FaHourglassHalf className="text-xl text-[#D5A54D]" />
                   </div>
                 </div>
               </div>
-              <div className="bg-white rounded-xl shadow-sm border border-zinc-100 p-5">
+              <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-5">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-zinc-500 font-medium">Accepted</p>
-                    <p className="text-3xl font-bold text-green-600 mt-1">{stats.accepted}</p>
+                    <p className="text-3xl font-bold text-green-700 mt-1">{stats.accepted}</p>
                   </div>
-                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                    <FaCheckCircle className="text-xl text-green-600" />
+                  <div className="w-12 h-12 bg-[#E9F5E1] rounded-lg flex items-center justify-center border border-[#76B947]/30">
+                    <FaCheckCircle className="text-xl text-[#0A5C0A]" />
                   </div>
                 </div>
               </div>
-              <div className="bg-white rounded-xl shadow-sm border border-zinc-100 p-5">
+              <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-5">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-zinc-500 font-medium">Rejected</p>
                     <p className="text-3xl font-bold text-red-600 mt-1">{stats.rejected}</p>
                   </div>
-                  <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                    <FaTimesCircle className="text-xl text-red-600" />
+                  <div className="w-12 h-12 bg-[#FFF5F5] rounded-lg flex items-center justify-center border border-red-200">
+                    <FaTimesCircle className="text-xl text-red-500" />
                   </div>
                 </div>
               </div>
@@ -745,13 +798,13 @@ export default function AbstractSubmissionPage() {
               {/* Submit Abstract Card */}
               <button
                 onClick={() => setView("submit")}
-                className="group bg-white rounded-2xl shadow-sm border border-zinc-100 p-8 text-left hover:shadow-xl hover:border-[#0A2540]/30 transition-all"
+                className="group bg-white rounded-2xl shadow-sm border border-zinc-200 p-8 text-left hover:shadow-xl hover:border-[#76B947]/40 transition-all"
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div className="w-14 h-14 bg-[#0A2540] rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <div className="w-14 h-14 bg-linear-to-br from-[#0A5C0A] to-[#76B947] rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-md shadow-[#0A5C0A]/20">
                     <FaPaperPlane className="text-2xl text-white" />
                   </div>
-                  <FaChevronRight className="text-zinc-300 group-hover:text-[#0A2540] group-hover:translate-x-1 transition-all" />
+                  <FaChevronRight className="text-zinc-300 group-hover:text-[#76B947] group-hover:translate-x-1 transition-all" />
                 </div>
                 <h3 className="text-xl font-bold text-[#0A2540] mb-2">Submit Abstract</h3>
                 <p className="text-sm text-zinc-500">
@@ -762,13 +815,13 @@ export default function AbstractSubmissionPage() {
               {/* My Submissions Card */}
               <button
                 onClick={() => setView("submissions")}
-                className="group bg-white rounded-2xl shadow-sm border border-zinc-100 p-8 text-left hover:shadow-xl hover:border-[#0A2540]/30 transition-all"
+                className="group bg-white rounded-2xl shadow-sm border border-zinc-200 p-8 text-left hover:shadow-xl hover:border-[#4FC3F7]/40 transition-all"
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div className="w-14 h-14 bg-[#D5A54D] rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <div className="w-14 h-14 bg-linear-to-br from-[#0B2A4A] to-[#1D3D6D] rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-md shadow-[#0B2A4A]/20">
                     <FaFolderOpen className="text-2xl text-white" />
                   </div>
-                  <FaChevronRight className="text-zinc-300 group-hover:text-[#0A2540] group-hover:translate-x-1 transition-all" />
+                  <FaChevronRight className="text-zinc-300 group-hover:text-[#4FC3F7] group-hover:translate-x-1 transition-all" />
                 </div>
                 <h3 className="text-xl font-bold text-[#0A2540] mb-2">My Submissions</h3>
                 <p className="text-sm text-zinc-500">
@@ -779,19 +832,19 @@ export default function AbstractSubmissionPage() {
 
             {/* Recent Submissions Preview */}
             {mySubmissions.length > 0 && (
-              <div className="bg-white rounded-2xl shadow-sm border border-zinc-100 p-6">
+              <div className="bg-white rounded-2xl shadow-sm border border-zinc-200 p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-bold text-[#0A2540]">Recent Submissions</h3>
                   <button
                     onClick={() => setView("submissions")}
-                    className="text-sm font-semibold text-[#0A2540] hover:text-[#143b66] inline-flex items-center gap-1"
+                    className="text-sm font-semibold text-[#1b5e20] hover:text-[#76B947] inline-flex items-center gap-1 transition-colors"
                   >
                     View All <FaChevronRight className="text-xs" />
                   </button>
                 </div>
                 <div className="space-y-3">
                   {mySubmissions.slice(0, 3).map((sub) => (
-                    <div key={sub.id} className="flex items-center justify-between p-3 rounded-lg border border-zinc-100 hover:bg-zinc-50">
+                    <div key={sub.id} className="flex items-center justify-between p-3 rounded-lg border border-zinc-100 hover:bg-[#F8FBF5] transition-colors">
                       <div className="flex-1 min-w-0 mr-4">
                         <p className="text-sm font-medium text-[#0A2540] truncate">{sub.research_title}</p>
                         <p className="text-xs text-zinc-500 mt-0.5">{sub.created_at}</p>
@@ -815,7 +868,7 @@ export default function AbstractSubmissionPage() {
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setView("landing")}
-                className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-zinc-600 hover:text-[#0A2540] hover:bg-white rounded-lg transition-colors"
+                className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-zinc-600 hover:text-[#0A2540] hover:bg-[#F8FBF5] rounded-lg transition-colors"
               >
                 <FaArrowLeft /> Back
               </button>
@@ -832,7 +885,7 @@ export default function AbstractSubmissionPage() {
                 <div>
                   <label className="block text-sm font-semibold text-[#0A2540] mb-2">Selected Track *</label>
                   <select name="selected_track" value={formData.selected_track} onChange={handleChange} required
-                    className="w-full px-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#0A2540] focus:ring-1 focus:ring-[#0A2540]">
+                    className="w-full px-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#76B947] focus:ring-1 focus:ring-[#76B947] bg-white transition-all">
                     <option value="">Select a track</option>
                     {Object.keys(trackData).map((track) => (
                       <option key={track} value={track}>{track}</option>
@@ -843,7 +896,7 @@ export default function AbstractSubmissionPage() {
                   <label className="block text-sm font-semibold text-[#0A2540] mb-2">Specific Track / Sub-theme *</label>
                   <select name="specific_track" value={formData.specific_track} onChange={handleChange} required
                     disabled={!formData.selected_track}
-                    className="w-full px-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#0A2540] focus:ring-1 focus:ring-[#0A2540] disabled:bg-zinc-100 disabled:cursor-not-allowed">
+                    className="w-full px-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#76B947] focus:ring-1 focus:ring-[#76B947] disabled:bg-zinc-100 disabled:cursor-not-allowed bg-white transition-all">
                     <option value="">{formData.selected_track ? "Select a specific track" : "Select a track first"}</option>
                     {getSpecificTracks().map((track, index) => (
                       <option key={index} value={track}>{track}</option>
@@ -857,16 +910,16 @@ export default function AbstractSubmissionPage() {
                 <label className="block text-sm font-semibold text-[#0A2540] mb-2">Presentation Preference *</label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <button type="button" onClick={() => setFormData({ ...formData, presentation_type: "oral" })}
-                    className={`flex items-center gap-3 p-4 border rounded-lg transition-all ${formData.presentation_type === "oral" ? "border-[#0A2540] bg-[#0A2540]/5" : "border-zinc-200 hover:border-[#0A2540]/50"}`}>
-                    <FaMicrophone className={`text-2xl ${formData.presentation_type === "oral" ? "text-[#0A2540]" : "text-zinc-400"}`} />
+                    className={`flex items-center gap-3 p-4 border rounded-lg transition-all ${formData.presentation_type === "oral" ? "border-[#76B947] bg-[#F2F9FF] ring-1 ring-[#76B947]" : "border-zinc-200 hover:border-[#76B947]/50"}`}>
+                    <FaMicrophone className={`text-2xl ${formData.presentation_type === "oral" ? "text-[#1b5e20]" : "text-zinc-400"}`} />
                     <div>
                       <p className="text-sm font-semibold text-[#0A2540]">Oral Presentation</p>
                       <p className="text-xs text-zinc-500">Present your research through a live presentation</p>
                     </div>
                   </button>
                   <button type="button" onClick={() => setFormData({ ...formData, presentation_type: "poster" })}
-                    className={`flex items-center gap-3 p-4 border rounded-lg transition-all ${formData.presentation_type === "poster" ? "border-[#0A2540] bg-[#0A2540]/5" : "border-zinc-200 hover:border-[#0A2540]/50"}`}>
-                    <FaImage className={`text-2xl ${formData.presentation_type === "poster" ? "text-[#0A2540]" : "text-zinc-400"}`} />
+                    className={`flex items-center gap-3 p-4 border rounded-lg transition-all ${formData.presentation_type === "poster" ? "border-[#76B947] bg-[#F2F9FF] ring-1 ring-[#76B947]" : "border-zinc-200 hover:border-[#76B947]/50"}`}>
+                    <FaImage className={`text-2xl ${formData.presentation_type === "poster" ? "text-[#1b5e20]" : "text-zinc-400"}`} />
                     <div>
                       <p className="text-sm font-semibold text-[#0A2540]">Poster Presentation</p>
                       <p className="text-xs text-zinc-500">Present your research through a poster</p>
@@ -880,7 +933,7 @@ export default function AbstractSubmissionPage() {
                 <label className="block text-sm font-semibold text-[#0A2540] mb-2">Research Title *</label>
                 <input type="text" name="research_title" value={formData.research_title} onChange={handleChange} required
                   placeholder="Enter the full research title"
-                  className="w-full px-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#0A2540] focus:ring-1 focus:ring-[#0A2540]" />
+                  className="w-full px-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#76B947] focus:ring-1 focus:ring-[#76B947] transition-all" />
               </div>
 
               {/* Author Section */}
@@ -889,24 +942,24 @@ export default function AbstractSubmissionPage() {
                   <label className="block text-sm font-semibold text-[#0A2540] mb-2">Author *</label>
                   <input type="text" name="author" value={formData.author} onChange={handleChange} required
                     placeholder="e.g., Dela Cruz, Juan"
-                    className="w-full px-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#0A2540] focus:ring-1 focus:ring-[#0A2540]" />
+                    className="w-full px-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#76B947] focus:ring-1 focus:ring-[#76B947] transition-all" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-[#0A2540] mb-2">Presenter *</label>
                   <input type="text" name="presenter" value={formData.presenter} onChange={handleChange} required
                     placeholder="e.g., Dela Cruz, Juan"
-                    className="w-full px-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#0A2540] focus:ring-1 focus:ring-[#0A2540]" />
+                    className="w-full px-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#76B947] focus:ring-1 focus:ring-[#76B947] transition-all" />
                 </div>
               </div>
 
               {/* Co-Authors Section */}
-              <div className="border border-zinc-200 rounded-lg p-4 bg-zinc-50/50">
+              <div className="border border-zinc-200 rounded-lg p-4 bg-[#F8FBF5]">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <FaUserPlus className="text-[#0A2540] text-sm" />
+                    <FaUserPlus className="text-[#1D3D6D] text-sm" />
                     <label className="text-sm font-semibold text-[#0A2540]">Co-Authors</label>
                   </div>
-                  <span className="text-xs text-zinc-400">
+                  <span className="text-xs text-zinc-500">
                     {formData.co_authors.length} {formData.co_authors.length === 1 ? 'author' : 'authors'} added
                   </span>
                 </div>
@@ -918,18 +971,18 @@ export default function AbstractSubmissionPage() {
                     <input type="text" value={newCoAuthor} onChange={(e) => setNewCoAuthor(e.target.value)}
                       onKeyPress={handleCoAuthorKeyPress}
                       placeholder="Enter co-author name (e.g., Santos, Maria)"
-                      className="w-full pl-10 pr-4 py-2.5 text-sm border border-zinc-300 rounded-lg focus:outline-none focus:border-[#0A2540] focus:ring-1 focus:ring-[#0A2540]" />
+                      className="w-full pl-10 pr-4 py-2.5 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:border-[#76B947] focus:ring-1 focus:ring-[#76B947] bg-white" />
                   </div>
                   <button type="button" onClick={addCoAuthor} disabled={!newCoAuthor.trim()}
-                    className="inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold text-white bg-[#0A2540] hover:bg-[#143b66] rounded-lg transition-colors disabled:bg-zinc-300 disabled:cursor-not-allowed">
+                    className="inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold text-white bg-[#0A5C0A] hover:bg-[#0d6b0d] rounded-lg transition-colors disabled:bg-zinc-300 disabled:cursor-not-allowed shadow-md">
                     <FaPlus className="text-xs" /> Add
                   </button>
                 </div>
                 {formData.co_authors.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {formData.co_authors.map((coAuthor, index) => (
-                      <div key={index} className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-zinc-200 rounded-full shadow-sm">
-                        <FaUser className="text-zinc-400 text-xs" />
+                      <div key={index} className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-[#76B947]/30 rounded-full shadow-sm">
+                        <FaUser className="text-[#1b5e20] text-xs" />
                         <span className="text-sm text-[#0A2540]">{coAuthor}</span>
                         <button type="button" onClick={() => removeCoAuthor(index)}
                           className="shrink-0 w-5 h-5 flex items-center justify-center text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors">
@@ -951,7 +1004,7 @@ export default function AbstractSubmissionPage() {
                   <label className="block text-sm font-semibold text-[#0A2540] mb-2">Email Address *</label>
                   <input type="email" name="email_address" value={formData.email_address} onChange={handleChange} required
                     placeholder="you@example.com"
-                    className="w-full px-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#0A2540] focus:ring-1 focus:ring-[#0A2540]" />
+                    className="w-full px-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#76B947] focus:ring-1 focus:ring-[#76B947] transition-all" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-[#0A2540] mb-2">University / Agency *</label>
@@ -975,7 +1028,7 @@ export default function AbstractSubmissionPage() {
                         onFocus={() => { if (!showCustomAgency) setAgencyDropdownOpen(true); }}
                         placeholder={showCustomAgency ? "Enter University/Agency name" : "Search University/Agency..."}
                         required
-                        className="w-full pl-10 pr-10 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#0A2540] focus:ring-1 focus:ring-[#0A2540]" />
+                        className="w-full pl-10 pr-10 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#76B947] focus:ring-1 focus:ring-[#76B947] transition-all" />
                       <button type="button" onClick={() => setAgencyDropdownOpen(!agencyDropdownOpen)}
                         className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-[#0A2540]">
                         <FaChevronDown className={`transition-transform ${agencyDropdownOpen ? 'rotate-180' : ''}`} />
@@ -987,7 +1040,7 @@ export default function AbstractSubmissionPage() {
                         {filteredAgencies.length > 0 ? (
                           filteredAgencies.map((suc) => (
                             <button key={suc.id} type="button" onClick={() => selectAgency(suc.name)}
-                              className="w-full text-left px-4 py-2.5 hover:bg-zinc-50 transition-colors flex items-center justify-between">
+                              className="w-full text-left px-4 py-2.5 hover:bg-[#F8FBF5] transition-colors flex items-center justify-between">
                               <div>
                                 <div className="text-sm font-medium text-[#0A2540]">{suc.name}</div>
                                 <div className="text-xs text-zinc-500">
@@ -995,14 +1048,14 @@ export default function AbstractSubmissionPage() {
                                   {suc.region && <span>{suc.region}</span>}
                                 </div>
                               </div>
-                              <FaCheck className="text-green-500 text-xs" />
+                              <FaCheck className="text-[#76B947] text-xs" />
                             </button>
                           ))
                         ) : (
                           <div className="px-4 py-3">
                             <p className="text-sm text-zinc-500 mb-2">No results found for "{agencySearch}"</p>
                             <button type="button" onClick={handleAddCustomAgency}
-                              className="inline-flex items-center gap-2 text-sm font-semibold text-[#0A2540] hover:text-[#143b66]">
+                              className="inline-flex items-center gap-2 text-sm font-semibold text-[#1b5e20] hover:text-[#76B947] transition-colors">
                               <FaPlusCircle className="text-xs" /> Add "{agencySearch}" as new agency
                             </button>
                           </div>
@@ -1010,8 +1063,8 @@ export default function AbstractSubmissionPage() {
                         {agencySearch && filteredAgencies.length > 0 && (
                           <div className="border-t border-zinc-200">
                             <button type="button" onClick={handleAddCustomAgency}
-                              className="w-full text-left px-4 py-3 hover:bg-zinc-50 transition-colors">
-                              <span className="inline-flex items-center gap-2 text-sm font-semibold text-[#0A2540]">
+                              className="w-full text-left px-4 py-3 hover:bg-[#F8FBF5] transition-colors">
+                              <span className="inline-flex items-center gap-2 text-sm font-semibold text-[#1b5e20]">
                                 <FaPlusCircle className="text-xs" /> Add "{agencySearch}" as new agency
                               </span>
                             </button>
@@ -1021,15 +1074,15 @@ export default function AbstractSubmissionPage() {
                     )}
 
                     {showCustomAgency && (
-                      <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="mt-2 p-3 bg-[#F2F9FF] border border-[#4FC3F7]/30 rounded-lg">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs font-semibold text-blue-800">Adding new agency</span>
+                          <span className="text-xs font-semibold text-[#1D3D6D]">Adding new agency</span>
                           <button type="button" onClick={() => {
                             setShowCustomAgency(false);
                             setCustomAgency("");
                             setSelectedAgency("");
                             setFormData({ ...formData, university_agency: "" });
-                          }} className="text-xs text-blue-600 hover:text-blue-800">
+                          }} className="text-xs text-[#1D3D6D] hover:text-[#4FC3F7] transition-colors">
                             Cancel
                           </button>
                         </div>
@@ -1039,9 +1092,9 @@ export default function AbstractSubmissionPage() {
                           </div>
                           <input type="text" value={customAgency} onChange={(e) => setCustomAgency(e.target.value)}
                             placeholder="Enter full University/Agency name"
-                            className="w-full pl-10 pr-4 py-2.5 text-sm border border-blue-300 rounded-lg focus:outline-none focus:border-[#0A2540] focus:ring-1 focus:ring-[#0A2540]" />
+                            className="w-full pl-10 pr-4 py-2.5 text-sm border border-[#4FC3F7]/50 rounded-lg focus:outline-none focus:border-[#76B947] focus:ring-1 focus:ring-[#76B947] bg-white" />
                         </div>
-                        <p className="text-xs text-blue-700 mt-2">This agency will be saved for future use.</p>
+                        <p className="text-xs text-[#1D3D6D]/70 mt-2">This agency will be saved for future use.</p>
                       </div>
                     )}
                   </div>
@@ -1058,7 +1111,7 @@ export default function AbstractSubmissionPage() {
                     </div>
                     <input type="text" name="address" value={formData.address} onChange={handleChange} required
                       placeholder="Enter your complete address"
-                      className="w-full pl-10 pr-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#0A2540] focus:ring-1 focus:ring-[#0A2540]" />
+                      className="w-full pl-10 pr-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#76B947] focus:ring-1 focus:ring-[#76B947] transition-all" />
                   </div>
                 </div>
                 <div>
@@ -1072,44 +1125,9 @@ export default function AbstractSubmissionPage() {
                         const cleaned = e.target.value.replace(/[^\d+\-()\s]/g, '');
                         setFormData({ ...formData, phone_number: cleaned });
                       }}
-                      required placeholder="e.g., 0917-123-4567" pattern="[0-9+\\-()\\s]*"
-                      className="w-full pl-10 pr-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#0A2540] focus:ring-1 focus:ring-[#0A2540]" />
+                      required placeholder="e.g., 0917-123-4567" pattern="[0-9+\-()\s]*"
+                      className="w-full pl-10 pr-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#76B947] focus:ring-1 focus:ring-[#76B947] transition-all" />
                   </div>
-                </div>
-              </div>
-
-              {/* City Tour/Boracay Transfer */}
-              <div className="border border-zinc-200 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <FaCity className="text-[#0A2540] text-sm" />
-                  <label className="text-sm font-semibold text-[#0A2540]">City Tour/Boracay Transfer *</label>
-                </div>
-                <div className="space-y-3">
-                  <button type="button" onClick={() => setFormData({ ...formData, city_tour_option: "option1" })}
-                    className={`w-full text-left p-3 border rounded-lg transition-all ${formData.city_tour_option === "option1" ? "border-[#0A2540] bg-[#0A2540]/5" : "border-zinc-200 hover:border-[#0A2540]/50"}`}>
-                    <div className="flex items-center gap-3">
-                      <div className={`w-4 h-4 rounded-full border-2 ${formData.city_tour_option === "option1" ? "border-[#0A2540] bg-[#0A2540]" : "border-zinc-300"}`} />
-                      <div>
-                        <p className="text-sm font-semibold text-[#0A2540]">Option 1: City Tour Only</p>
-                        <p className="text-xs text-zinc-500">Includes city tour of Roxas City</p>
-                      </div>
-                    </div>
-                  </button>
-                  <button type="button" onClick={() => setFormData({ ...formData, city_tour_option: "option2" })}
-                    className={`w-full text-left p-3 border rounded-lg transition-all ${formData.city_tour_option === "option2" ? "border-[#0A2540] bg-[#0A2540]/5" : "border-zinc-200 hover:border-[#0A2540]/50"}`}>
-                    <div className="flex items-center gap-3">
-                      <div className={`w-4 h-4 rounded-full border-2 ${formData.city_tour_option === "option2" ? "border-[#0A2540] bg-[#0A2540]" : "border-zinc-300"}`} />
-                      <div>
-                        <p className="text-sm font-semibold text-[#0A2540]">Option 2: City Tour & Boracay Transfer</p>
-                        <p className="text-xs text-zinc-500">Includes city tour and Boracay transfer</p>
-                      </div>
-                    </div>
-                  </button>
-                </div>
-                <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <p className="text-xs text-yellow-800">
-                    Participants proceeding to Boracay shall be responsible for arranging their own accommodation and return/onward travel. Delegates may arrange their departure at their convenience through Caticlan or Kalibo, depending on their preferred flight or onward travel arrangements. The Organizing Committee may provide general travel information and coordination assistance but shall not be responsible for individual bookings or personal travel expenses.
-                  </p>
                 </div>
               </div>
 
@@ -1118,7 +1136,7 @@ export default function AbstractSubmissionPage() {
                 <label className="block text-sm font-semibold text-[#0A2540] mb-2">Abstract (not more than 300 words) *</label>
                 <textarea name="abstract" value={formData.abstract} onChange={handleChange} required rows={8}
                   placeholder="Enter your abstract here..."
-                  className="w-full px-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#0A2540] focus:ring-1 focus:ring-[#0A2540]"></textarea>
+                  className="w-full px-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#76B947] focus:ring-1 focus:ring-[#76B947] transition-all"></textarea>
                 <p className="text-xs text-zinc-400 mt-1">{formData.abstract.split(/\s+/).filter(Boolean).length} words</p>
               </div>
 
@@ -1127,26 +1145,26 @@ export default function AbstractSubmissionPage() {
                 <label className="block text-sm font-semibold text-[#0A2540] mb-2">Keywords *</label>
                 <input type="text" name="keywords" value={formData.keywords} onChange={handleChange} required
                   placeholder="e.g., Agriculture, Sustainability, Biotechnology"
-                  className="w-full px-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#0A2540] focus:ring-1 focus:ring-[#0A2540]" />
+                  className="w-full px-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#76B947] focus:ring-1 focus:ring-[#76B947] transition-all" />
               </div>
 
               {/* Preview Section */}
-              <div className="border border-zinc-200 rounded-lg p-4 bg-zinc-50/50">
+              <div className="border border-zinc-200 rounded-lg p-4 bg-[#F8FBF5]">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <FaFilePdf className="text-red-500" />
                     <span className="text-sm font-semibold text-[#0A2540]">PDF Preview</span>
                   </div>
                   <button type="button" onClick={handleManualPreview} disabled={previewLoading}
-                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#0A2540] hover:bg-[#143b66] rounded-lg transition-colors disabled:bg-zinc-300 disabled:cursor-not-allowed">
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-linear-to-r from-[#0B2A4A] to-[#1D3D6D] hover:shadow-lg rounded-lg transition-all disabled:bg-zinc-300 disabled:cursor-not-allowed">
                     {previewLoading ? (<><FaSpinner className="animate-spin" /> Generating...</>) : (<><FaSync /> Generate Preview</>)}
                   </button>
                 </div>
                 {previewGenerated && previewUrl && (
                   <div className="mt-3 flex items-center gap-3">
-                    <span className="text-xs text-green-600 flex items-center gap-1"><FaCheck /> Preview ready</span>
+                    <span className="text-xs text-[#0A5C0A] font-semibold flex items-center gap-1"><FaCheck /> Preview ready</span>
                     <button type="button" onClick={() => setShowPreviewModal(true)}
-                      className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold text-[#0A2540] border border-[#0A2540] hover:bg-[#0A2540] hover:text-white rounded-lg transition-colors">
+                      className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold text-[#1b5e20] border border-[#76B947] hover:bg-[#76B947] hover:text-white rounded-lg transition-colors">
                       <FaEye /> View Preview
                     </button>
                   </div>
@@ -1160,7 +1178,7 @@ export default function AbstractSubmissionPage() {
 
               {/* Submit Button */}
               <button type="submit" disabled={loading}
-                className="w-full bg-[#0A2540] text-white py-4 rounded-lg font-bold hover:bg-[#143b66] transition-colors flex items-center justify-center gap-2 disabled:bg-zinc-300 disabled:cursor-not-allowed">
+                className="w-full bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white py-4 rounded-lg font-bold hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 disabled:bg-zinc-300 disabled:cursor-not-allowed">
                 {loading ? <><FaSpinner className="animate-spin" /> Generating PDF & Submitting...</> : <><FaPaperPlane /> Submit Abstract</>}
               </button>
             </form>
@@ -1174,7 +1192,7 @@ export default function AbstractSubmissionPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <button onClick={() => setView("landing")}
-                  className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-zinc-600 hover:text-[#0A2540] hover:bg-white rounded-lg transition-colors">
+                  className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-zinc-600 hover:text-[#0A2540] hover:bg-[#F8FBF5] rounded-lg transition-colors">
                   <FaArrowLeft /> Back
                 </button>
                 <div>
@@ -1183,7 +1201,7 @@ export default function AbstractSubmissionPage() {
                 </div>
               </div>
               <button onClick={fetchMySubmissions}
-                className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-[#0A2540] border border-[#0A2540] hover:bg-[#0A2540] hover:text-white rounded-lg transition-colors">
+                className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-[#0B2A4A] border border-[#0B2A4A] hover:bg-[#0B2A4A] hover:text-white rounded-lg transition-colors">
                 <FaSync className="text-xs" /> Refresh
               </button>
             </div>
@@ -1191,14 +1209,14 @@ export default function AbstractSubmissionPage() {
             <div className="bg-white rounded-2xl shadow-xl border border-zinc-100 p-8">
               {submissionsLoading ? (
                 <div className="flex items-center justify-center py-12">
-                  <FaSpinner className="animate-spin text-3xl text-[#0A2540]" />
+                  <FaSpinner className="animate-spin text-3xl text-[#1D3D6D]" />
                 </div>
               ) : mySubmissions.length === 0 ? (
                 <div className="text-center py-12">
                   <FaExclamationTriangle className="text-4xl text-zinc-300 mx-auto mb-4" />
                   <p className="text-zinc-500">You haven't submitted any abstracts yet.</p>
                   <button onClick={() => setView("submit")}
-                    className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-[#0A2540] text-white rounded-lg hover:bg-[#143b66]">
+                    className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white rounded-lg hover:shadow-lg transition-all">
                     <FaPaperPlane /> Submit Your First Abstract
                   </button>
                 </div>
@@ -1216,13 +1234,13 @@ export default function AbstractSubmissionPage() {
                     </thead>
                     <tbody>
                       {mySubmissions.map((submission) => (
-                        <tr key={submission.id} className="border-b border-zinc-100 hover:bg-zinc-50">
+                        <tr key={submission.id} className="border-b border-zinc-100 hover:bg-[#F8FBF5] transition-colors">
                           <td className="py-3 px-4">
                             <p className="text-sm font-medium text-[#0A2540] line-clamp-1">{submission.research_title}</p>
                           </td>
                           <td className="py-3 px-4">
                             <span className="inline-flex items-center gap-1 text-xs text-zinc-500">
-                              {submission.presentation_type === 'oral' ? <FaMicrophone /> : <FaImage />}
+                              {submission.presentation_type === 'oral' ? <FaMicrophone className="text-[#1D3D6D]" /> : <FaImage className="text-[#1D3D6D]" />}
                               {submission.presentation_type === 'oral' ? 'Oral' : 'Poster'}
                             </span>
                           </td>
@@ -1236,7 +1254,7 @@ export default function AbstractSubmissionPage() {
                           </td>
                           <td className="py-3 px-4">
                             <button onClick={() => viewSubmission(submission)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-[#0A2540] hover:text-[#143b66]">
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-[#1b5e20] hover:text-[#76B947] transition-colors">
                               <FaEye className="text-xs" /> View
                             </button>
                           </td>

@@ -41,7 +41,6 @@ def generate_abstract_pdf(data):
         leading=16
     )
     
-    # FIXED: Changed 'Times New Roman' to 'Times-Roman' (built-in PostScript font)
     event_subtitle_style = ParagraphStyle(
         'EventSubtitleStyle',
         parent=styles['Normal'],
@@ -53,7 +52,6 @@ def generate_abstract_pdf(data):
         leading=13
     )
     
-    # Updated Event Details Style - Font 12, Line Spacing 1.0
     event_details_style = ParagraphStyle(
         'EventDetailsStyle',
         parent=styles['Normal'],
@@ -66,7 +64,6 @@ def generate_abstract_pdf(data):
         leading=12,
     )
     
-    # Updated Form Title Style with Century Gothic font, size 20
     form_title_style = ParagraphStyle(
         'FormTitleStyle',
         parent=styles['Title'],
@@ -78,7 +75,6 @@ def generate_abstract_pdf(data):
         leading=24
     )
     
-    # Label style - font size 12
     section_label_style = ParagraphStyle(
         'SectionLabelStyle',
         parent=styles['Normal'],
@@ -89,7 +85,6 @@ def generate_abstract_pdf(data):
         spaceAfter=4
     )
     
-    # Value style - font size 11
     value_style = ParagraphStyle(
         'ValueStyle',
         parent=styles['Normal'],
@@ -114,8 +109,8 @@ def generate_abstract_pdf(data):
     story = []
     
     event_details_text = (
-        "10-13 March 2027 | Roxas City, Campus, Philippines<br/>"
-        "THE SEAFOOD CAPITAL OF THE PHILIPPINES"
+        "11-13 March 2027 | Boracay Island, Aklan, Philippines<br/>"
+        "THE BEACH CAPITAL OF THE PHILIPPINES"
     )
     
     header_data = [
@@ -146,7 +141,7 @@ def generate_abstract_pdf(data):
     story.append(Spacer(1, 12))
     
     # ===== MAIN FORM TABLE =====
-    # Determine selected preferences - using checkmark symbol ✓
+    # Determine selected preferences
     presentation_type = data.get('presentation_type', '')
     is_oral = '✓' if presentation_type == 'oral' else '&nbsp;&nbsp;&nbsp;'
     is_poster = '✓' if presentation_type == 'poster' else '&nbsp;&nbsp;&nbsp;'
@@ -158,18 +153,6 @@ def generate_abstract_pdf(data):
     else:
         oral_text = f"{is_oral}&nbsp;&nbsp; Oral Presentation"
         poster_text = f"<b>{is_poster}&nbsp;&nbsp; Poster presentation</b>"
-    
-    city_tour_option = data.get('city_tour_option', '')
-    is_option1 = '✓' if city_tour_option == 'option1' else '&nbsp;&nbsp;&nbsp;'
-    is_option2 = '✓' if city_tour_option == 'option2' else '&nbsp;&nbsp;&nbsp;'
-    
-    # Make selected option bold for city tour
-    if city_tour_option == 'option1':
-        option1_text = f"<b>{is_option1}&nbsp;&nbsp; Option 1 (City Tour Only)</b>"
-        option2_text = f"{is_option2}&nbsp;&nbsp; Option 2 (City tour, and Boracay Transfer)"
-    else:
-        option1_text = f"{is_option1}&nbsp;&nbsp; Option 1 (City Tour Only)"
-        option2_text = f"<b>{is_option2}&nbsp;&nbsp; Option 2 (City tour, and Boracay Transfer)</b>"
     
     # Define form rows
     form_data = []
@@ -216,7 +199,7 @@ def generate_abstract_pdf(data):
         Paragraph(data.get('address', ''), value_style)
     ])
     
-    # Row 7: Phone Number (Telephone/Fax/Cellphone)
+    # Row 7: Phone Number
     form_data.append([
         Paragraph("Telephone/ Fax. No./ Cellphone No.", section_label_style),
         Paragraph(data.get('phone_number', ''), value_style)
@@ -228,21 +211,7 @@ def generate_abstract_pdf(data):
         Paragraph(data['email_address'], value_style)
     ])
     
-    # Row 9: City Tour/Boracay Transfer (Multi-line with bold selection)
-    city_tour_text = (
-        f"{option1_text}<br/><br/>"
-        f"{option2_text}<br/><br/>"
-        f"<font size='8'><i>Participants proceeding to Boracay shall be responsible for arranging their own "
-        f"accommodation and return/onward travel. Delegates may arrange their departure at their convenience through "
-        f"Caticlan or Kalibo, depending on their preferred flight or onward travel arrangements. The Organizing "
-        f"Committee may provide general travel information and coordination assistance but shall not be responsible "
-        f"for individual bookings or personal travel expenses.</i></font>"
-    )
-    
-    form_data.append([
-        Paragraph("City Tour/Boracay Transfer", section_label_style),
-        Paragraph(city_tour_text, value_style)
-    ])
+    # REMOVED: Row 9 (City Tour/Boracay Transfer)
     
     # Create form table
     form_table = Table(form_data, colWidths=[2.5*inch, 4.5*inch])

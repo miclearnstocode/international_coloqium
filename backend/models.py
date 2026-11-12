@@ -38,7 +38,6 @@ class AbstractSubmission(db.Model):
     address = db.Column(db.String(255), nullable=True)
     phone_number = db.Column(db.String(20), nullable=True)
     presentation_type = db.Column(db.String(50), nullable=True)
-    city_tour_option = db.Column(db.String(50), nullable=True)
     abstract = db.Column(db.Text, nullable=False)
     keywords = db.Column(db.String(255), nullable=False)
     abstract_drive_view_url = db.Column(db.String(500), nullable=True)
@@ -62,7 +61,6 @@ class AbstractSubmission(db.Model):
             'address': self.address,
             'phone_number': self.phone_number,
             'presentation_type': self.presentation_type,
-            'city_tour_option': self.city_tour_option,
             'abstract': self.abstract,
             'keywords': self.keywords,
             'abstract_drive_view_url': self.abstract_drive_view_url,
