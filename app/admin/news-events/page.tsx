@@ -17,6 +17,7 @@ import {
   FaEye,
   FaEyeSlash,
   FaCopy,
+  FaClock, // Added for deadline
 } from "react-icons/fa";
 
 import { Sidebar } from "@/app/admin/admin-components/Sidebar";
@@ -26,11 +27,13 @@ import { apiFetch } from "../../lib/api";
 
 // ── Event type ──
 type EventItem = {
-  id: string; // string in the UI; real DB IDs are numeric strings
+  id: string; 
   title: string;
   description: string;
   date: string;
   endDate?: string;
+  submissionDeadline?: string; // <--- Added
+  isSubmissionOpen: boolean;   // <--- Added
   location: string;
   category: string;
   status: "Draft" | "Published";
@@ -51,6 +54,8 @@ const normalizeEvent = (item: Record<string, any>): EventItem => ({
   description: typeof item.description === "string" ? item.description : "",
   date: typeof item.date === "string" ? item.date : "",
   endDate: typeof item.endDate === "string" ? item.endDate : "",
+  submissionDeadline: typeof item.submission_deadline === "string" ? item.submission_deadline : "", // <--- Added
+  isSubmissionOpen: item.is_submission_open !== false, // Default to true if undefined
   location: typeof item.location === "string" ? item.location : "",
   category: typeof item.category === "string" ? item.category : "Announcement",
   status: item.status === "Published" ? "Published" : "Draft",
@@ -63,6 +68,8 @@ const createBlankEvent = (): EventItem => ({
   description: "",
   date: new Date().toISOString().split("T")[0],
   endDate: "",
+  submissionDeadline: "", // <--- Added
+  isSubmissionOpen: true, // <--- Added
   location: "",
   category: "Announcement",
   status: "Draft",
@@ -127,8 +134,6 @@ export default function AdminNewsEvents() {
         console.error("[AdminNewsEvents] Failed to load events:", err);
         if (!cancelled) {
           setSaveError(err.message || "Failed to load events.");
-          // Leave list empty — do not fall back to stale static seeds,
-          // since those don't represent what's actually in the DB.
           setEvents([]);
           setPristineEvents([]);
         }
@@ -221,12 +226,13 @@ export default function AdminNewsEvents() {
 
       const payload = {
         events: events.map((e) => ({
-          // Send numeric IDs only for existing rows
           ...(isRealId(e.id) ? { id: Number(e.id) } : {}),
           title: e.title,
           description: e.description,
           date: e.date,
           endDate: e.endDate || "",
+          submissionDeadline: e.submissionDeadline || "", // <--- Added
+          isSubmissionOpen: e.isSubmissionOpen,           // <--- Added
           location: e.location,
           category: e.category,
           status: e.status,
@@ -492,7 +498,6 @@ export default function AdminNewsEvents() {
                   </div>
                 ) : (
                   filteredEvents.map((evt) => {
-                    // Real position in the full (unfiltered) list, for move up/down
                     const realIndex = events.findIndex((x) => x.id === evt.id);
                     return (
                       <EventCard
@@ -707,110 +712,174 @@ function EventCard({
 
       {/* ── Expanded editor ── */}
       {expanded && (
-        <div className="px-5 pb-5 pt-2 border-t border-gray-100 bg-gray-50/50 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="md:col-span-2">
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                Event Name
-              </label>
-              <input
-                type="text"
-                value={event.title}
-                onChange={(e) => update("title", e.target.value)}
-                placeholder="e.g. 3rd International Agri-Life & Bioresource Science Symposium"
-                className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-              />
+        <div className="px-5 pb-6 pt-5 border-t border-gray-100 bg-gray-50/50 space-y-6">
+          
+          {/* SECTION 1: Basic Event Info */}
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">
+                  Event Name
+                </label>
+                <input
+                  type="text"
+                  value={event.title}
+                  onChange={(e) => update("title", e.target.value)}
+                  placeholder="e.g. 3rd International Agri-Life & Bioresource Science Symposium"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">
+                  Category
+                </label>
+                <input
+                  type="text"
+                  value={event.category}
+                  onChange={(e) => update("category", e.target.value)}
+                  placeholder="e.g. Announcement"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                />
+              </div>
             </div>
+
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                Category
+              <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">
+                Event Description
               </label>
-              <input
-                type="text"
-                value={event.category}
-                onChange={(e) => update("category", e.target.value)}
-                placeholder="e.g. Announcement"
-                className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              <textarea
+                rows={3}
+                value={event.description}
+                onChange={(e) => update("description", e.target.value)}
+                placeholder="Describe the event, its purpose, and what attendees can expect…"
+                className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-white shadow-sm"
               />
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              Event Description
-            </label>
-            <textarea
-              rows={4}
-              value={event.description}
-              onChange={(e) => update("description", e.target.value)}
-              placeholder="Describe the event, its purpose, and what attendees can expect…"
-              className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-white"
-            />
+          {/* SECTION 2: Dates & Location */}
+          <div className="border-t border-gray-200 pt-5">
+            <h4 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+              <FaCalendarAlt className="text-blue-500" /> Dates & Location
+            </h4>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                  Start Date
+                </label>
+                <input
+                  type="date"
+                  value={event.date}
+                  onChange={(e) => update("date", e.target.value)}
+                  className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                  End Date <span className="text-gray-400 font-normal">(optional)</span>
+                </label>
+                <input
+                  type="date"
+                  value={event.endDate || ""}
+                  onChange={(e) => update("endDate", e.target.value)}
+                  className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                />
+              </div>
+              
+              {/* Highlighted Submission Deadline */}
+              <div className="bg-blue-50/50 p-3 rounded-xl border border-blue-100 shadow-sm">
+                <label className="flex items-center gap-1.5 text-xs font-bold text-blue-800 mb-1.5">
+                  <FaClock className="text-blue-600" />
+                  Submission Deadline
+                </label>
+                <input
+                  type="date"
+                  value={event.submissionDeadline || ""}
+                  onChange={(e) => update("submissionDeadline", e.target.value)}
+                  className="w-full p-2 border border-blue-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                />
+                <p className="text-[10px] text-blue-600 mt-1.5 leading-tight">
+                  Portal locks after this date.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                  Location
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FaMapMarkerAlt className="text-gray-400 text-sm" />
+                  </div>
+                  <input
+                    type="text"
+                    value={event.location}
+                    onChange={(e) => update("location", e.target.value)}
+                    placeholder="e.g. Manila, Philippines"
+                    className="w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                Start Date
+          {/* SECTION 3: Settings & Visibility */}
+          <div className="border-t border-gray-200 pt-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            
+            <div className="flex flex-wrap items-center gap-6">
+              <label className="flex items-center gap-2.5 cursor-pointer group">
+                <div className="relative flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={event.featured}
+                    onChange={(e) => update("featured", e.target.checked)}
+                    className="peer w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500 cursor-pointer"
+                  />
+                </div>
+                <span className="text-sm font-medium text-gray-700 group-hover:text-purple-700 transition-colors">
+                  Feature on Homepage
+                </span>
               </label>
-              <input
-                type="date"
-                value={event.date}
-                onChange={(e) => update("date", e.target.value)}
-                className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                End Date <span className="text-gray-400">(optional)</span>
-              </label>
-              <input
-                type="date"
-                value={event.endDate || ""}
-                onChange={(e) => update("endDate", e.target.value)}
-                className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                Location
-              </label>
-              <input
-                type="text"
-                value={event.location}
-                onChange={(e) => update("location", e.target.value)}
-                placeholder="e.g. Manila, Philippines"
-                className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-              />
-            </div>
-          </div>
 
-          <div className="flex items-center gap-6 pt-1">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={event.featured}
-                onChange={(e) => update("featured", e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <span className="text-xs text-gray-700">
-                Feature this event on the homepage
-              </span>
-            </label>
+              <label className="flex items-center gap-2.5 cursor-pointer group border-l border-gray-200 pl-6">
+                <div className="relative flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={event.isSubmissionOpen}
+                    onChange={(e) => update("isSubmissionOpen", e.target.checked)}
+                    className="peer w-5 h-5 rounded border-gray-300 text-green-600 focus:ring-green-500 cursor-pointer"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-gray-700 group-hover:text-green-700 transition-colors leading-tight">
+                    Accept Submissions
+                  </span>
+                  <span className="text-[10px] text-gray-400 leading-tight">
+                    Toggle off to manually close the portal
+                  </span>
+                </div>
+              </label>
+            </div>
 
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500">Status:</span>
+            <div className="flex items-center gap-3 bg-gray-100 p-1.5 rounded-lg shrink-0">
+              <span className="text-xs font-bold text-gray-500 uppercase pl-2">Status</span>
               <select
                 value={event.status}
                 onChange={(e) =>
                   update("status", e.target.value as EventItem["status"])
                 }
-                className="px-2 py-1 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`px-3 py-1.5 rounded-md text-sm font-bold shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer ${
+                  event.status === "Published" 
+                    ? "bg-green-100 text-green-800" 
+                    : "bg-yellow-100 text-yellow-800"
+                }`}
               >
                 <option value="Draft">Draft</option>
                 <option value="Published">Published</option>
               </select>
             </div>
+            
           </div>
         </div>
       )}

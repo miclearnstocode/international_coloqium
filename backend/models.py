@@ -98,9 +98,6 @@ class PasswordResetCode(db.Model):
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
 
-# ============================================================
-# PAGE CONTENT MODELS (for Super Admin CMS)
-# ============================================================
 class PageContent(db.Model):
     """Stores individual editable fields for each page."""
     __tablename__ = 'page_content'
@@ -182,27 +179,42 @@ class ContentAuditLog(db.Model):
         }
 
 class Event(db.Model):
-    """Stores news & event entries created by admins."""
     __tablename__ = 'events'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(500), nullable=False)
     description = db.Column(db.Text, nullable=True)
-    date = db.Column(db.String(50), nullable=True)        # ISO date "2025-09-01"
-    end_date = db.Column(db.String(50), nullable=True)    # optional end date
+    date = db.Column(db.String(50), nullable=True)        
+    end_date = db.Column(db.String(50), nullable=True)    
+    submission_deadline = db.Column(db.String(50), nullable=True) 
+    
+    # ONLY THIS BOOLEAN
+    is_submission_open = db.Column(db.Boolean, default=True, nullable=False) 
+    
     location = db.Column(db.String(255), nullable=True)
     category = db.Column(db.String(100), nullable=False, default='Announcement')
     status = db.Column(db.Enum('Draft', 'Published'), nullable=False, default='Draft')
     featured = db.Column(db.Boolean, default=False)
-    item_order = db.Column(db.Integer, default=0)         # for drag-reorder
-    is_active = db.Column(db.Boolean, default=True)
+    item_order = db.Column(db.Integer, default=0)         
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
-    created_by = db.Column(db.Integer, nullable=True)     # admin user id
+    created_by = db.Column(db.Integer, nullable=True)     
 
-    __table_args__ = (
-        db.Index('idx_event_status', 'status'),
-        db.Index('idx_event_order', 'item_order'),
-    )
+    @property
+    def is_deadline_passed(self):
+        if not self.submission_deadline:
+            return False
+        try:
+            deadline = datetime.strptime(self.submission_deadline, '%Y-%m-%d').date()
+            return datetime.now().date() > deadline
+        except ValueError:
+            return False
+
+    @property
+    def can_accept_submissions(self):
+        return (
+            self.is_submission_open 
+            and not self.is_deadline_passed
+        )
 
     def to_dict(self):
         return {
@@ -211,12 +223,15 @@ class Event(db.Model):
             'description': self.description,
             'date': self.date,
             'endDate': self.end_date,
+            'submission_deadline': self.submission_deadline,
+            'is_submission_open': self.is_submission_open,
+            'is_deadline_passed': self.is_deadline_passed,
+            'can_accept_submissions': self.can_accept_submissions,
             'location': self.location,
             'category': self.category,
             'status': self.status,
             'featured': self.featured,
             'order': self.item_order,
-            'is_active': self.is_active,
             'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None,
             'updated_at': self.updated_at.strftime('%Y-%m-%d %H:%M:%S') if self.updated_at else None,
             'created_by': self.created_by,
