@@ -18,6 +18,7 @@ import {
 interface Institution {
   name: string;
   logo: string;
+  shortName?: string;
   location?: string;
   role?: string;
 }
@@ -141,7 +142,18 @@ export default function PartnerInstitutionsPage() {
     { name: "University of San Carlos", logo: "https://res.cloudinary.com/xbloqjom/image/upload/v1794368844/usc-logo.svg", location: "Cebu, Philippines" },
   ];
 
-  const institutionalPartners: Institution[] = [];
+  const institutionalPartners: Institution[] = [
+    {
+      name: "Commission on Higher Education (CHED)",
+      logo: "https://res.cloudinary.com/xbloqjom/image/upload/v1794448218/ched.png",
+      location: "Metro Manila, Philippines",
+    },
+    {
+      name: "Department of Science and Technology (DOST)",
+      logo: "https://res.cloudinary.com/xbloqjom/image/upload/v1794448209/dost-logo-150x150.png",
+      location: "Metro Manila, Philippines",
+    },
+  ];
   const sponsors: Institution[] = [];
 
   return (
@@ -544,17 +556,15 @@ export default function PartnerInstitutionsPage() {
               Other Institutional Partners
             </h2>
             <div className="w-12 h-1 gold-underline mx-auto mt-3 reveal-up stagger-1 rounded-full"></div>
-            <p className="text-sm text-gray-500 mt-3 reveal-up stagger-2">
-              Only add organizations here after confirmation.
-            </p>
           </div>
 
           {institutionalPartners.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            // Flex-wrap + justify-center keeps any number of partners centered.
+            <div className="flex flex-wrap justify-center gap-6">
               {institutionalPartners.map((partner: Institution, idx: number) => (
                 <div
                   key={idx}
-                  className={`premium-card scroll-lift bg-[#F8FBF5] rounded-xl border border-zinc-200 p-6 text-center reveal-up stagger-${(idx % 6) + 1}`}
+                  className={`premium-card scroll-lift bg-[#F8FBF5] rounded-xl border border-zinc-200 p-6 text-center reveal-up stagger-${(idx % 6) + 1} w-full sm:w-1/2 lg:w-1/4 max-w-xs`}
                   style={{ ["--scroll-y" as any]: `${(1 - partnerScroll.progress) * (20 - idx * 2)}px` }}
                 >
                   <div className="logo-bubble relative w-24 h-24 mx-auto mb-3">
@@ -570,10 +580,10 @@ export default function PartnerInstitutionsPage() {
                         if (parent) {
                           parent.innerHTML = `
                             <div class="w-24 h-24 bg-[#1D3D6D] rounded-xl flex items-center justify-center mx-auto">
-                              <span class="text-white text-xl font-bold">${partner.name
-                                .split(" ")
-                                .map((w: string) => w[0])
-                                .join("")}</span>
+                              <span class="text-white text-xl font-bold">${
+                                partner.shortName ??
+                                partner.name.split(" ").map((w: string) => w[0]).join("")
+                              }</span>
                             </div>
                           `;
                         }
@@ -581,10 +591,14 @@ export default function PartnerInstitutionsPage() {
                     />
                   </div>
                   <p className="font-semibold text-[#0A2540] text-sm">{partner.name}</p>
+                  {partner.location && (
+                    <p className="text-xs text-gray-500 mt-1">{partner.location}</p>
+                  )}
                 </div>
               ))}
             </div>
           ) : (
+            // Placeholder grid shown only when no partners are added yet
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {[...Array(4)].map((_, idx: number) => (
                 <div
@@ -599,11 +613,6 @@ export default function PartnerInstitutionsPage() {
                 </div>
               ))}
             </div>
-          )}
-          {institutionalPartners.length === 0 && (
-            <p className="text-sm text-gray-400 text-center mt-4 reveal-up stagger-5">
-              Institutional partners will be displayed here once confirmed.
-            </p>
           )}
         </div>
       </section>
@@ -671,11 +680,6 @@ export default function PartnerInstitutionsPage() {
               ))
             )}
           </div>
-
-          <p className="text-xs text-gray-400 text-center mt-6 max-w-2xl mx-auto reveal-up stagger-3">
-            Avoid putting organizations listed merely as possible invitees in
-            your internal proposal on the public page before they formally agree.
-          </p>
         </div>
       </section>
 

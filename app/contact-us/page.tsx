@@ -93,7 +93,7 @@ function ScrollProgressBar() {
   return (
     <div className="fixed top-0 left-0 right-0 z-100 h-0.75 bg-transparent pointer-events-none">
       <div
-        className="h-full origin-left bg-linear-to-r from-[#D5A54D] via-[#F0C674] to-[#1D3D6D] shadow-[0_0_12px_rgba(213,165,77,0.6)]"
+        className="h-full origin-left bg-linear-to-r from-[#76B947] via-[#F0C674] to-[#1D3D6D] shadow-[0_0_12px_rgba(213,165,77,0.6)]"
         style={{ transform: `scaleX(${progress})`, transition: "transform 0.08s linear" }}
       />
     </div>
@@ -183,7 +183,7 @@ export default function ContactPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans text-[#0A2540] overflow-x-hidden">
+    <div className="min-h-screen bg-linear-to-b from-white via-[#F8FBF5] to-white font-sans text-[#0A2540] overflow-x-hidden">
       <ScrollProgressBar />
 
       <style jsx global>{`
@@ -231,7 +231,7 @@ export default function ContactPage() {
         .stagger-6 { animation-delay: 0.70s; }
 
         .gold-underline {
-          background-image: linear-gradient(90deg, #D5A54D, #F0C674, #D5A54D);
+          background-image: linear-gradient(90deg, #76B947, #F0C674, #D5A54D);
           background-size: 200% 100%;
           animation: shimmerLine 4s linear infinite;
         }
@@ -255,7 +255,7 @@ export default function ContactPage() {
           inset: 0;
           border-radius: inherit;
           padding: 1px;
-          background: linear-gradient(135deg, rgba(213,165,77,0) 0%, rgba(213,165,77,0) 50%, rgba(213,165,77,0) 100%);
+          background: linear-gradient(135deg, rgba(118,185,71,0) 0%, rgba(118,185,71,0) 50%, rgba(118,185,71,0) 100%);
           -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
           -webkit-mask-composite: xor;
           mask-composite: exclude;
@@ -268,7 +268,7 @@ export default function ContactPage() {
           position: absolute;
           inset: -1px;
           border-radius: inherit;
-          background: radial-gradient(120% 80% at 50% 0%, rgba(213,165,77,0.18) 0%, rgba(213,165,77,0) 60%);
+          background: radial-gradient(120% 80% at 50% 0%, rgba(76,195,247,0.16) 0%, rgba(76,195,247,0) 60%);
           opacity: 0;
           transition: opacity 0.55s ease;
           pointer-events: none;
@@ -276,15 +276,15 @@ export default function ContactPage() {
         }
         .premium-card:hover {
           transform: translateY(-10px);
-          border-color: rgba(213, 165, 77, 0.35);
+          border-color: rgba(118, 185, 71, 0.35);
           box-shadow:
             0 2px 4px rgba(11, 42, 74, 0.05),
             0 12px 24px -10px rgba(11, 42, 74, 0.16),
             0 32px 60px -20px rgba(11, 42, 74, 0.22),
-            0 0 0 1px rgba(213, 165, 77, 0.05);
+            0 0 0 1px rgba(118, 185, 71, 0.05);
         }
         .premium-card:hover::before {
-          background: linear-gradient(135deg, rgba(213,165,77,0.9) 0%, rgba(29,61,109,0.35) 50%, rgba(213,165,77,0.9) 100%);
+          background: linear-gradient(135deg, rgba(118,185,71,0.9) 0%, rgba(213,165,77,0.5) 50%, rgba(76,195,247,0.9) 100%);
         }
         .premium-card:hover::after { opacity: 1; }
 
@@ -293,7 +293,7 @@ export default function ContactPage() {
         }
         .premium-card:hover .premium-icon {
           transform: scale(1.08) rotate(-6deg);
-          box-shadow: 0 0 0 6px rgba(213,165,77,0.10), 0 8px 20px -8px rgba(213,165,77,0.45);
+          box-shadow: 0 0 0 6px rgba(76,195,247,0.12), 0 8px 20px -8px rgba(76,195,247,0.45);
         }
 
         .premium-btn {
@@ -317,12 +317,12 @@ export default function ContactPage() {
           transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
         }
         .premium-input:hover {
-          border-color: rgba(213, 165, 77, 0.35);
+          border-color: rgba(118, 185, 71, 0.4);
         }
         .premium-input:focus {
-          border-color: #D5A54D;
-          box-shadow: 0 0 0 4px rgba(213,165,77,0.12);
-          background-color: #FFFDF8;
+          border-color: #76B947;
+          box-shadow: 0 0 0 4px rgba(118,185,71,0.14);
+          background-color: #FAFDF7;
         }
 
         /* ===== Info row hover ===== */
@@ -349,10 +349,11 @@ export default function ContactPage() {
           transform: translateX(4px);
         }
         .help-list-item svg {
-          transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+          transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s ease;
         }
         .help-list-item:hover svg {
           transform: scale(1.2) rotate(8deg);
+          color: #76B947;
         }
 
         /* ===== Intro info grid item ===== */
@@ -392,10 +393,14 @@ export default function ContactPage() {
         ref={heroScroll.ref}
         className={`relative bg-white overflow-hidden border-b border-zinc-100 ${heroReveal.inView ? "in-view" : ""}`}
       >
-        {/* Decorative gradient orb */}
+        {/* Decorative orbs — green + sky blue */}
         <div
           aria-hidden
-          className="absolute top-0 right-0 w-96 h-96 bg-linear-to-br from-[#D5A54D]/10 to-transparent rounded-full blur-3xl -translate-y-1/3 translate-x-1/4 pointer-events-none"
+          className="absolute top-0 right-0 w-96 h-96 bg-linear-to-br from-[#76B947]/10 to-transparent rounded-full blur-3xl -translate-y-1/3 translate-x-1/4 pointer-events-none"
+        />
+        <div
+          aria-hidden
+          className="absolute bottom-0 left-0 w-72 h-72 bg-linear-to-tr from-[#4FC3F7]/10 to-transparent rounded-full blur-3xl -translate-x-1/4 translate-y-1/4 pointer-events-none"
         />
 
         <div
@@ -403,7 +408,7 @@ export default function ContactPage() {
           className="max-w-7xl mx-auto px-6 py-16 relative z-10"
         >
           <div className="flex items-center gap-2 text-sm text-zinc-500 mb-6 reveal-up">
-            <Link href="/" className="hover:text-[#D5A54D] transition-colors">
+            <Link href="/" className="hover:text-[#76B947] transition-colors">
               Home
             </Link>
             <span className="text-zinc-300">›</span>
@@ -421,8 +426,10 @@ export default function ContactPage() {
       </section>
 
       {/* ================= INTRO SECTION ================= */}
-      <section ref={introReveal.ref} className={`py-12 ${introReveal.inView ? "in-view" : ""}`}>
-        <div className="max-w-4xl mx-auto px-6">
+      <section ref={introReveal.ref} className={`py-12 relative overflow-hidden ${introReveal.inView ? "in-view" : ""}`}>
+        <div aria-hidden className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-64 w-[70%] rounded-full bg-[#4FC3F7]/10 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-[#76B947]/10 blur-3xl" />
+        <div className="relative max-w-4xl mx-auto px-6">
           <div className="premium-card reveal-up bg-white rounded-xl border border-zinc-200 p-8">
             <h2 className="text-2xl font-bold text-[#0A2540] mb-4">
               Contact the Symposium Secretariat
@@ -432,19 +439,19 @@ export default function ContactPage() {
               Have questions about abstract submission, registration, travel, participation, or institutional collaboration? The 3rd International Agri-Life & Bioresource Sciences Symposium Secretariat is available to assist participants, presenters, partner institutions, and international delegates.
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-[#F8FAFC] rounded-lg border border-zinc-100">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-[#F8FBF5] rounded-lg border border-zinc-100">
               {[
-                { icon: <FaRegBuilding className="text-[#D5A54D] text-lg" />, title: "Symposium Secretariat", sub: "3rd International Agri-Life & Bioresource Sciences Symposium" },
-                { icon: <FaUniversity className="text-[#D5A54D] text-lg" />, title: "Capiz State University", sub: "Roxas City, Capiz, Philippines" },
-                { icon: <FaEnvelope className="text-[#D5A54D] text-lg" />, title: "Email", sub: "internationalsymposium@capsu.edu.ph", href: "mailto:internationalsymposium@capsu.edu.ph" },
-                { icon: <FaPhone className="text-[#D5A54D] text-lg" />, title: "Phone / Telephone", sub: "+63 927 477 8024 / (036) 522 9756" },
+                { icon: <FaRegBuilding className="text-[#76B947] text-lg" />, title: "Symposium Secretariat", sub: "3rd International Agri-Life & Bioresource Sciences Symposium" },
+                { icon: <FaUniversity className="text-[#76B947] text-lg" />, title: "Capiz State University", sub: "Roxas City, Capiz, Philippines" },
+                { icon: <FaEnvelope className="text-[#76B947] text-lg" />, title: "Email", sub: "internationalsymposium@capsu.edu.ph", href: "mailto:internationalsymposium@capsu.edu.ph" },
+                { icon: <FaPhone className="text-[#76B947] text-lg" />, title: "Phone / Telephone", sub: "+63 927 477 8024 / (036) 522 9756" },
               ].map((item, idx) => (
                 <div key={idx} className={`intro-item flex items-center gap-3 reveal-up stagger-${idx + 1}`}>
                   {item.icon}
                   <div>
                     <p className="font-semibold text-[#0A2540] text-sm">{item.title}</p>
                     {item.href ? (
-                      <a href={item.href} className="text-xs text-[#1D3D6D] hover:text-[#D5A54D] transition-colors">
+                      <a href={item.href} className="text-xs text-[#1D3D6D] hover:text-[#76B947] transition-colors">
                         {item.sub}
                       </a>
                     ) : (
@@ -473,9 +480,9 @@ export default function ContactPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Card 1 */}
-            <div className="premium-card scroll-lift reveal-up bg-[#F8FAFC] rounded-xl border border-zinc-200 p-6"
+            <div className="premium-card scroll-lift reveal-up bg-linear-to-b from-[#F7FBF3] to-white rounded-xl border border-zinc-200 p-6"
                  style={{ ["--scroll-y" as any]: `${(1 - helpScroll.progress) * 25}px` }}>
-              <div className="premium-icon w-12 h-12 bg-[#1D3D6D] rounded-full flex items-center justify-center mb-4">
+              <div className="premium-icon w-12 h-12 bg-[#1D3D6D] rounded-full flex items-center justify-center mb-4 ring-2 ring-[#76B947]/30">
                 <FaInfoCircle className="text-white text-xl" />
               </div>
               <h3 className="text-lg font-bold text-[#0A2540] mb-2">General Inquiries</h3>
@@ -484,26 +491,26 @@ export default function ContactPage() {
               </p>
               <div className="space-y-2 text-sm">
                 <div className="info-row flex items-center gap-2">
-                  <FaEnvelope className="text-[#D5A54D] text-sm shrink-0" />
-                  <a href="mailto:internationalsymposium@capsu.edu.ph" className="text-[#1D3D6D] hover:text-[#D5A54D] transition-colors">
+                  <FaEnvelope className="text-[#76B947] text-sm shrink-0" />
+                  <a href="mailto:internationalsymposium@capsu.edu.ph" className="text-[#1D3D6D] hover:text-[#76B947] transition-colors">
                     internationalsymposium@capsu.edu.ph
                   </a>
                 </div>
                 <div className="info-row flex items-center gap-2">
-                  <FaMobile className="text-[#D5A54D] text-sm shrink-0" />
+                  <FaMobile className="text-[#76B947] text-sm shrink-0" />
                   <span className="text-gray-500">+63 927 477 8024</span>
                 </div>
                 <div className="info-row flex items-center gap-2">
-                  <FaPhone className="text-[#D5A54D] text-sm shrink-0" />
+                  <FaPhone className="text-[#76B947] text-sm shrink-0" />
                   <span className="text-gray-500">(036) 522 9756</span>
                 </div>
               </div>
             </div>
 
             {/* Card 2 */}
-            <div className="premium-card scroll-lift reveal-up stagger-1 bg-[#F8FAFC] rounded-xl border border-zinc-200 p-6"
+            <div className="premium-card scroll-lift reveal-up stagger-1 bg-linear-to-b from-[#F7FBF3] to-white rounded-xl border border-zinc-200 p-6"
                  style={{ ["--scroll-y" as any]: `${(1 - helpScroll.progress) * 18}px` }}>
-              <div className="premium-icon w-12 h-12 bg-[#1D3D6D] rounded-full flex items-center justify-center mb-4">
+              <div className="premium-icon w-12 h-12 bg-[#1D3D6D] rounded-full flex items-center justify-center mb-4 ring-2 ring-[#76B947]/30">
                 <FaClipboardList className="text-white text-xl" />
               </div>
               <h3 className="text-lg font-bold text-[#0A2540] mb-2">Registration &amp; Payment Concerns</h3>
@@ -516,31 +523,31 @@ export default function ContactPage() {
                   "Symposium kit and certificates",
                 ].map((item, idx) => (
                   <li key={idx} className="help-list-item flex items-start gap-2">
-                    <FaCheckCircle className="text-[#D5A54D] text-xs mt-1 shrink-0" />
+                    <FaCheckCircle className="text-[#76B947] text-xs mt-1 shrink-0" />
                     <span>{item}</span>
                   </li>
                 ))}
               </ul>
               <div className="space-y-2 text-sm">
                 <div className="info-row flex items-center gap-2">
-                  <FaEnvelope className="text-[#D5A54D] text-sm shrink-0" />
+                  <FaEnvelope className="text-[#76B947] text-sm shrink-0" />
                   <span className="text-gray-500">internationalsymposium@capsu.edu.ph</span>
                 </div>
                 <div className="info-row flex items-center gap-2">
-                  <FaMobile className="text-[#D5A54D] text-sm shrink-0" />
+                  <FaMobile className="text-[#76B947] text-sm shrink-0" />
                   <span className="text-gray-500">+63 927 477 8024</span>
                 </div>
                 <div className="info-row flex items-center gap-2">
-                  <FaPhone className="text-[#D5A54D] text-sm shrink-0" />
+                  <FaPhone className="text-[#76B947] text-sm shrink-0" />
                   <span className="text-gray-500">(036) 522 9756</span>
                 </div>
               </div>
             </div>
 
             {/* Card 3 */}
-            <div className="premium-card scroll-lift reveal-up stagger-2 bg-[#F8FAFC] rounded-xl border border-zinc-200 p-6"
+            <div className="premium-card scroll-lift reveal-up stagger-2 bg-linear-to-b from-[#F7FBF3] to-white rounded-xl border border-zinc-200 p-6"
                  style={{ ["--scroll-y" as any]: `${(1 - helpScroll.progress) * 10}px` }}>
-              <div className="premium-icon w-12 h-12 bg-[#1D3D6D] rounded-full flex items-center justify-center mb-4">
+              <div className="premium-icon w-12 h-12 bg-[#1D3D6D] rounded-full flex items-center justify-center mb-4 ring-2 ring-[#76B947]/30">
                 <FaHandshake className="text-white text-xl" />
               </div>
               <h3 className="text-lg font-bold text-[#0A2540] mb-2">Partnership &amp; Sponsorship</h3>
@@ -556,20 +563,20 @@ export default function ContactPage() {
                   "Post-symposium research collaboration",
                 ].map((item, idx) => (
                   <li key={idx} className="help-list-item flex items-start gap-2">
-                    <FaCheckCircle className="text-[#D5A54D] text-xs mt-1 shrink-0" />
+                    <FaCheckCircle className="text-[#76B947] text-xs mt-1 shrink-0" />
                     <span>{item}</span>
                   </li>
                 ))}
               </ul>
               <div className="space-y-2 text-sm">
                 <div className="info-row flex items-center gap-2">
-                  <FaEnvelope className="text-[#D5A54D] text-sm shrink-0" />
+                  <FaEnvelope className="text-[#76B947] text-sm shrink-0" />
                   <span className="text-gray-500">internationalsymposium@capsu.edu.ph</span>
                 </div>
               </div>
               <Link
                 href="/partner-institutions"
-                className="inline-flex items-center gap-2 text-[#1D3D6D] font-semibold text-sm hover:text-[#D5A54D] transition-colors mt-3"
+                className="inline-flex items-center gap-2 text-[#1b5e20] font-semibold text-sm hover:text-[#76B947] transition-colors mt-3"
               >
                 Explore Our Partners <FaArrowRight />
               </Link>
@@ -579,19 +586,21 @@ export default function ContactPage() {
       </section>
 
       {/* ================= CONTACT FORM ================= */}
-      <section ref={formReveal.ref} className={`py-12 ${formReveal.inView ? "in-view" : ""}`}>
-        <div className="max-w-7xl mx-auto px-6">
+      <section ref={formReveal.ref} className={`py-12 relative overflow-hidden ${formReveal.inView ? "in-view" : ""}`}>
+        <div aria-hidden className="pointer-events-none absolute -top-24 left-1/3 h-64 w-64 rounded-full bg-[#F0C674]/10 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-[#4FC3F7]/10 blur-3xl" />
+        <div className="relative max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
             {/* Left: Contact Info */}
             <div className="lg:col-span-2 reveal-left">
-              <div className="premium-card bg-linear-to-br from-[#0A2540] to-[#1a3a5c] rounded-2xl p-8 text-white h-full relative overflow-hidden">
-                {/* Gold sheen overlay */}
+              <div className="premium-card bg-linear-to-br from-white to-[#F8FBF5] rounded-2xl p-8 h-full relative overflow-hidden border border-[#76B947]/20">
+                {/* Green + gold sheen overlay */}
                 <div
                   aria-hidden
                   className="absolute inset-0 opacity-40 pointer-events-none"
                   style={{
                     background:
-                      "radial-gradient(60% 50% at 100% 0%, rgba(213,165,77,0.25) 0%, rgba(0,0,0,0) 70%)",
+                      "radial-gradient(60% 50% at 100% 0%, rgba(118,185,71,0.18) 0%, rgba(0,0,0,0) 70%)",
                   }}
                 />
                 <div className="relative">
@@ -610,19 +619,19 @@ export default function ContactPage() {
                     ].map((item, idx) => (
                       <div
                         key={idx}
-                        className="info-row flex items-start gap-4 p-3 -mx-3 rounded-lg transition-colors duration-300 hover:bg-[#F0F6FF]"
+                        className="info-row flex items-start gap-4 p-3 -mx-3 rounded-lg transition-colors duration-300 hover:bg-[#F2F9FF]"
                       >
-                        <div className="info-icon w-11 h-11 bg-[#F0F6FF] ring-1 ring-[#D5A54D]/40 rounded-full flex items-center justify-center shrink-0">
+                        <div className="info-icon w-11 h-11 bg-[#F2F9FF] ring-1 ring-[#4FC3F7]/40 rounded-full flex items-center justify-center shrink-0">
                           <span className="text-[#1D3D6D] text-lg">{item.icon}</span>
                         </div>
                         <div className="pt-1">
-                          <p className="font-semibold text-xs uppercase tracking-wider text-[#D5A54D] mb-1">
+                          <p className="font-semibold text-xs uppercase tracking-wider text-[#1b5e20] mb-1">
                             {item.title}
                           </p>
                           {item.href ? (
                             <a
                               href={item.href}
-                              className="text-sm text-[#0A2540] hover:text-[#D5A54D] transition-colors break-all"
+                              className="text-sm text-[#0A2540] hover:text-[#76B947] transition-colors break-all"
                             >
                               {item.sub}
                             </a>
@@ -645,7 +654,7 @@ export default function ContactPage() {
                 {/* ============ INITIAL: SEND MESSAGE TRIGGER ============ */}
                 {!formOpen && (
                   <div className="text-center py-16 px-4">
-                    <div className="w-20 h-20 bg-linear-to-br from-[#1D3D6D] to-[#0A2540] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-[#0A2540]/20">
+                    <div className="w-20 h-20 bg-linear-to-br from-[#0A5C0A] to-[#76B947] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-[#0A5C0A]/20">
                       <FaRegPaperPlane className="text-white text-3xl rotate-[-20deg]" />
                     </div>
                     <h3 className="text-2xl font-bold text-[#0A2540] mb-2">
@@ -657,7 +666,7 @@ export default function ContactPage() {
                     </p>
                     <button
                       onClick={openForm}
-                      className="premium-btn inline-flex items-center justify-center gap-2 bg-linear-to-r from-[#1D3D6D] to-[#16305a] text-white px-8 py-3.5 rounded-lg font-semibold text-sm tracking-wide transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
+                      className="premium-btn inline-flex items-center justify-center gap-2 bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white px-8 py-3.5 rounded-lg font-semibold text-sm tracking-wide transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
                     >
                       SEND MESSAGE <FaRegPaperPlane className="rotate-[-20deg]" />
                     </button>
@@ -667,8 +676,8 @@ export default function ContactPage() {
                 {/* ============ SUCCESS STATE ============ */}
                 {formOpen && isSubmitted && (
                   <div className="text-center py-12">
-                    <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <FaCheckCircle className="text-green-600 text-4xl" />
+                    <div className="w-20 h-20 bg-[#E9F5E1] rounded-full flex items-center justify-center mx-auto mb-4 ring-2 ring-[#76B947]/30">
+                      <FaCheckCircle className="text-[#0A5C0A] text-4xl" />
                     </div>
                     <h3 className="text-2xl font-bold text-[#0A2540] mb-2">Message Sent!</h3>
                     <p className="text-gray-600">
@@ -679,7 +688,7 @@ export default function ContactPage() {
                         setIsSubmitted(false);
                         closeForm();
                       }}
-                      className="mt-4 text-[#1D3D6D] font-semibold hover:text-[#D5A54D] transition-colors"
+                      className="mt-4 text-[#1b5e20] font-semibold hover:text-[#76B947] transition-colors"
                     >
                       Send another message
                     </button>
@@ -704,7 +713,7 @@ export default function ContactPage() {
                       <button
                         type="button"
                         onClick={closeForm}
-                        className="text-xs font-semibold text-zinc-500 hover:text-[#D5A54D] transition-colors"
+                        className="text-xs font-semibold text-zinc-500 hover:text-[#76B947] transition-colors"
                       >
                         ← Back
                       </button>
@@ -820,7 +829,7 @@ export default function ContactPage() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="premium-btn w-full bg-linear-to-r from-[#1D3D6D] to-[#16305a] text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl flex items-center justify-center gap-2 disabled:opacity-70"
+                      className="premium-btn w-full bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl flex items-center justify-center gap-2 disabled:opacity-70"
                     >
                       {isSubmitting ? (
                         <>
@@ -838,9 +847,9 @@ export default function ContactPage() {
                     </button>
 
                     {/* Privacy disclaimer — link removed */}
-                    <div className="mt-4 p-4 bg-[#F8FAFC] rounded-lg border border-zinc-200">
+                    <div className="mt-4 p-4 bg-[#F8FBF5] rounded-lg border border-[#76B947]/20">
                       <div className="flex items-start gap-2">
-                        <FaShieldAlt className="text-[#D5A54D] text-sm mt-0.5 shrink-0" />
+                        <FaShieldAlt className="text-[#76B947] text-sm mt-0.5 shrink-0" />
                         <p className="text-xs text-gray-600 leading-relaxed">
                           By submitting this form, you agree that the information you provide
                           may be used by the Symposium Secretariat to respond to your inquiry
