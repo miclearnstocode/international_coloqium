@@ -12,7 +12,7 @@ import {
   FaMoneyBillWave, FaTruck, FaPlane, FaMicroscope, FaUserCheck
 } from "react-icons/fa";
 
-// ===== Reusable scroll-reveal hook =====
+//  Reusable scroll-reveal hook 
 function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
   const ref = useRef<T | null>(null);
   const [inView, setInView] = useState(false);
@@ -36,7 +36,7 @@ function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
   return { ref, inView };
 }
 
-// ===== Scroll progress hook =====
+//  Scroll progress hook 
 function useScrollProgress<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);
   const [progress, setProgress] = useState(0);
@@ -69,7 +69,7 @@ function useScrollProgress<T extends HTMLElement>() {
   return { ref, progress };
 }
 
-// ===== Page-wide scroll progress bar =====
+//  Page-wide scroll progress bar 
 function ScrollProgressBar() {
   const [progress, setProgress] = useState(0);
   useEffect(() => {
@@ -94,7 +94,7 @@ function ScrollProgressBar() {
   return (
     <div className="fixed top-0 left-0 right-0 z-100 h-0.75 bg-transparent pointer-events-none">
       <div
-        className="h-full origin-left bg-linear-to-r from-[#D5A54D] via-[#F0C674] to-[#1D3D6D] shadow-[0_0_12px_rgba(213,165,77,0.6)]"
+        className="h-full origin-left bg-linear-to-r from-[#76B947] via-[#F0C674] to-[#1D3D6D] shadow-[0_0_12px_rgba(213,165,77,0.6)]"
         style={{ transform: `scaleX(${progress})`, transition: "transform 0.08s linear" }}
       />
     </div>
@@ -282,7 +282,7 @@ export default function AboutPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans text-[#0A2540] overflow-x-hidden">
+    <div className="min-h-screen bg-linear-to-b from-white via-[#F8FBF5] to-white font-sans text-[#0A2540] overflow-x-hidden">
       <ScrollProgressBar />
 
       <style jsx global>{`
@@ -343,12 +343,12 @@ export default function AboutPage() {
         .float-slower { animation: floatSlower 11s ease-in-out infinite; }
 
         .gold-underline {
-          background-image: linear-gradient(90deg, #D5A54D, #F0C674, #D5A54D);
+          background-image: linear-gradient(90deg, #76B947, #F0C674, #D5A54D);
           background-size: 200% 100%;
           animation: shimmerLine 4s linear infinite;
         }
 
-        /* ===== Premium card ===== */
+        /*  Premium card  */
         .premium-card {
           position: relative;
           isolation: isolate;
@@ -367,7 +367,7 @@ export default function AboutPage() {
           inset: 0;
           border-radius: inherit;
           padding: 1px;
-          background: linear-gradient(135deg, rgba(213,165,77,0) 0%, rgba(213,165,77,0) 50%, rgba(213,165,77,0) 100%);
+          background: linear-gradient(135deg, rgba(118,185,71,0) 0%, rgba(118,185,71,0) 50%, rgba(118,185,71,0) 100%);
           -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
           -webkit-mask-composite: xor;
           mask-composite: exclude;
@@ -380,7 +380,7 @@ export default function AboutPage() {
           position: absolute;
           inset: -1px;
           border-radius: inherit;
-          background: radial-gradient(120% 80% at 50% 0%, rgba(213,165,77,0.18) 0%, rgba(213,165,77,0) 60%);
+          background: radial-gradient(120% 80% at 50% 0%, rgba(76,195,247,0.16) 0%, rgba(76,195,247,0) 60%);
           opacity: 0;
           transition: opacity 0.55s ease;
           pointer-events: none;
@@ -388,15 +388,15 @@ export default function AboutPage() {
         }
         .premium-card:hover {
           transform: translateY(-10px);
-          border-color: rgba(213, 165, 77, 0.35);
+          border-color: rgba(118, 185, 71, 0.35);
           box-shadow:
             0 2px 4px rgba(11, 42, 74, 0.05),
             0 12px 24px -10px rgba(11, 42, 74, 0.16),
             0 32px 60px -20px rgba(11, 42, 74, 0.22),
-            0 0 0 1px rgba(213, 165, 77, 0.05);
+            0 0 0 1px rgba(118, 185, 71, 0.05);
         }
         .premium-card:hover::before {
-          background: linear-gradient(135deg, rgba(213,165,77,0.9) 0%, rgba(29,61,109,0.35) 50%, rgba(213,165,77,0.9) 100%);
+          background: linear-gradient(135deg, rgba(118,185,71,0.9) 0%, rgba(213,165,77,0.5) 50%, rgba(76,195,247,0.9) 100%);
         }
         .premium-card:hover::after { opacity: 1; }
 
@@ -405,7 +405,7 @@ export default function AboutPage() {
         }
         .premium-card:hover .premium-icon {
           transform: scale(1.08) rotate(-6deg);
-          box-shadow: 0 0 0 6px rgba(213,165,77,0.10), 0 8px 20px -8px rgba(213,165,77,0.45);
+          box-shadow: 0 0 0 6px rgba(76,195,247,0.12), 0 8px 20px -8px rgba(76,195,247,0.45);
         }
 
         .premium-link {
@@ -424,12 +424,12 @@ export default function AboutPage() {
           bottom: -3px;
           width: 100%;
           height: 1.5px;
-          background: linear-gradient(90deg, #d5a54d, #f0c674);
+          background: linear-gradient(90deg, #76B947, #F0C674);
           transform: scaleX(0);
           transform-origin: left center;
           transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
         }
-        .premium-link:hover { color: #1d3d6d; gap: 0.75rem; }
+        .premium-link:hover { color: #1b5e20; gap: 0.75rem; }
         .premium-link:hover::after { transform: scaleX(1); }
 
         .scroll-lift {
@@ -450,19 +450,23 @@ export default function AboutPage() {
 
       <Header />
 
-      {/* ================= PAGE HERO ================= */}
+      {/* == PAGE HERO == */}
       <section
         ref={heroReveal.ref}
         className={`relative bg-white overflow-hidden border-b border-zinc-100 ${heroReveal.inView ? "in-view" : ""}`}
       >
-        {/* Decorative orb */}
+        {/* Decorative orbs — multi-hue */}
         <div
           aria-hidden
-          className="absolute top-0 right-0 w-96 h-96 bg-linear-to-br from-[#D5A54D]/10 to-transparent rounded-full blur-3xl -translate-y-1/3 translate-x-1/4 float-slow pointer-events-none"
+          className="absolute top-0 right-0 w-96 h-96 bg-linear-to-br from-[#76B947]/10 to-transparent rounded-full blur-3xl -translate-y-1/3 translate-x-1/4 float-slow pointer-events-none"
+        />
+        <div
+          aria-hidden
+          className="absolute bottom-0 left-0 w-72 h-72 bg-linear-to-tr from-[#4FC3F7]/10 to-transparent rounded-full blur-3xl -translate-x-1/4 translate-y-1/4 float-slower pointer-events-none"
         />
         <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
           <div className="flex items-center gap-2 text-sm text-zinc-500 mb-6 reveal-up">
-            <Link href="/" className="hover:text-[#F5A623] transition-colors">
+            <Link href="/" className="hover:text-[#76B947] transition-colors">
               Home
             </Link>
             <span className="text-zinc-300">›</span>
@@ -479,7 +483,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ================= ABOUT CONTENT ================= */}
+      {/* == ABOUT CONTENT == */}
       <section ref={aboutScroll.ref} className="py-16">
         <div className="max-w-7xl mx-auto px-6">
           <div
@@ -503,15 +507,17 @@ export default function AboutPage() {
               </p>
 
               <div className="flex flex-wrap gap-4 mt-6 reveal-up stagger-5">
+                {/* Primary CTA — navy (strongest anchor) */}
                 <Link 
                   href="/program" 
-                  className="inline-flex items-center gap-2 bg-linear-to-r from-[#1D3D6D] to-[#16305a] text-white px-6 py-3 rounded-md font-semibold hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 shadow-lg"
+                  className="inline-flex items-center gap-2 bg-linear-to-r from-[#0B2A4A] to-[#1D3D6D] text-white px-6 py-3 rounded-md font-semibold hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 shadow-lg"
                 >
                   Discover the Symposium <FaArrowRight />
                 </Link>
+                {/* Secondary CTA — green outline */}
                 <Link 
                   href="/presentation-guidelines" 
-                  className="inline-flex items-center gap-2 border-2 border-[#1D3D6D] text-[#1D3D6D] px-6 py-3 rounded-md font-semibold hover:bg-[#1D3D6D] hover:text-white transition-all"
+                  className="inline-flex items-center gap-2 border-2 border-[#0A5C0A] text-[#0A5C0A] px-6 py-3 rounded-md font-semibold hover:bg-[#0A5C0A] hover:text-white transition-all"
                 >
                   Presentation Guidelines
                 </Link>
@@ -523,9 +529,11 @@ export default function AboutPage() {
               className="relative scroll-lift reveal-right stagger-2"
               style={{ ["--scroll-y" as any]: `${(1 - aboutScroll.progress) * 30}px` }}
             >
-              <div className="bg-linear-to-br from-[#1D3D6D]/5 to-[#D5A54D]/5 rounded-2xl p-8 border border-gray-200">
+              <div className="bg-linear-to-br from-[#76B947]/5 via-white to-[#4FC3F7]/5 rounded-2xl p-8 border border-gray-200">
                 <div className="relative h-64 rounded-xl overflow-hidden shadow-lg">
-                  <div className="flex flex-col items-center justify-center h-full bg-gradient-to-br from-[#1D3D6D] to-[#0B2A4A] text-white p-8 text-center rounded-xl">
+                  {/* Theme card — navy → marine with green accent */}
+                  <div className="flex flex-col items-center justify-center h-full bg-linear-to-br from-[#0B2A4A] via-[#1D3D6D] to-[#153A61] text-white p-8 text-center rounded-xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-[#76B947] via-[#F0C674] to-[#D5A54D]" />
                     <h3 className="text-xl font-bold">Symposium Theme</h3>
                     <p className="text-sm opacity-80 mt-2">
                       Converging Frontiers in Agri-Life and Bioresource Sciences:<br />
@@ -533,26 +541,27 @@ export default function AboutPage() {
                     </p>
                   </div>
                 </div>
-                <div className="absolute -bottom-4 -right-4 bg-[#D5A54D] text-white p-4 rounded-xl shadow-lg">
+                {/* Floating accents — green + sky blue */}
+                <div className="absolute -bottom-4 -right-4 bg-[#76B947] text-white p-4 rounded-xl shadow-lg">
                   <FaUsers className="text-3xl" />
                 </div>
-                <div className="absolute -top-4 -left-4 bg-[#1D3D6D] text-white p-4 rounded-xl shadow-lg">
+                <div className="absolute -top-4 -left-4 bg-[#4FC3F7] text-white p-4 rounded-xl shadow-lg">
                   <FaLightbulb className="text-3xl" />
                 </div>
               </div>
               {/* Date and Location */}
               <div className="mt-6 p-4 bg-[#F8FAFC] rounded-lg border border-zinc-200">
                 <div className="flex items-center gap-3 mb-2">
-                  <FaCalendarAlt className="text-[#D5A54D] text-lg" />
+                  <FaCalendarAlt className="text-[#76B947] text-lg" />
                   <span className="font-semibold text-[#0A2540]">March 11–13, 2027</span>
                 </div>
                 <div className="flex items-center gap-3 mb-1">
-                  <FaMapMarkerAlt className="text-[#D5A54D] text-lg" />
-                  <span className="font-semibold text-[#0A2540]">Roxas City, Capiz, Philippines</span>
+                  <FaMapMarkerAlt className="text-[#76B947] text-lg" />
+                  <span className="font-semibold text-[#0A2540]">Manoc-Manoc, Boracay Island, Malay, Aklan, Philippines</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="w-5"></span>
-                  <span className="text-sm text-[#D5A54D] font-medium">The Seafood Capital of the Philippines</span>
+                  <span className="text-sm text-[#D5A54D] font-medium">The Beach Capital of the Philippines</span>
                 </div>
               </div>
             </div>
@@ -560,11 +569,14 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ================= SYMPOSIUM AT A GLANCE ================= */}
-      <section ref={glanceScroll.ref} className="py-16 bg-white">
+      {/* == SYMPOSIUM AT A GLANCE == */}
+      <section ref={glanceScroll.ref} className="py-16 bg-linear-to-b from-white via-[#F8FBF5] to-white relative overflow-hidden">
+        {/* Ambient palette glows */}
+        <div aria-hidden className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-64 w-[70%] rounded-full bg-[#4FC3F7]/10 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-[#76B947]/10 blur-3xl" />
         <div
           ref={glanceReveal.ref}
-          className={`max-w-7xl mx-auto px-6 ${glanceReveal.inView ? "in-view" : ""}`}
+          className={`relative max-w-7xl mx-auto px-6 ${glanceReveal.inView ? "in-view" : ""}`}
         >
           <div className="text-center mb-12 reveal-up">
             <h2 className="text-3xl font-bold text-[#0A2540] uppercase">Symposium at a Glance</h2>
@@ -581,11 +593,11 @@ export default function AboutPage() {
             ].map((item, idx) => (
               <div
                 key={idx}
-                className={`premium-card scroll-lift bg-linear-to-b from-[#F8FAFC] to-white rounded-xl border border-zinc-100 p-6 flex flex-col items-center text-center reveal-up stagger-${idx + 1}`}
+                className={`premium-card scroll-lift bg-linear-to-b from-[#F7FBF3] to-white rounded-xl border border-zinc-100 p-6 flex flex-col items-center text-center reveal-up stagger-${idx + 1}`}
                 style={{ ["--scroll-y" as any]: `${(1 - glanceScroll.progress) * (20 - idx * 3)}px` }}
               >
-                <div className="premium-icon w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-sm ring-1 ring-[#D5A54D]/20 mb-3">
-                  <span className="text-2xl text-[#D5A54D]">{item.icon}</span>
+                <div className="premium-icon w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-sm ring-1 ring-[#76B947]/25 mb-3">
+                  <span className="text-2xl text-[#1b5e20]">{item.icon}</span>
                 </div>
                 <span className="text-2xl font-bold text-[#0A2540] mb-1">{item.value}</span>
                 <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{item.label}</span>
@@ -595,17 +607,34 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ================= OBJECTIVES ================= */}
+      {/* == OBJECTIVES == */}
       <section
         ref={objectivesScroll.ref}
-        className="py-16 bg-linear-to-r from-[#0A2540] to-[#1a3a5c] relative overflow-hidden"
+        className="py-16 bg-linear-to-br from-[#0B2A4A] via-[#1D3D6D] to-[#153A61] relative overflow-hidden"
       >
+        {/* Decorative glows — green + gold + sky */}
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-40 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(60% 50% at 20% 20%, rgba(118,185,71,0.22) 0%, rgba(0,0,0,0) 70%)",
+          }}
+        />
         <div
           aria-hidden
           className="absolute inset-0 opacity-30 pointer-events-none"
           style={{
             background:
-              "radial-gradient(60% 50% at 20% 20%, rgba(213,165,77,0.18) 0%, rgba(0,0,0,0) 70%)",
+              "radial-gradient(50% 50% at 80% 80%, rgba(76,195,247,0.20) 0%, rgba(0,0,0,0) 70%)",
+          }}
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-30 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(40% 40% at 90% 10%, rgba(213,165,77,0.18) 0%, rgba(0,0,0,0) 70%)",
           }}
         />
         <div
@@ -624,10 +653,10 @@ export default function AboutPage() {
             {objectives.map((item, idx) => (
               <div
                 key={idx}
-                className={`reveal-up stagger-${(idx % 6) + 1} bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:bg-white/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl`}
+                className={`reveal-up stagger-${(idx % 6) + 1} bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:bg-white/20 hover:border-[#76B947]/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl`}
               >
                 <div className="flex items-start gap-4">
-                  <div className="text-[#F5A623] text-xl mt-1">
+                  <div className="text-[#76B947] text-xl mt-1">
                     <FaCheckCircle />
                   </div>
                   <p className="text-white text-sm text-justify leading-relaxed">{item}</p>
@@ -638,11 +667,12 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ================= WHO SHOULD ATTEND ================= */}
-      <section className="py-16 bg-white">
+      {/* == WHO SHOULD ATTEND == */}
+      <section className="py-16 bg-white relative overflow-hidden">
+        <div aria-hidden className="pointer-events-none absolute -top-16 right-0 h-56 w-56 rounded-full bg-[#F0C674]/10 blur-3xl" />
         <div
           ref={attendReveal.ref}
-          className={`max-w-7xl mx-auto px-6 ${attendReveal.inView ? "in-view" : ""}`}
+          className={`relative max-w-7xl mx-auto px-6 ${attendReveal.inView ? "in-view" : ""}`}
         >
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-[#0A2540] uppercase reveal-up">Who Should Attend?</h2>
@@ -654,9 +684,9 @@ export default function AboutPage() {
             {whoShouldAttend.map((item, idx) => (
               <div
                 key={idx}
-                className={`reveal-up stagger-${(idx % 6) + 1} premium-card flex items-center gap-3 bg-linear-to-b from-[#F8FAFC] to-white rounded-lg p-4 border border-zinc-100`}
+                className={`reveal-up stagger-${(idx % 6) + 1} premium-card flex items-center gap-3 bg-linear-to-b from-[#F7FBF3] to-white rounded-lg p-4 border border-zinc-100`}
               >
-                <FaCheckCircle className="text-[#D5A54D] text-sm shrink-0" />
+                <FaCheckCircle className="text-[#76B947] text-sm shrink-0" />
                 <span className="text-sm text-gray-700">{item}</span>
               </div>
             ))}
@@ -664,11 +694,12 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ================= HOST INSTITUTIONS ================= */}
-      <section ref={hostScroll.ref} className="py-16 bg-[#F8FAFC]">
+      {/* == HOST INSTITUTIONS == */}
+      <section ref={hostScroll.ref} className="py-16 bg-linear-to-b from-[#F8FAFC] via-[#F8FBF5] to-[#F8FAFC] relative overflow-hidden">
+        <div aria-hidden className="pointer-events-none absolute top-10 left-10 h-40 w-40 rounded-full bg-[#4FC3F7]/10 blur-3xl" />
         <div
           ref={hostReveal.ref}
-          className={`max-w-7xl mx-auto px-6 ${hostReveal.inView ? "in-view" : ""}`}
+          className={`relative max-w-7xl mx-auto px-6 ${hostReveal.inView ? "in-view" : ""}`}
         >
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-[#0A2540] uppercase reveal-up">About Us</h2>
@@ -708,7 +739,7 @@ export default function AboutPage() {
                 </div>
                 <h3 className="font-bold text-[#0A2540] text-sm">{inst.name}</h3>
                 <p className="text-xs text-gray-500 mb-2">{inst.location}</p>
-                <span className="inline-block bg-[#D5A54D]/20 text-[#D5A54D] text-xs font-bold px-3 py-1 rounded-full mb-3">
+                <span className="inline-block bg-[#76B947]/15 text-[#1b5e20] text-xs font-bold px-3 py-1 rounded-full mb-3">
                   {inst.role}
                 </span>
                 <p className="text-xs text-gray-600 leading-relaxed">{inst.description}</p>
@@ -718,7 +749,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ================= ORGANIZING COMMITTEE ================= */}
+      {/* == ORGANIZING COMMITTEE == */}
       <section className="py-16 bg-white">
         <div
           ref={committeeReveal.ref}
@@ -737,10 +768,10 @@ export default function AboutPage() {
               >
                 <button
                   onClick={() => toggleAccordion(committee.id)}
-                  className="w-full flex items-center justify-between p-5 text-left hover:bg-[#F8FAFC] transition-colors"
+                  className="w-full flex items-center justify-between p-5 text-left hover:bg-[#F8FBF5] transition-colors"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="text-[#D5A54D]">
+                    <div className="text-[#76B947]">
                       {committee.icon}
                     </div>
                     <div>
@@ -758,12 +789,12 @@ export default function AboutPage() {
                 </button>
                 
                 {openAccordion === committee.id && (
-                  <div className="px-5 pb-5 pt-2 border-t border-zinc-100 bg-[#F8FAFC]">
+                  <div className="px-5 pb-5 pt-2 border-t border-zinc-100 bg-[#F8FBF5]">
                     <div className="flex flex-wrap gap-2">
                       {committee.members.map((member, i) => (
                         <span 
                           key={i}
-                          className="inline-block bg-white px-3 py-1.5 rounded-full text-sm text-gray-700 border border-zinc-200 shadow-sm"
+                          className="inline-block bg-white px-3 py-1.5 rounded-full text-sm text-gray-700 border border-[#76B947]/25 shadow-sm"
                         >
                           {member}
                         </span>

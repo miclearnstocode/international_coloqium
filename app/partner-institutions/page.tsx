@@ -14,7 +14,7 @@ import {
   FaHandshake,
 } from "react-icons/fa";
 
-// ================= TYPE DEFINITIONS =================
+// == TYPE DEFINITIONS ==
 interface Institution {
   name: string;
   logo: string;
@@ -22,7 +22,7 @@ interface Institution {
   role?: string;
 }
 
-// ===== Reusable scroll-reveal hook =====
+//  Reusable scroll-reveal hook 
 function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
   const ref = useRef<T | null>(null);
   const [inView, setInView] = useState(false);
@@ -46,7 +46,7 @@ function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
   return { ref, inView };
 }
 
-// ===== Scroll progress hook =====
+//  Scroll progress hook 
 function useScrollProgress<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);
   const [progress, setProgress] = useState(0);
@@ -79,7 +79,7 @@ function useScrollProgress<T extends HTMLElement>() {
   return { ref, progress };
 }
 
-// ===== Page-wide scroll progress bar =====
+//  Page-wide scroll progress bar 
 function ScrollProgressBar() {
   const [progress, setProgress] = useState(0);
   useEffect(() => {
@@ -104,7 +104,7 @@ function ScrollProgressBar() {
   return (
     <div className="fixed top-0 left-0 right-0 z-100 h-0.75 bg-transparent pointer-events-none">
       <div
-        className="h-full origin-left bg-linear-to-r from-[#D5A54D] via-[#F0C674] to-[#1D3D6D] shadow-[0_0_12px_rgba(213,165,77,0.6)]"
+        className="h-full origin-left bg-linear-to-r from-[#76B947] via-[#F0C674] to-[#1D3D6D] shadow-[0_0_12px_rgba(213,165,77,0.6)]"
         style={{ transform: `scaleX(${progress})`, transition: "transform 0.08s linear" }}
       />
     </div>
@@ -127,7 +127,7 @@ export default function PartnerInstitutionsPage() {
   const coHostScroll = useScrollProgress<HTMLElement>();
   const partnerScroll = useScrollProgress<HTMLElement>();
 
-  // ================= DATA =================
+  // == DATA ==
   const hostInstitution: Institution = {
     name: "Capiz State University",
     logo: "https://res.cloudinary.com/xbloqjom/image/upload/v1794368584/capsu-logo.png",
@@ -136,16 +136,16 @@ export default function PartnerInstitutionsPage() {
   };
 
   const coHosts: Institution[] = [
-    { name: "Hiroshima University", logo: "https://res.cloudinary.com/xbloqjom/image/upload/v1794368585/hiroshima-logo.webp" },
-    { name: "Visayas State University", logo: "https://res.cloudinary.com/xbloqjom/image/upload/v1794368684/vsu-logo.png", location: "Philippines" },
-    { name: "University of San Carlos", logo: "https://res.cloudinary.com/xbloqjom/image/upload/v1794368844/usc-logo.svg", location: "Philippines" },
+    { name: "Hiroshima University", logo: "https://res.cloudinary.com/xbloqjom/image/upload/v1794368585/hiroshima-logo.webp", location: "Hiroshima, Japan" },
+    { name: "Visayas State University", logo: "https://res.cloudinary.com/xbloqjom/image/upload/v1794368684/vsu-logo.png", location: "Leyte, Philippines" },
+    { name: "University of San Carlos", logo: "https://res.cloudinary.com/xbloqjom/image/upload/v1794368844/usc-logo.svg", location: "Cebu, Philippines" },
   ];
 
   const institutionalPartners: Institution[] = [];
   const sponsors: Institution[] = [];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans text-[#0A2540] overflow-x-hidden">
+    <div className="min-h-screen bg-linear-to-b from-white via-[#F8FBF5] to-white font-sans text-[#0A2540] overflow-x-hidden">
       <ScrollProgressBar />
 
       <style jsx global>{`
@@ -193,12 +193,12 @@ export default function PartnerInstitutionsPage() {
         .stagger-6 { animation-delay: 0.70s; }
 
         .gold-underline {
-          background-image: linear-gradient(90deg, #D5A54D, #F0C674, #D5A54D);
+          background-image: linear-gradient(90deg, #76B947, #F0C674, #D5A54D);
           background-size: 200% 100%;
           animation: shimmerLine 4s linear infinite;
         }
 
-        /* ===== Premium card ===== */
+        /*  Premium card  */
         .premium-card {
           position: relative;
           isolation: isolate;
@@ -217,7 +217,7 @@ export default function PartnerInstitutionsPage() {
           inset: 0;
           border-radius: inherit;
           padding: 1px;
-          background: linear-gradient(135deg, rgba(213,165,77,0) 0%, rgba(213,165,77,0) 50%, rgba(213,165,77,0) 100%);
+          background: linear-gradient(135deg, rgba(118,185,71,0) 0%, rgba(118,185,71,0) 50%, rgba(118,185,71,0) 100%);
           -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
           -webkit-mask-composite: xor;
           mask-composite: exclude;
@@ -230,7 +230,7 @@ export default function PartnerInstitutionsPage() {
           position: absolute;
           inset: -1px;
           border-radius: inherit;
-          background: radial-gradient(120% 80% at 50% 0%, rgba(213,165,77,0.18) 0%, rgba(213,165,77,0) 60%);
+          background: radial-gradient(120% 80% at 50% 0%, rgba(76,195,247,0.16) 0%, rgba(76,195,247,0) 60%);
           opacity: 0;
           transition: opacity 0.55s ease;
           pointer-events: none;
@@ -238,15 +238,15 @@ export default function PartnerInstitutionsPage() {
         }
         .premium-card:hover {
           transform: translateY(-10px);
-          border-color: rgba(213, 165, 77, 0.35);
+          border-color: rgba(118, 185, 71, 0.35);
           box-shadow:
             0 2px 4px rgba(11, 42, 74, 0.05),
             0 12px 24px -10px rgba(11, 42, 74, 0.16),
             0 32px 60px -20px rgba(11, 42, 74, 0.22),
-            0 0 0 1px rgba(213, 165, 77, 0.05);
+            0 0 0 1px rgba(118, 185, 71, 0.05);
         }
         .premium-card:hover::before {
-          background: linear-gradient(135deg, rgba(213,165,77,0.9) 0%, rgba(29,61,109,0.35) 50%, rgba(213,165,77,0.9) 100%);
+          background: linear-gradient(135deg, rgba(118,185,71,0.9) 0%, rgba(213,165,77,0.5) 50%, rgba(76,195,247,0.9) 100%);
         }
         .premium-card:hover::after { opacity: 1; }
 
@@ -256,22 +256,23 @@ export default function PartnerInstitutionsPage() {
         }
         .premium-card:hover .logo-bubble {
           transform: scale(1.06);
-          filter: drop-shadow(0 12px 24px rgba(213,165,77,0.25));
+          filter: drop-shadow(0 12px 24px rgba(76,195,247,0.30));
         }
 
-        /* ===== Role list item ===== */
+        /*  Role list item  */
         .role-item {
           transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.35s ease;
         }
         .role-item:hover {
           transform: translateX(4px);
-          background-color: rgba(255, 255, 255, 0.16);
+          background-color: rgba(118, 185, 71, 0.16);
         }
         .role-item svg {
-          transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+          transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s ease;
         }
         .role-item:hover svg {
           transform: scale(1.2) rotate(8deg);
+          color: #76B947;
         }
 
         .premium-btn {
@@ -308,15 +309,19 @@ export default function PartnerInstitutionsPage() {
 
       <Header />
 
-      {/* ================= PAGE HERO ================= */}
+      {/* == PAGE HERO == */}
       <section
         ref={heroScroll.ref}
         className={`relative bg-white overflow-hidden border-b border-zinc-100 ${heroReveal.inView ? "in-view" : ""}`}
       >
-        {/* Decorative gradient orb */}
+        {/* Decorative orbs — green + sky blue */}
         <div
           aria-hidden
-          className="absolute top-0 right-0 w-96 h-96 bg-linear-to-br from-[#D5A54D]/10 to-transparent rounded-full blur-3xl -translate-y-1/3 translate-x-1/4 pointer-events-none"
+          className="absolute top-0 right-0 w-96 h-96 bg-linear-to-br from-[#76B947]/10 to-transparent rounded-full blur-3xl -translate-y-1/3 translate-x-1/4 pointer-events-none"
+        />
+        <div
+          aria-hidden
+          className="absolute bottom-0 left-0 w-72 h-72 bg-linear-to-tr from-[#4FC3F7]/10 to-transparent rounded-full blur-3xl -translate-x-1/4 translate-y-1/4 pointer-events-none"
         />
 
         <div
@@ -324,7 +329,7 @@ export default function PartnerInstitutionsPage() {
           className="max-w-7xl mx-auto px-6 py-16 relative z-10"
         >
           <div className="flex items-center gap-2 text-sm text-zinc-500 mb-6 reveal-up">
-            <Link href="/" className="hover:text-[#D5A54D] transition-colors">
+            <Link href="/" className="hover:text-[#76B947] transition-colors">
               Home
             </Link>
             <span className="text-zinc-300">›</span>
@@ -341,11 +346,14 @@ export default function PartnerInstitutionsPage() {
         </div>
       </section>
 
-      {/* ================= HOST INSTITUTION ================= */}
-      <section ref={hostScroll.ref} className="py-12">
+      {/* == HOST INSTITUTION == */}
+      <section ref={hostScroll.ref} className="py-12 relative overflow-hidden">
+        {/* Ambient palette glows */}
+        <div aria-hidden className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-64 w-[70%] rounded-full bg-[#4FC3F7]/10 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-[#76B947]/10 blur-3xl" />
         <div
           ref={hostReveal.ref}
-          className={`max-w-7xl mx-auto px-6 ${hostReveal.inView ? "in-view" : ""}`}
+          className={`relative max-w-7xl mx-auto px-6 ${hostReveal.inView ? "in-view" : ""}`}
         >
           <div className="text-center mb-8 reveal-up">
             <h2 className="text-2xl font-bold text-[#0A2540] uppercase">Organized by</h2>
@@ -353,7 +361,7 @@ export default function PartnerInstitutionsPage() {
           </div>
 
           <div className="flex justify-center">
-            <div className="premium-card bg-white rounded-2xl border border-zinc-200 p-8 w-full max-w-md reveal-scale">
+            <div className="premium-card bg-linear-to-b from-[#F7FBF3] to-white rounded-2xl border border-zinc-200 p-8 w-full max-w-md reveal-scale">
               <div className="flex flex-col items-center">
                 <div className="logo-bubble relative w-32 h-32 mb-4">
                   <Image
@@ -381,7 +389,7 @@ export default function PartnerInstitutionsPage() {
                 <h3 className="font-bold text-[#0A2540] text-xl">
                   {hostInstitution.name}
                 </h3>
-                <p className="text-sm text-[#D5A54D] font-semibold mt-1">
+                <p className="text-sm text-[#1b5e20] font-semibold mt-1">
                   {hostInstitution.role}
                 </p>
                 <p className="text-sm text-gray-500">{hostInstitution.location}</p>
@@ -396,11 +404,12 @@ export default function PartnerInstitutionsPage() {
         </div>
       </section>
 
-      {/* ================= CO-HOST INSTITUTIONS ================= */}
-      <section ref={coHostScroll.ref} className="py-12 bg-white">
+      {/* == CO-HOST INSTITUTIONS == */}
+      <section ref={coHostScroll.ref} className="py-12 bg-white relative overflow-hidden">
+        <div aria-hidden className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-56 w-[60%] rounded-full bg-[#76B947]/8 blur-3xl" />
         <div
           ref={coHostReveal.ref}
-          className={`max-w-7xl mx-auto px-6 ${coHostReveal.inView ? "in-view" : ""}`}
+          className={`relative max-w-7xl mx-auto px-6 ${coHostReveal.inView ? "in-view" : ""}`}
         >
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-[#0A2540] uppercase reveal-up">
@@ -416,7 +425,7 @@ export default function PartnerInstitutionsPage() {
             {coHosts.map((institution: Institution, idx: number) => (
               <div
                 key={idx}
-                className={`premium-card scroll-lift bg-[#F8FAFC] rounded-xl border border-zinc-200 p-6 text-center reveal-up stagger-${idx + 1}`}
+                className={`premium-card scroll-lift bg-[#F8FBF5] rounded-xl border border-zinc-200 p-6 text-center reveal-up stagger-${idx + 1}`}
                 style={{ ["--scroll-y" as any]: `${(1 - coHostScroll.progress) * (25 - idx * 4)}px` }}
               >
                 <div className="logo-bubble relative w-24 h-24 mx-auto mb-4">
@@ -452,17 +461,34 @@ export default function PartnerInstitutionsPage() {
         </div>
       </section>
 
-      {/* ================= THE ROLE OF PARTNER INSTITUTIONS ================= */}
+      {/* == THE ROLE OF PARTNER INSTITUTIONS == */}
       <section
         ref={roleReveal.ref}
-        className={`py-12 bg-linear-to-r from-[#0A2540] to-[#1a3a5c] relative overflow-hidden ${roleReveal.inView ? "in-view" : ""}`}
+        className={`py-12 bg-linear-to-br from-[#0B2A4A] via-[#1D3D6D] to-[#153A61] relative overflow-hidden ${roleReveal.inView ? "in-view" : ""}`}
       >
+        {/* Decorative glows — green + gold + sky */}
         <div
           aria-hidden
           className="absolute inset-0 opacity-40 pointer-events-none"
           style={{
             background:
-              "radial-gradient(60% 50% at 20% 20%, rgba(213,165,77,0.18) 0%, rgba(0,0,0,0) 70%)",
+              "radial-gradient(60% 50% at 20% 20%, rgba(118,185,71,0.22) 0%, rgba(0,0,0,0) 70%)",
+          }}
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-30 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(50% 50% at 80% 80%, rgba(76,195,247,0.20) 0%, rgba(0,0,0,0) 70%)",
+          }}
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-30 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(40% 40% at 90% 10%, rgba(213,165,77,0.18) 0%, rgba(0,0,0,0) 70%)",
           }}
         />
 
@@ -490,7 +516,7 @@ export default function PartnerInstitutionsPage() {
                 key={idx}
                 className={`role-item flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/10 reveal-up stagger-${(idx % 6) + 1}`}
               >
-                <FaCheckCircle className="text-[#D5A54D] text-sm shrink-0" />
+                <FaCheckCircle className="text-[#76B947] text-sm shrink-0" />
                 <span className="text-white text-sm leading-relaxed">{item}</span>
               </div>
             ))}
@@ -507,7 +533,7 @@ export default function PartnerInstitutionsPage() {
         </div>
       </section>
 
-      {/* ================= OTHER INSTITUTIONAL PARTNERS ================= */}
+      {/* == OTHER INSTITUTIONAL PARTNERS == */}
       <section ref={partnerScroll.ref} className="py-12 bg-white">
         <div
           ref={partnerReveal.ref}
@@ -528,7 +554,7 @@ export default function PartnerInstitutionsPage() {
               {institutionalPartners.map((partner: Institution, idx: number) => (
                 <div
                   key={idx}
-                  className={`premium-card scroll-lift bg-[#F8FAFC] rounded-xl border border-zinc-200 p-6 text-center reveal-up stagger-${(idx % 6) + 1}`}
+                  className={`premium-card scroll-lift bg-[#F8FBF5] rounded-xl border border-zinc-200 p-6 text-center reveal-up stagger-${(idx % 6) + 1}`}
                   style={{ ["--scroll-y" as any]: `${(1 - partnerScroll.progress) * (20 - idx * 2)}px` }}
                 >
                   <div className="logo-bubble relative w-24 h-24 mx-auto mb-3">
@@ -563,10 +589,10 @@ export default function PartnerInstitutionsPage() {
               {[...Array(4)].map((_, idx: number) => (
                 <div
                   key={idx}
-                  className={`premium-card bg-[#F8FAFC] rounded-xl border border-dashed border-zinc-300 p-6 text-center reveal-up stagger-${(idx % 6) + 1}`}
+                  className={`premium-card bg-[#F2F9FF] rounded-xl border border-dashed border-[#4FC3F7]/40 p-6 text-center reveal-up stagger-${(idx % 6) + 1}`}
                 >
-                  <div className="w-24 h-24 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-                    <FaBuilding className="text-3xl text-gray-300" />
+                  <div className="w-24 h-24 bg-[#F8FBF5] rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <FaBuilding className="text-3xl text-[#76B947]/50" />
                   </div>
                   <p className="text-sm text-gray-400">Institutional Partner</p>
                   <p className="text-xs text-gray-400">Logo &amp; Name</p>
@@ -582,9 +608,11 @@ export default function PartnerInstitutionsPage() {
         </div>
       </section>
 
-      {/* ================= SPONSORS ================= */}
-      <section ref={sponsorReveal.ref} className={`py-12 bg-[#F8FAFC] ${sponsorReveal.inView ? "in-view" : ""}`}>
-        <div className="max-w-7xl mx-auto px-6">
+      {/* == SPONSORS == */}
+      <section ref={sponsorReveal.ref} className={`py-12 bg-linear-to-b from-[#F8FBF5] via-white to-[#F8FAFC] relative overflow-hidden ${sponsorReveal.inView ? "in-view" : ""}`}>
+        <div aria-hidden className="pointer-events-none absolute top-0 left-0 h-40 w-40 rounded-full bg-[#F0C674]/10 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-40 w-40 rounded-full bg-[#4FC3F7]/10 blur-3xl" />
+        <div className="relative max-w-7xl mx-auto px-6">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-[#0A2540] uppercase reveal-up">
               Sponsors
@@ -632,10 +660,10 @@ export default function PartnerInstitutionsPage() {
               [...Array(6)].map((_, idx: number) => (
                 <div
                   key={idx}
-                  className={`premium-card bg-white rounded-xl border border-dashed border-zinc-300 p-6 text-center w-48 reveal-up stagger-${(idx % 6) + 1}`}
+                  className={`premium-card bg-white rounded-xl border border-dashed border-[#D5A54D]/40 p-6 text-center w-48 reveal-up stagger-${(idx % 6) + 1}`}
                 >
-                  <div className="w-24 h-24 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-                    <FaStar className="text-3xl text-gray-300" />
+                  <div className="w-24 h-24 bg-[#FBF3E0] rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <FaStar className="text-3xl text-[#D5A54D]/60" />
                   </div>
                   <p className="text-sm text-gray-400">Sponsor</p>
                   <p className="text-xs text-gray-400">Logo &amp; Name</p>
@@ -651,24 +679,32 @@ export default function PartnerInstitutionsPage() {
         </div>
       </section>
 
-      {/* ================= BECOME A PARTNER ================= */}
+      {/* == BECOME A PARTNER == */}
       <section
         ref={ctaReveal.ref}
-        className={`py-16 bg-linear-to-r from-[#0A2540] to-[#1a3a5c] relative overflow-hidden ${ctaReveal.inView ? "in-view" : ""}`}
+        className={`py-16 bg-linear-to-br from-[#0B2A4A] via-[#1D3D6D] to-[#153A61] relative overflow-hidden ${ctaReveal.inView ? "in-view" : ""}`}
       >
         <div
           aria-hidden
           className="absolute inset-0 opacity-30 pointer-events-none"
           style={{
             background:
-              "radial-gradient(60% 50% at 80% 50%, rgba(213,165,77,0.20) 0%, rgba(0,0,0,0) 70%)",
+              "radial-gradient(60% 50% at 80% 50%, rgba(118,185,71,0.22) 0%, rgba(0,0,0,0) 70%)",
+          }}
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-25 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(50% 40% at 20% 20%, rgba(76,195,247,0.20) 0%, rgba(0,0,0,0) 70%)",
           }}
         />
 
         <div className="relative max-w-4xl mx-auto px-6 text-center">
           <div className="flex justify-center mb-4 reveal-up">
-            <div className="premium-icon w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center ring-1 ring-[#D5A54D]/40">
-              <FaHandshake className="text-[#D5A54D] text-3xl" />
+            <div className="premium-icon w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center ring-1 ring-[#76B947]/50">
+              <FaHandshake className="text-[#76B947] text-3xl" />
             </div>
           </div>
           <h2 className="text-3xl font-bold text-white mb-4 reveal-up stagger-1">
@@ -683,7 +719,7 @@ export default function PartnerInstitutionsPage() {
           </p>
           <Link
             href="#"
-            className="premium-btn inline-flex items-center gap-3 bg-linear-to-r from-[#D5A54D] to-[#F0C674] text-[#0A2540] px-8 py-4 rounded-lg font-bold shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl reveal-up stagger-4"
+            className="premium-btn inline-flex items-center gap-3 bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white px-8 py-4 rounded-lg font-bold shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl reveal-up stagger-4"
           >
             Contact the Secretariat <FaArrowRight />
           </Link>

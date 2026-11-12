@@ -11,7 +11,7 @@ import {
   FaPastafarianism, FaViadeoSquare, FaFileAlt, FaBell, FaCalendarCheck, FaEdit, FaClock, FaPenFancy, FaRocket, FaPrint, FaEnvelope     
 } from "react-icons/fa";
 
-// ===== Reusable scroll-reveal hook =====
+//  Reusable scroll-reveal hook 
 function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
   const ref = useRef<T | null>(null);
   const [inView, setInView] = useState(false);
@@ -35,7 +35,7 @@ function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
   return { ref, inView };
 }
 
-// ===== Scroll progress hook =====
+//  Scroll progress hook 
 function useScrollProgress<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);
   const [progress, setProgress] = useState(0);
@@ -68,7 +68,7 @@ function useScrollProgress<T extends HTMLElement>() {
   return { ref, progress };
 }
 
-// ===== Page-wide scroll progress bar =====
+//  Page-wide scroll progress bar 
 function ScrollProgressBar() {
   const [progress, setProgress] = useState(0);
   useEffect(() => {
@@ -93,7 +93,7 @@ function ScrollProgressBar() {
   return (
     <div className="fixed top-0 left-0 right-0 z-100 h-0.75 bg-transparent pointer-events-none">
       <div
-        className="h-full origin-left bg-linear-to-r from-[#D5A54D] via-[#F0C674] to-[#1D3D6D] shadow-[0_0_12px_rgba(213,165,77,0.6)]"
+        className="h-full origin-left bg-linear-to-r from-[#76B947] via-[#F0C674] to-[#1D3D6D] shadow-[0_0_12px_rgba(213,165,77,0.6)]"
         style={{ transform: `scaleX(${progress})`, transition: "transform 0.08s linear" }}
       />
     </div>
@@ -216,7 +216,7 @@ export default function ProgramPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans text-[#0A2540] overflow-x-hidden">
+    <div className="min-h-screen bg-linears-to-b from-white via-[#F8FBF5] to-white font-sans text-[#0A2540] overflow-x-hidden">
       <ScrollProgressBar />
 
       <style jsx global>{`
@@ -263,12 +263,12 @@ export default function ProgramPage() {
         .float-slow { animation: floatSlow 9s ease-in-out infinite; }
 
         .gold-underline {
-          background-image: linear-gradient(90deg, #D5A54D, #F0C674, #D5A54D);
+          background-image: linear-gradient(90deg, #76B947, #F0C674, #D5A54D);
           background-size: 200% 100%;
           animation: shimmerLine 4s linear infinite;
         }
 
-        /* ===== Premium card ===== */
+        /*  Premium card  */
         .premium-card {
           position: relative;
           isolation: isolate;
@@ -287,7 +287,7 @@ export default function ProgramPage() {
           inset: 0;
           border-radius: inherit;
           padding: 1px;
-          background: linear-gradient(135deg, rgba(213,165,77,0) 0%, rgba(213,165,77,0) 50%, rgba(213,165,77,0) 100%);
+          background: linear-gradient(135deg, rgba(118,185,71,0) 0%, rgba(118,185,71,0) 50%, rgba(118,185,71,0) 100%);
           -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
           -webkit-mask-composite: xor;
           mask-composite: exclude;
@@ -300,7 +300,7 @@ export default function ProgramPage() {
           position: absolute;
           inset: -1px;
           border-radius: inherit;
-          background: radial-gradient(120% 80% at 50% 0%, rgba(213,165,77,0.18) 0%, rgba(213,165,77,0) 60%);
+          background: radial-gradient(120% 80% at 50% 0%, rgba(76,195,247,0.16) 0%, rgba(76,195,247,0) 60%);
           opacity: 0;
           transition: opacity 0.55s ease;
           pointer-events: none;
@@ -308,15 +308,15 @@ export default function ProgramPage() {
         }
         .premium-card:hover {
           transform: translateY(-10px);
-          border-color: rgba(213, 165, 77, 0.35);
+          border-color: rgba(118, 185, 71, 0.35);
           box-shadow:
             0 2px 4px rgba(11, 42, 74, 0.05),
             0 12px 24px -10px rgba(11, 42, 74, 0.16),
             0 32px 60px -20px rgba(11, 42, 74, 0.22),
-            0 0 0 1px rgba(213, 165, 77, 0.05);
+            0 0 0 1px rgba(118, 185, 71, 0.05);
         }
         .premium-card:hover::before {
-          background: linear-gradient(135deg, rgba(213,165,77,0.9) 0%, rgba(29,61,109,0.35) 50%, rgba(213,165,77,0.9) 100%);
+          background: linear-gradient(135deg, rgba(118,185,71,0.9) 0%, rgba(213,165,77,0.5) 50%, rgba(76,195,247,0.9) 100%);
         }
         .premium-card:hover::after { opacity: 1; }
 
@@ -325,35 +325,36 @@ export default function ProgramPage() {
         }
         .premium-card:hover .premium-icon {
           transform: scale(1.08) rotate(-6deg);
-          box-shadow: 0 0 0 6px rgba(213,165,77,0.10), 0 8px 20px -8px rgba(213,165,77,0.45);
+          box-shadow: 0 0 0 6px rgba(76,195,247,0.12), 0 8px 20px -8px rgba(76,195,247,0.45);
         }
 
-        /* ===== Schedule row hover ===== */
+        /*  Schedule row hover  */
         .schedule-row {
           transition: background-color 0.35s ease, transform 0.35s ease;
         }
         .schedule-row:hover {
-          background-color: rgba(213, 165, 77, 0.06);
+          background-color: rgba(118, 185, 71, 0.08);
           transform: translateX(4px);
         }
         .schedule-row:hover .schedule-icon {
           transform: scale(1.15) rotate(-8deg);
-          background-color: rgba(213, 165, 77, 0.15);
+          background-color: rgba(118, 185, 71, 0.15);
+          color: #1b5e20;
         }
         .schedule-icon {
-          transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.35s ease;
+          transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.35s ease, color 0.3s ease;
         }
 
-        /* ===== Key date row hover ===== */
+        /*  Key date row hover  */
         .keydate-row {
           transition: background-color 0.3s ease, transform 0.3s ease;
         }
         .keydate-row:hover {
-          background-color: rgba(213, 165, 77, 0.06);
+          background-color: rgba(118, 185, 71, 0.08);
         }
         .keydate-row:hover .keydate-icon {
           transform: scale(1.2) rotate(8deg);
-          color: #b8892f;
+          color: #4FC3F7;
         }
         .keydate-icon {
           transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s ease;
@@ -377,17 +378,27 @@ export default function ProgramPage() {
 
       <Header />
 
-      {/* ================= PAGE HERO ================= */}
+      {/* == PAGE HERO == */}
       <section
         ref={heroScroll.ref}
         className={`relative bg-white overflow-hidden border-b border-zinc-100 ${heroReveal.inView ? "in-view" : ""}`}
       >
+        {/* Decorative orbs — green + sky blue */}
+        <div
+          aria-hidden
+          className="absolute top-0 left-0 w-80 h-80 bg-linear-to-br from-[#76B947]/10 to-transparent rounded-full blur-3xl -translate-y-1/3 -translate-x-1/4 float-slow pointer-events-none"
+        />
+        <div
+          aria-hidden
+          className="absolute bottom-0 left-1/3 w-64 h-64 bg-linear-to-tr from-[#4FC3F7]/10 to-transparent rounded-full blur-3xl translate-y-1/4 float-slow pointer-events-none"
+        />
+
         <div
           ref={heroReveal.ref}
           className="max-w-7xl mx-auto px-6 py-16 relative z-10"
         >
           <div className="flex items-center gap-2 text-sm text-zinc-500 mb-6 reveal-up">
-            <Link href="/" className="hover:text-[#F5A623] transition-colors">
+            <Link href="/" className="hover:text-[#76B947] transition-colors">
               Home
             </Link>
             <span className="text-zinc-300">›</span>
@@ -416,23 +427,40 @@ export default function ProgramPage() {
             loading="eager"
             className="object-cover object-right opacity-40"
           />
-          <div className="absolute top-1/4 right-1/4 w-4 h-4 bg-[#F5A623] rounded-full shadow-lg"></div>
-          <div className="absolute top-1/2 right-1/2 w-4 h-4 bg-[#F5A623] rounded-full shadow-lg"></div>
-          <div className="absolute top-1/3 right-1/3 w-4 h-4 bg-[#F5A623] rounded-full shadow-lg"></div>
+          <div className="absolute top-1/4 right-1/4 w-4 h-4 bg-[#76B947] rounded-full shadow-lg"></div>
+          <div className="absolute top-1/2 right-1/2 w-4 h-4 bg-[#4FC3F7] rounded-full shadow-lg"></div>
+          <div className="absolute top-1/3 right-1/3 w-4 h-4 bg-[#F0C674] rounded-full shadow-lg"></div>
         </div>
       </section>
 
-      {/* ================= KEY DATES ================= */}
+      {/* == KEY DATES == */}
       <section
         ref={keyDatesScroll.ref}
-        className="py-8 bg-linear-to-r from-[#0A2540] to-[#1a3a5c] relative overflow-hidden"
+        className="py-8 bg-linear-to-br from-[#0B2A4A] via-[#1D3D6D] to-[#153A61] relative overflow-hidden"
       >
+        {/* Decorative glows — green + gold + sky */}
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-40 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(60% 50% at 20% 20%, rgba(118,185,71,0.22) 0%, rgba(0,0,0,0) 70%)",
+          }}
+        />
         <div
           aria-hidden
           className="absolute inset-0 opacity-30 pointer-events-none"
           style={{
             background:
-              "radial-gradient(60% 50% at 20% 20%, rgba(213,165,77,0.18) 0%, rgba(0,0,0,0) 70%)",
+              "radial-gradient(50% 50% at 80% 80%, rgba(76,195,247,0.20) 0%, rgba(0,0,0,0) 70%)",
+          }}
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-30 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(40% 40% at 90% 10%, rgba(213,165,77,0.18) 0%, rgba(0,0,0,0) 70%)",
           }}
         />
         <div
@@ -441,7 +469,7 @@ export default function ProgramPage() {
         >
           <div className="text-center mb-6">
             <div className="flex items-center justify-center gap-3 mb-3 reveal-up">
-              <FaClock className="text-[#F5A623] text-3xl" />
+              <FaClock className="text-[#76B947] text-3xl" />
               <h2 className="text-3xl font-bold text-white uppercase">Key Dates</h2>
             </div>
             <div className="w-16 h-1 gold-underline mx-auto reveal-up stagger-1 rounded-full"></div>
@@ -451,7 +479,7 @@ export default function ProgramPage() {
           </div>
 
           <div className="bg-white rounded-xl overflow-hidden shadow-xl reveal-up stagger-3">
-            <div className="grid grid-cols-12 bg-[#0A2540] text-white px-4 py-2">
+            <div className="grid grid-cols-12 bg-[#0B2A4A] text-white px-4 py-2">
               <div className="col-span-3 font-bold uppercase text-xs">Date</div>
               <div className="col-span-4 font-bold uppercase text-xs">Event</div>
               <div className="col-span-5 font-bold uppercase text-xs">Description</div>
@@ -466,7 +494,7 @@ export default function ProgramPage() {
                   }`}
                 >
                   <div className="col-span-3 flex items-center gap-2">
-                    <span className="keydate-icon text-[#F5A623] text-sm shrink-0">{item.icon}</span>
+                    <span className="keydate-icon text-[#76B947] text-sm shrink-0">{item.icon}</span>
                     <span className="font-bold text-[#0A2540] text-sm">{item.date}</span>
                   </div>
                   <div className="col-span-4">
@@ -486,11 +514,14 @@ export default function ProgramPage() {
         </div>
       </section>
 
-      {/* ================= AT A GLANCE ================= */}
-      <section ref={glanceScroll.ref} className="py-12">
+      {/* == AT A GLANCE == */}
+      <section ref={glanceScroll.ref} className="py-12 relative overflow-hidden">
+        {/* Ambient palette glows */}
+        <div aria-hidden className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-64 w-[70%] rounded-full bg-[#4FC3F7]/10 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-[#76B947]/10 blur-3xl" />
         <div
           ref={glanceReveal.ref}
-          className={`max-w-7xl mx-auto px-6 ${glanceReveal.inView ? "in-view" : ""}`}
+          className={`relative max-w-7xl mx-auto px-6 ${glanceReveal.inView ? "in-view" : ""}`}
         >
           <div className="text-center mb-8 reveal-up">
             <h2 className="text-3xl font-bold text-[#0A2540] uppercase">Program At A Glance</h2>
@@ -507,11 +538,11 @@ export default function ProgramPage() {
             ].map((item, idx) => (
               <div
                 key={idx}
-                className={`premium-card scroll-lift bg-white rounded-xl border border-zinc-100 p-4 flex flex-col items-center text-center reveal-up stagger-${idx + 1}`}
+                className={`premium-card scroll-lift bg-linear-to-b from-[#F7FBF3] to-white rounded-xl border border-zinc-100 p-4 flex flex-col items-center text-center reveal-up stagger-${idx + 1}`}
                 style={{ ["--scroll-y" as any]: `${(1 - glanceScroll.progress) * (20 - idx * 3)}px` }}
               >
-                <div className="premium-icon w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-sm ring-1 ring-[#D5A54D]/20 mb-2">
-                  <span className="text-2xl text-[#0A2540]">{item.icon}</span>
+                <div className="premium-icon w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-sm ring-1 ring-[#76B947]/25 mb-2">
+                  <span className="text-2xl text-[#1b5e20]">{item.icon}</span>
                 </div>
                 <span className="text-3xl font-bold text-green-700 mb-1">{item.value}</span>
                 <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{item.label}</span>
@@ -521,7 +552,7 @@ export default function ProgramPage() {
         </div>
       </section>
 
-      {/* ================= SCHEDULE ================= */}
+      {/* == SCHEDULE == */}
       <section ref={scheduleScroll.ref} className="pb-12">
         <div
           ref={scheduleReveal.ref}
@@ -535,11 +566,11 @@ export default function ProgramPage() {
                 onClick={() => setActiveDay(day)}
                 className={`p-4 flex items-center justify-center gap-3 transition-all duration-300 ${
                   activeDay === day 
-                    ? 'bg-[#0A2540] text-white shadow-lg' 
-                    : 'bg-white text-[#0A2540] hover:bg-zinc-50'
+                    ? 'bg-[#0B2A4A] text-white shadow-lg' 
+                    : 'bg-white text-[#0A2540] hover:bg-[#F8FBF5]'
                 } ${day === 2 ? 'border-x border-zinc-200' : ''}`}
               >
-                <FaCalendarAlt className={`text-2xl transition-transform duration-300 ${activeDay === day ? 'text-[#F5A623] scale-110' : 'text-[#0A2540]'}`} />
+                <FaCalendarAlt className={`text-2xl transition-transform duration-300 ${activeDay === day ? 'text-[#76B947] scale-110' : 'text-[#0A2540]'}`} />
                 <div>
                   <p className={`font-bold text-base leading-tight ${activeDay === day ? 'text-white' : 'text-gray-700'}`}>
                     DAY {day}
@@ -554,7 +585,7 @@ export default function ProgramPage() {
 
           {/* Schedule Table */}
           <div className="border border-t-0 border-zinc-200 bg-white rounded-b-xl overflow-hidden shadow-sm reveal-up stagger-1">
-            <div className="grid grid-cols-12 bg-[#0A2540] text-white px-4 py-2 sticky top-0 z-10">
+            <div className="grid grid-cols-12 bg-[#0B2A4A] text-white px-4 py-2 sticky top-0 z-10">
               <div className="col-span-3 font-bold uppercase text-xs">Time</div>
               <div className="col-span-9 font-bold uppercase text-xs">Session / Activity</div>
             </div>
@@ -563,11 +594,11 @@ export default function ProgramPage() {
               {scheduleData.map((row, idx) => (
                 <div 
                   key={`${activeDay}-${idx}`}
-                  className={`schedule-row grid grid-cols-12 px-4 py-2 items-start border-b border-zinc-100 last:border-b-0 ${idx % 2 === 0 ? 'bg-white' : 'bg-zinc-50/50'}`}
+                  className={`schedule-row grid grid-cols-12 px-4 py-2 items-start border-b border-zinc-100 last:border-b-0 ${idx % 2 === 0 ? 'bg-white' : 'bg-[#F8FBF5]/60'}`}
                 >
                   <div className="col-span-3 text-xs font-semibold text-gray-600 pt-1">{row.time}</div>
                   <div className="col-span-9 flex gap-3">
-                    <div className="schedule-icon w-7 h-7 rounded-full bg-[#e8f0fe] text-[#0A2540] flex items-center justify-center text-sm shrink-0">
+                    <div className="schedule-icon w-7 h-7 rounded-full bg-[#F2F9FF] text-[#1D3D6D] flex items-center justify-center text-sm shrink-0">
                       {row.icon}
                     </div>
                     <div>
@@ -584,9 +615,11 @@ export default function ProgramPage() {
         </div>
       </section>
 
-      {/* ================= DOWNLOAD & HIGHLIGHTS ================= */}
-      <section ref={downloadReveal.ref} className={`bg-white py-12 border-t border-zinc-100 ${downloadReveal.inView ? "in-view" : ""}`}>
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+      {/* == DOWNLOAD & HIGHLIGHTS == */}
+      <section ref={downloadReveal.ref} className={`bg-linear-to-b from-white via-[#F8FBF5] to-white py-12 border-t border-zinc-100 relative overflow-hidden ${downloadReveal.inView ? "in-view" : ""}`}>
+        <div aria-hidden className="pointer-events-none absolute top-0 left-0 h-40 w-40 rounded-full bg-[#F0C674]/10 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-40 w-40 rounded-full bg-[#4FC3F7]/10 blur-3xl" />
+        <div className="relative max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-8">
           
           {/* Left: Download */}
           <div className="premium-card reveal-up stagger-1 bg-white border border-zinc-200 rounded-xl p-6 flex flex-col md:flex-row gap-6 items-center">
@@ -596,12 +629,12 @@ export default function ProgramPage() {
               <p className="text-gray-600 text-sm mb-4">
                 Get the complete program schedule in PDF format.
               </p>
-              <button className="inline-flex items-center gap-2 bg-linear-to-r from-[#0A2540] to-[#1a3a5c] text-white px-4 py-2 rounded-md font-bold text-sm hover:shadow-xl hover:-translate-y-0.5 transition-all">
+              <button className="inline-flex items-center gap-2 bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white px-4 py-2 rounded-md font-bold text-sm hover:shadow-xl hover:-translate-y-0.5 transition-all">
                 <FaDownload /> DOWNLOAD FULL PROGRAM (PDF)
               </button>
             </div>
             <div className="w-32 shrink-0 bg-white shadow-lg border border-zinc-200 p-3 rounded-lg flex flex-col items-center text-center">
-              <div className="w-20 h-28 bg-blue-100 mb-2 relative overflow-hidden rounded">
+              <div className="w-20 h-28 bg-[#F2F9FF] mb-2 relative overflow-hidden rounded">
                 <Image src="/program-cover.png" alt="Program Cover" fill className="object-cover" />
               </div>
               <p className="text-[8px] font-bold text-gray-700 mt-1 leading-tight">INTERNATIONAL<br/>SCIENCE<br/>SYMPOSIUM<br/>2027</p>
@@ -622,12 +655,12 @@ export default function ProgramPage() {
                   "Cultural and social events"
                 ].map((item, idx) => (
                   <li key={idx} className="flex items-start gap-2 text-xs text-gray-700">
-                    <FaCheckCircle className="text-[#F5A623] mt-0.5 text-sm shrink-0" /> {item}
+                    <FaCheckCircle className="text-[#76B947] mt-0.5 text-sm shrink-0" /> {item}
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="w-40 shrink-0 h-24 rounded-xl overflow-hidden bg-zinc-200 shadow-lg relative">
+            <div className="w-40 shrink-0 h-24 rounded-xl overflow-hidden bg-[#F2F9FF] shadow-lg relative">
               <Image src="/conference-photo.jpg" alt="Conference" fill className="object-cover" />
             </div>
           </div>

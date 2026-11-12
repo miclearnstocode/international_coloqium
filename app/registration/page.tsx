@@ -11,7 +11,7 @@ import {
   FaRegCheckCircle, FaPaperPlane
 } from "react-icons/fa";
 
-// ===== Reusable scroll-reveal hook =====
+//  Reusable scroll-reveal hook 
 function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
   const ref = useRef<T | null>(null);
   const [inView, setInView] = useState(false);
@@ -35,7 +35,7 @@ function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
   return { ref, inView };
 }
 
-// ===== Scroll progress hook =====
+//  Scroll progress hook 
 function useScrollProgress<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);
   const [progress, setProgress] = useState(0);
@@ -68,7 +68,7 @@ function useScrollProgress<T extends HTMLElement>() {
   return { ref, progress };
 }
 
-// ===== Page-wide scroll progress bar =====
+//  Page-wide scroll progress bar 
 function ScrollProgressBar() {
   const [progress, setProgress] = useState(0);
   useEffect(() => {
@@ -93,7 +93,7 @@ function ScrollProgressBar() {
   return (
     <div className="fixed top-0 left-0 right-0 z-100 h-0.75 bg-transparent pointer-events-none">
       <div
-        className="h-full origin-left bg-linear-to-r from-[#D5A54D] via-[#F0C674] to-[#1D3D6D] shadow-[0_0_12px_rgba(213,165,77,0.6)]"
+        className="h-full origin-left bg-linear-to-r from-[#76B947] via-[#F0C674] to-[#1D3D6D] shadow-[0_0_12px_rgba(213,165,77,0.6)]"
         style={{ transform: `scaleX(${progress})`, transition: "transform 0.08s linear" }}
       />
     </div>
@@ -121,12 +121,12 @@ export default function RegistrationPage() {
   ];
 
   const importantDates = [
-    { icon: <FaRegPaperPlane />, title: "Call for Papers Open", date: "April 15, 2025" },
-    { icon: <FaRegFileAlt />, title: "Full Paper Submission Deadline", date: "June 30, 2025" },
-    { icon: <FaRegCheckCircle />, title: "Notification of Acceptance", date: "July 25, 2025" },
-    { icon: <FaDollarSign />, title: "Early Bird Payment Deadline", date: "July 31, 2025" },
-    { icon: <FaRegUser />, title: "Regular Payment Deadline", date: "August 31, 2025" },
-    { icon: <FaRegCalendarAlt />, title: "Colloquium Dates", date: "October 15-17, 2025" },
+    { icon: <FaRegPaperPlane />, title: "Opening of Abstract Submission and Registration", date: "November 16, 2026" },
+    { icon: <FaRegFileAlt />, title: "Abstract Submission Deadline", date: "January 20, 2027" },
+    { icon: <FaRegCheckCircle />, title: "Notification of Acceptance", date: "January 25, 2027" },
+    { icon: <FaDollarSign />, title: "Early Bird Payment Deadline", date: "January 10, 2027" },
+    { icon: <FaRegUser />, title: "Final Registration and Payment Deadline", date: "February 06, 2027" },
+    { icon: <FaRegCalendarAlt />, title: "Submission of Full Papers", date: "Subject to confirmation of publication number" },
   ];
 
   const steps = [
@@ -138,14 +138,14 @@ export default function RegistrationPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans text-[#0A2540] flex flex-col overflow-x-hidden">
+    <div className="min-h-screen bg-linear-to-b from-white via-[#F8FBF5] to-white font-sans text-[#0A2540] flex flex-col overflow-x-hidden">
       <ScrollProgressBar />
 
       <style jsx global>{`
       @keyframes timelinePulse {
         0% {
           transform: scale(1);
-          background-color: #F0F6FF;
+          background-color: #F2F9FF;
           border-color: #ffffff;
           color: #1D3D6D;
           box-shadow: none;
@@ -153,27 +153,27 @@ export default function RegistrationPage() {
         2% {
           /* instant on */
           transform: scale(1.14);
-          background-color: #FBF3E0;
-          border-color: #D5A54D;
-          color: #8B6F47;
+          background-color: #E9F5E1;
+          border-color: #76B947;
+          color: #1b5e20;
           box-shadow:
-            0 0 0 6px rgba(213,165,77,0.14),
-            0 8px 20px -8px rgba(213,165,77,0.55);
+            0 0 0 6px rgba(118,185,71,0.16),
+            0 8px 20px -8px rgba(118,185,71,0.55);
         }
         11% {
           /* hold on for ~1/9 of the cycle */
           transform: scale(1.14);
-          background-color: #FBF3E0;
-          border-color: #D5A54D;
-          color: #8B6F47;
+          background-color: #E9F5E1;
+          border-color: #76B947;
+          color: #1b5e20;
           box-shadow:
-            0 0 0 6px rgba(213,165,77,0.14),
-            0 8px 20px -8px rgba(213,165,77,0.55);
+            0 0 0 6px rgba(118,185,71,0.16),
+            0 8px 20px -8px rgba(118,185,71,0.55);
         }
         13% {
           /* instant off */
           transform: scale(1);
-          background-color: #F0F6FF;
+          background-color: #F2F9FF;
           border-color: #ffffff;
           color: #1D3D6D;
           box-shadow: none;
@@ -181,7 +181,7 @@ export default function RegistrationPage() {
         100% {
           /* stay off until next cycle */
           transform: scale(1);
-          background-color: #F0F6FF;
+          background-color: #F2F9FF;
           border-color: #ffffff;
           color: #1D3D6D;
           box-shadow: none;
@@ -262,12 +262,12 @@ export default function RegistrationPage() {
         .stagger-6 { animation-delay: 0.70s; }
 
         .gold-underline {
-          background-image: linear-gradient(90deg, #D5A54D, #F0C674, #D5A54D);
+          background-image: linear-gradient(90deg, #76B947, #F0C674, #D5A54D);
           background-size: 200% 100%;
           animation: shimmerLine 4s linear infinite;
         }
 
-        /* ===== Premium card ===== */
+        /*  Premium card  */
         .premium-card {
           position: relative;
           isolation: isolate;
@@ -286,7 +286,7 @@ export default function RegistrationPage() {
           inset: 0;
           border-radius: inherit;
           padding: 1px;
-          background: linear-gradient(135deg, rgba(213,165,77,0) 0%, rgba(213,165,77,0) 50%, rgba(213,165,77,0) 100%);
+          background: linear-gradient(135deg, rgba(118,185,71,0) 0%, rgba(118,185,71,0) 50%, rgba(118,185,71,0) 100%);
           -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
           -webkit-mask-composite: xor;
           mask-composite: exclude;
@@ -299,7 +299,7 @@ export default function RegistrationPage() {
           position: absolute;
           inset: -1px;
           border-radius: inherit;
-          background: radial-gradient(120% 80% at 50% 0%, rgba(213,165,77,0.18) 0%, rgba(213,165,77,0) 60%);
+          background: radial-gradient(120% 80% at 50% 0%, rgba(76,195,247,0.16) 0%, rgba(76,195,247,0) 60%);
           opacity: 0;
           transition: opacity 0.55s ease;
           pointer-events: none;
@@ -307,15 +307,15 @@ export default function RegistrationPage() {
         }
         .premium-card:hover {
           transform: translateY(-10px);
-          border-color: rgba(213, 165, 77, 0.35);
+          border-color: rgba(118, 185, 71, 0.35);
           box-shadow:
             0 2px 4px rgba(11, 42, 74, 0.05),
             0 12px 24px -10px rgba(11, 42, 74, 0.16),
             0 32px 60px -20px rgba(11, 42, 74, 0.22),
-            0 0 0 1px rgba(213, 165, 77, 0.05);
+            0 0 0 1px rgba(118, 185, 71, 0.05);
         }
         .premium-card:hover::before {
-          background: linear-gradient(135deg, rgba(213,165,77,0.9) 0%, rgba(29,61,109,0.35) 50%, rgba(213,165,77,0.9) 100%);
+          background: linear-gradient(135deg, rgba(118,185,71,0.9) 0%, rgba(213,165,77,0.5) 50%, rgba(76,195,247,0.9) 100%);
         }
         .premium-card:hover::after { opacity: 1; }
 
@@ -324,7 +324,7 @@ export default function RegistrationPage() {
         }
         .premium-card:hover .premium-icon {
           transform: scale(1.08) rotate(-6deg);
-          box-shadow: 0 0 0 6px rgba(213,165,77,0.10), 0 8px 20px -8px rgba(213,165,77,0.45);
+          box-shadow: 0 0 0 6px rgba(76,195,247,0.12), 0 8px 20px -8px rgba(76,195,247,0.45);
         }
 
         .premium-btn {
@@ -343,7 +343,7 @@ export default function RegistrationPage() {
         }
         .premium-btn:hover::after { transform: translateX(100%); }
 
-        /* ===== Timeline row hover ===== */
+        /*  Timeline row hover  */
         .timeline-item {
           transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
         }
@@ -358,20 +358,20 @@ export default function RegistrationPage() {
         }
         .timeline-item:hover .timeline-icon {
           transform: scale(1.12) rotate(-6deg);
-          background-color: #FBF3E0;
-          color: #8B6F47;
-          box-shadow: 0 0 0 6px rgba(213,165,77,0.10), 0 8px 20px -8px rgba(213,165,77,0.45);
+          background-color: #E9F5E1;
+          color: #1b5e20;
+          box-shadow: 0 0 0 6px rgba(118,185,71,0.12), 0 8px 20px -8px rgba(118,185,71,0.45);
         }
 
-        /* ===== Payment table row hover ===== */
+        /*  Payment table row hover  */
         .pay-row {
           transition: background-color 0.3s ease, transform 0.3s ease;
         }
         .pay-row:hover {
-          background-color: rgba(213, 165, 77, 0.06);
+          background-color: rgba(118, 185, 71, 0.08);
         }
 
-        /* ===== Fee list hover ===== */
+        /*  Fee list hover  */
         .fee-item {
           transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
         }
@@ -383,7 +383,7 @@ export default function RegistrationPage() {
         }
         .fee-item:hover svg {
           transform: scale(1.2) rotate(8deg);
-          color: #D5A54D;
+          color: #76B947;
         }
 
         .scroll-lift {
@@ -404,18 +404,22 @@ export default function RegistrationPage() {
 
       <Header />
 
-      {/* ================= PAGE HERO ================= */}
+      {/* == PAGE HERO == */}
       <section
         ref={heroScroll.ref}
         className={`relative bg-white overflow-hidden border-b border-zinc-100 ${heroReveal.inView ? "in-view" : ""}`}
       >
-        {/* Decorative gradient orb */}
+        {/* Decorative orbs — green + sky blue */}
         <div
           aria-hidden
-          className="absolute top-0 left-0 w-96 h-96 bg-linear-to-br from-[#D5A54D]/8 to-transparent rounded-full blur-3xl -translate-y-1/3 -translate-x-1/4 pointer-events-none"
+          className="absolute top-0 left-0 w-96 h-96 bg-linear-to-br from-[#76B947]/10 to-transparent rounded-full blur-3xl -translate-y-1/3 -translate-x-1/4 pointer-events-none"
+        />
+        <div
+          aria-hidden
+          className="absolute bottom-0 left-1/3 w-72 h-72 bg-linear-to-tr from-[#4FC3F7]/10 to-transparent rounded-full blur-3xl translate-y-1/4 pointer-events-none"
         />
 
-        {/* Floating image — subtle scroll parallax (Aligned like Hotel & Mapping) */}
+        {/* Floating image — subtle scroll parallax */}
         <div
           className="hidden md:block absolute top-1/2 right-8 w-[45%] pointer-events-none z-10"
           style={{ transform: `translateY(calc(-50% + ${(heroScroll.progress - 0.5) * -30}px))` }}
@@ -435,14 +439,13 @@ export default function RegistrationPage() {
           className="max-w-350 mx-auto px-8 py-16 relative z-20"
         >
           <div className="flex items-center gap-2 text-sm text-zinc-500 mb-8 reveal-up">
-            <Link href="/" className="hover:text-[#F5A623] transition-colors">
+            <Link href="/" className="hover:text-[#76B947] transition-colors">
               Home
             </Link>
             <span className="text-zinc-300">›</span>
             <span className="text-[#0A2540] font-medium">Registration</span>
           </div>
 
-          {/* Changed to max-w-xl so the text doesn't collide with the absolute image on large screens */}
           <div className="max-w-xl">
             <h1 className="text-5xl font-bold text-[#0A2540] mb-4 reveal-up stagger-1">
               Registration
@@ -455,17 +458,20 @@ export default function RegistrationPage() {
         </div>
       </section>
 
-      {/* ================= FEES & INFORMATION ================= */}
-      <section ref={feesScroll.ref} className="py-16">
+      {/* == FEES & INFORMATION == */}
+      <section ref={feesScroll.ref} className="py-16 relative overflow-hidden">
+        {/* Ambient palette glows */}
+        <div aria-hidden className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-64 w-[70%] rounded-full bg-[#4FC3F7]/10 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-[#76B947]/10 blur-3xl" />
         <div
           ref={feesReveal.ref}
-          className={`max-w-350 mx-auto px-8 ${feesReveal.inView ? "in-view" : ""}`}
+          className={`relative max-w-350 mx-auto px-8 ${feesReveal.inView ? "in-view" : ""}`}
         >
           <div className="flex flex-col md:flex-row gap-8 items-stretch">
 
             {/* Left: Fees */}
             <div className="w-full md:w-1/2 reveal-left">
-              <div className="bg-linear-to-r from-[#0A2540] to-[#1a3a5c] text-white p-5 flex items-center gap-3 rounded-t-xl">
+              <div className="bg-linear-to-r from-[#0B2A4A] to-[#1D3D6D] text-white p-5 flex items-center gap-3 rounded-t-xl">
                 <FaRegListAlt className="text-xl" />
                 <h2 className="text-lg font-bold uppercase">Registration Fees</h2>
               </div>
@@ -486,8 +492,8 @@ export default function RegistrationPage() {
                   ))}
                 </ul>
 
-                <div className="mt-auto bg-[#F0F6FF] border border-blue-100 rounded-lg p-4 flex gap-3 items-start">
-                  <FaInfoCircle className="text-[#0A2540] mt-0.5 shrink-0" />
+                <div className="mt-auto bg-[#F2F9FF] border border-[#4FC3F7]/30 rounded-lg p-4 flex gap-3 items-start">
+                  <FaInfoCircle className="text-[#1D3D6D] mt-0.5 shrink-0" />
                   <p className="text-xs text-zinc-600">
                     The registration fee covers participation in all sessions, conference materials, certificates, and meals during the event.
                   </p>
@@ -497,7 +503,7 @@ export default function RegistrationPage() {
 
             {/* Right: Table */}
             <div className="w-full md:w-1/2 reveal-right">
-              <div className="bg-linear-to-r from-[#0A2540] to-[#1a3a5c] text-white p-5 flex items-center gap-3 rounded-t-xl">
+              <div className="bg-linear-to-r from-[#0B2A4A] to-[#1D3D6D] text-white p-5 flex items-center gap-3 rounded-t-xl">
                 <FaUsers className="text-xl" />
                 <h2 className="text-lg font-bold uppercase">Registration Information by Participant</h2>
               </div>
@@ -528,7 +534,7 @@ export default function RegistrationPage() {
                           <ul className="space-y-0.5">
                             {row.inc.map((item, i) => (
                               <li key={i} className="flex items-start gap-1.5 text-xs whitespace-nowrap">
-                                <span className="text-[#F5A623] mt-0.5">•</span> {item}
+                                <span className="text-[#76B947] mt-0.5">•</span> {item}
                               </li>
                             ))}
                           </ul>
@@ -543,13 +549,15 @@ export default function RegistrationPage() {
         </div>
       </section>
 
-      {/* ================= DATES, STEPS & POLICY ================= */}
-      <section ref={infoReveal.ref} className={`bg-white py-16 border-t border-zinc-100 ${infoReveal.inView ? "in-view" : ""}`}>
-        <div className="max-w-350 mx-auto px-8 grid grid-cols-1 lg:grid-cols-3 gap-12 items-stretch">
+      {/* == DATES, STEPS & POLICY == */}
+      <section ref={infoReveal.ref} className={`bg-white py-16 border-t border-zinc-100 relative overflow-hidden ${infoReveal.inView ? "in-view" : ""}`}>
+        <div aria-hidden className="pointer-events-none absolute top-0 left-0 h-56 w-56 rounded-full bg-[#F0C674]/10 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-56 w-56 rounded-full bg-[#4FC3F7]/10 blur-3xl" />
+        <div className="relative max-w-350 mx-auto px-8 grid grid-cols-1 lg:grid-cols-3 gap-12 items-stretch">
 
           {/* Important Dates */}
           <div className="reveal-up stagger-1 flex flex-col h-full">
-            <div className="bg-linear-to-r from-[#0A2540] to-[#1a3a5c] text-white p-5 flex items-center gap-3 rounded-t-xl mb-0">
+            <div className="bg-linear-to-r from-[#0B2A4A] to-[#1D3D6D] text-white p-5 flex items-center gap-3 rounded-t-xl mb-0">
               <FaRegCalendarAlt className="text-xl" />
               <h2 className="text-lg font-bold uppercase">Important Dates</h2>
             </div>
@@ -560,7 +568,7 @@ export default function RegistrationPage() {
               <div className="space-y-6 relative dates-timeline">
                 {importantDates.map((date, idx) => (
                   <div key={idx} className={`timeline-item flex gap-4 relative reveal-up stagger-${(idx % 6) + 1}`}>
-                    <div className="timeline-icon animate-step w-10 h-10 rounded-full bg-[#F0F6FF] border-2 border-white text-[#1D3D6D] flex items-center justify-center text-lg shrink-0 relative z-10">
+                    <div className="timeline-icon animate-step w-10 h-10 rounded-full bg-[#F2F9FF] border-2 border-white text-[#1D3D6D] flex items-center justify-center text-lg shrink-0 relative z-10">
                       {date.icon}
                     </div>
                     <div>
@@ -575,7 +583,7 @@ export default function RegistrationPage() {
 
           {/* Steps for Registration */}
           <div className="reveal-up stagger-2 flex flex-col h-full">
-            <div className="bg-linear-to-r from-[#0A2540] to-[#1a3a5c] text-white p-5 flex items-center gap-3 rounded-t-xl mb-0">
+            <div className="bg-linear-to-r from-[#0B2A4A] to-[#1D3D6D] text-white p-5 flex items-center gap-3 rounded-t-xl mb-0">
               <FaBullseye className="text-xl" />
               <h2 className="text-lg font-bold uppercase">Steps for Registration</h2>
             </div>
@@ -586,7 +594,7 @@ export default function RegistrationPage() {
               <div className="space-y-6 relative steps-timeline">
                 {steps.map((step, idx) => (
                   <div key={idx} className={`timeline-item flex gap-4 relative reveal-up stagger-${(idx % 6) + 1}`}>
-                    <div className="timeline-icon animate-step w-10 h-10 rounded-full bg-[#F0F6FF] border-2 border-white text-[#1D3D6D] flex items-center justify-center text-lg shrink-0 relative z-10 font-bold">
+                    <div className="timeline-icon animate-step w-10 h-10 rounded-full bg-[#F2F9FF] border-2 border-white text-[#1D3D6D] flex items-center justify-center text-lg shrink-0 relative z-10 font-bold">
                       <span className="text-sm leading-none tabular-nums">{idx + 1}</span>
                     </div>
                     <div>
@@ -601,7 +609,7 @@ export default function RegistrationPage() {
 
           {/* Cancel Policy */}
           <div className="reveal-up stagger-3 flex flex-col h-full">
-            <div className="bg-linear-to-r from-[#0A2540] to-[#1a3a5c] text-white p-5 flex items-center gap-3 rounded-t-xl mb-0">
+            <div className="bg-linear-to-r from-[#0B2A4A] to-[#1D3D6D] text-white p-5 flex items-center gap-3 rounded-t-xl mb-0">
               <FaRegListAlt className="text-xl" />
               <h2 className="text-lg font-bold uppercase">Cancel Policy</h2>
             </div>
@@ -632,14 +640,15 @@ export default function RegistrationPage() {
         </div>
       </section>
 
-      {/* ================= PAYMENT INFO ================= */}
+      {/* == PAYMENT INFO == */}
       <section
         ref={paymentReveal.ref}
-        className={`py-16 ${paymentReveal.inView ? "in-view" : ""}`}
+        className={`py-16 relative overflow-hidden ${paymentReveal.inView ? "in-view" : ""}`}
       >
-        <div className="max-w-350 mx-auto px-8">
+        <div aria-hidden className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-64 w-[60%] rounded-full bg-[#76B947]/8 blur-3xl" />
+        <div className="relative max-w-350 mx-auto px-8">
           <div className="max-w-4xl mx-auto reveal-up">
-            <div className="bg-linear-to-r from-[#0A2540] to-[#1a3a5c] text-white p-5 flex items-center gap-3 rounded-t-xl mb-0">
+            <div className="bg-linear-to-r from-[#0B2A4A] to-[#1D3D6D] text-white p-5 flex items-center gap-3 rounded-t-xl mb-0">
               <FaRegListAlt className="text-xl" />
               <h2 className="text-lg font-bold uppercase">Paying Registration Account</h2>
             </div>
@@ -673,9 +682,9 @@ export default function RegistrationPage() {
                 </div>
 
                 {/* Right: Email Instructions */}
-                <div className="bg-[#F0F6FF] border border-blue-100 rounded-lg p-6 h-full flex flex-col justify-center">
+                <div className="bg-[#F2F9FF] border border-[#4FC3F7]/30 rounded-lg p-6 h-full flex flex-col justify-center">
                   <div className="flex items-start gap-3">
-                    <FaRegFileAlt className="text-[#0A2540] mt-1 text-xl shrink-0" />
+                    <FaRegFileAlt className="text-[#1D3D6D] mt-1 text-xl shrink-0" />
                     <div>
                       <p className="font-bold text-[#0A2540] text-sm mb-2">Please email or upload your proof of payment</p>
                       <div className="text-xs text-zinc-600 space-y-1">
@@ -692,12 +701,14 @@ export default function RegistrationPage() {
         </div>
       </section>
 
-      {/* ================= BOTTOM CTA ================= */}
-      <section ref={ctaReveal.ref} className={`pb-20 ${ctaReveal.inView ? "in-view" : ""}`}>
-        <div className="max-w-350 mx-auto px-8">
+      {/* == BOTTOM CTA == */}
+      <section ref={ctaReveal.ref} className={`pb-20 relative overflow-hidden ${ctaReveal.inView ? "in-view" : ""}`}>
+        <div aria-hidden className="pointer-events-none absolute top-0 left-0 h-40 w-40 rounded-full bg-[#F0C674]/10 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-40 w-40 rounded-full bg-[#4FC3F7]/10 blur-3xl" />
+        <div className="relative max-w-350 mx-auto px-8">
           <div className="premium-card reveal-up bg-white rounded-xl border border-zinc-100 p-8 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-              <div className="premium-icon w-16 h-16 bg-[#F0F6FF] rounded-full flex items-center justify-center">
+              <div className="premium-icon w-16 h-16 bg-[#F2F9FF] rounded-full flex items-center justify-center ring-1 ring-[#4FC3F7]/30">
                 <FaPaperPlane className="text-[#1D3D6D] text-3xl rotate-[-20deg]" />
               </div>
               <div>
@@ -707,7 +718,7 @@ export default function RegistrationPage() {
                 </p>
               </div>
             </div>
-            <button className="premium-btn bg-linear-to-r from-[#1D3D6D] to-[#16305a] text-white px-8 py-4 rounded-lg font-bold transition-all duration-300 flex items-center gap-2 shrink-0 hover:-translate-y-0.5 hover:shadow-xl">
+            <button className="premium-btn bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white px-8 py-4 rounded-lg font-bold transition-all duration-300 flex items-center gap-2 shrink-0 hover:-translate-y-0.5 hover:shadow-xl">
               Register Now <FaChevronRight />
             </button>
           </div>

@@ -12,7 +12,7 @@ import {
   FaSignInAlt, FaChevronDown, FaArrowRight, FaBullhorn
 } from "react-icons/fa";
 
-// ===== Reusable scroll-reveal hook =====
+//  Reusable scroll-reveal hook 
 function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
   const ref = useRef<T | null>(null);
   const [inView, setInView] = useState(false);
@@ -36,7 +36,7 @@ function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
   return { ref, inView };
 }
 
-// ===== Scroll progress hook =====
+//  Scroll progress hook 
 function useScrollProgress<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);
   const [progress, setProgress] = useState(0);
@@ -69,7 +69,7 @@ function useScrollProgress<T extends HTMLElement>() {
   return { ref, progress };
 }
 
-// ===== Page-wide scroll progress bar =====
+//  Page-wide scroll progress bar 
 function ScrollProgressBar() {
   const [progress, setProgress] = useState(0);
   useEffect(() => {
@@ -94,7 +94,7 @@ function ScrollProgressBar() {
   return (
     <div className="fixed top-0 left-0 right-0 z-100 h-0.75 bg-transparent pointer-events-none">
       <div
-        className="h-full origin-left bg-linear-to-r from-[#D5A54D] via-[#F0C674] to-[#1D3D6D] shadow-[0_0_12px_rgba(213,165,77,0.6)]"
+        className="h-full origin-left bg-linear-to-r from-[#76B947] via-[#F0C674] to-[#1D3D6D] shadow-[0_0_12px_rgba(213,165,77,0.6)]"
         style={{ transform: `scaleX(${progress})`, transition: "transform 0.08s linear" }}
       />
     </div>
@@ -121,7 +121,7 @@ export default function FullabstractSubmission() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F7FB] font-sans text-[#0A2540] overflow-x-hidden">
+    <div className="min-h-screen bg-linear-to-b from-white via-[#F8FBF5] to-white font-sans text-[#0A2540] overflow-x-hidden">
       <ScrollProgressBar />
 
       <style jsx global>{`
@@ -169,12 +169,12 @@ export default function FullabstractSubmission() {
         .stagger-6 { animation-delay: 0.70s; }
 
         .gold-underline {
-          background-image: linear-gradient(90deg, #D5A54D, #F0C674, #D5A54D);
+          background-image: linear-gradient(90deg, #76B947, #F0C674, #D5A54D);
           background-size: 200% 100%;
           animation: shimmerLine 4s linear infinite;
         }
 
-        /* ===== Premium card ===== */
+        /*  Premium card  */
         .premium-card {
           position: relative;
           isolation: isolate;
@@ -193,7 +193,7 @@ export default function FullabstractSubmission() {
           inset: 0;
           border-radius: inherit;
           padding: 1px;
-          background: linear-gradient(135deg, rgba(213,165,77,0) 0%, rgba(213,165,77,0) 50%, rgba(213,165,77,0) 100%);
+          background: linear-gradient(135deg, rgba(118,185,71,0) 0%, rgba(118,185,71,0) 50%, rgba(118,185,71,0) 100%);
           -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
           -webkit-mask-composite: xor;
           mask-composite: exclude;
@@ -206,7 +206,7 @@ export default function FullabstractSubmission() {
           position: absolute;
           inset: -1px;
           border-radius: inherit;
-          background: radial-gradient(120% 80% at 50% 0%, rgba(213,165,77,0.18) 0%, rgba(213,165,77,0) 60%);
+          background: radial-gradient(120% 80% at 50% 0%, rgba(76,195,247,0.16) 0%, rgba(76,195,247,0) 60%);
           opacity: 0;
           transition: opacity 0.55s ease;
           pointer-events: none;
@@ -214,15 +214,15 @@ export default function FullabstractSubmission() {
         }
         .premium-card:hover {
           transform: translateY(-10px);
-          border-color: rgba(213, 165, 77, 0.35);
+          border-color: rgba(118, 185, 71, 0.35);
           box-shadow:
             0 2px 4px rgba(11, 42, 74, 0.05),
             0 12px 24px -10px rgba(11, 42, 74, 0.16),
             0 32px 60px -20px rgba(11, 42, 74, 0.22),
-            0 0 0 1px rgba(213, 165, 77, 0.05);
+            0 0 0 1px rgba(118, 185, 71, 0.05);
         }
         .premium-card:hover::before {
-          background: linear-gradient(135deg, rgba(213,165,77,0.9) 0%, rgba(29,61,109,0.35) 50%, rgba(213,165,77,0.9) 100%);
+          background: linear-gradient(135deg, rgba(118,185,71,0.9) 0%, rgba(213,165,77,0.5) 50%, rgba(76,195,247,0.9) 100%);
         }
         .premium-card:hover::after { opacity: 1; }
 
@@ -231,7 +231,7 @@ export default function FullabstractSubmission() {
         }
         .premium-card:hover .premium-icon {
           transform: scale(1.08) rotate(-6deg);
-          box-shadow: 0 0 0 6px rgba(213,165,77,0.10), 0 8px 20px -8px rgba(213,165,77,0.45);
+          box-shadow: 0 0 0 6px rgba(76,195,247,0.12), 0 8px 20px -8px rgba(76,195,247,0.45);
         }
         .premium-card:hover .premium-icon svg {
           transform: scale(1.08);
@@ -254,12 +254,12 @@ export default function FullabstractSubmission() {
           bottom: -3px;
           width: 100%;
           height: 1.5px;
-          background: linear-gradient(90deg, #D5A54D, #F0C674);
+          background: linear-gradient(90deg, #76B947, #F0C674);
           transform: scaleX(0);
           transform-origin: left center;
           transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
         }
-        .premium-link:hover { color: #1D3D6D; gap: 0.75rem; }
+        .premium-link:hover { color: #1b5e20; gap: 0.75rem; }
         .premium-link:hover::after { transform: scaleX(1); }
 
         .premium-btn {
@@ -286,15 +286,15 @@ export default function FullabstractSubmission() {
         }
         .process-step:hover .process-icon {
           transform: scale(1.1) rotate(-6deg);
-          box-shadow: 0 0 0 8px rgba(213,165,77,0.12), 0 12px 28px -10px rgba(213,165,77,0.5);
-          border-color: rgba(213,165,77,0.4);
+          box-shadow: 0 0 0 8px rgba(76,195,247,0.14), 0 12px 28px -10px rgba(76,195,247,0.5);
+          border-color: rgba(76,195,247,0.45);
         }
         .process-icon {
           transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.5s ease, border-color 0.5s ease;
         }
         .process-step:hover .process-num {
           transform: scale(1.15);
-          background: linear-gradient(135deg, #D5A54D, #F0C674);
+          background: linear-gradient(135deg, #0A5C0A, #76B947);
         }
         .process-num {
           transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), background 0.4s ease;
@@ -308,11 +308,12 @@ export default function FullabstractSubmission() {
         }
         .guideline-item:hover .guideline-icon {
           transform: scale(1.12) rotate(-6deg);
-          box-shadow: 0 0 0 6px rgba(213,165,77,0.10);
-          background-color: rgba(213,165,77,0.15);
+          box-shadow: 0 0 0 6px rgba(118,185,71,0.12);
+          background-color: rgba(118,185,71,0.15);
+          color: #1b5e20;
         }
         .guideline-icon {
-          transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.5s ease, background-color 0.5s ease;
+          transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.5s ease, background-color 0.5s ease, color 0.3s ease;
         }
 
         .faq-row {
@@ -320,7 +321,7 @@ export default function FullabstractSubmission() {
         }
         .faq-row:hover {
           transform: translateY(-3px);
-          border-color: rgba(213,165,77,0.5);
+          border-color: rgba(118,185,71,0.5);
           box-shadow:
             0 2px 4px rgba(11, 42, 74, 0.05),
             0 12px 24px -10px rgba(11, 42, 74, 0.12);
@@ -350,15 +351,19 @@ export default function FullabstractSubmission() {
 
       <Header />
 
-      {/* ================= PAGE HERO ================= */}
+      {/* == PAGE HERO == */}
       <section
         ref={heroScroll.ref}
         className={`relative bg-white overflow-hidden border-b border-zinc-100 ${heroReveal.inView ? "in-view" : ""}`}
       >
-        {/* Decorative gradient orb */}
+        {/* Decorative orbs — green + sky blue */}
         <div
           aria-hidden
-          className="absolute top-0 right-0 w-96 h-96 bg-linear-to-br from-[#D5A54D]/10 to-transparent rounded-full blur-3xl -translate-y-1/3 translate-x-1/4 pointer-events-none"
+          className="absolute top-0 right-0 w-96 h-96 bg-linear-to-br from-[#76B947]/10 to-transparent rounded-full blur-3xl -translate-y-1/3 translate-x-1/4 pointer-events-none"
+        />
+        <div
+          aria-hidden
+          className="absolute bottom-0 left-0 w-72 h-72 bg-linear-to-tr from-[#4FC3F7]/10 to-transparent rounded-full blur-3xl -translate-x-1/4 translate-y-1/4 pointer-events-none"
         />
 
         {/* Floating laptop image — subtle parallax on scroll, no pulse */}
@@ -381,7 +386,7 @@ export default function FullabstractSubmission() {
           className="max-w-7xl mx-auto px-6 py-16 relative z-10"
         >
           <div className="flex items-center gap-2 text-sm text-zinc-500 mb-8 reveal-up">
-            <Link href="/" className="hover:text-[#F5A623] transition-colors">
+            <Link href="/" className="hover:text-[#76B947] transition-colors">
               Home
             </Link>
             <span className="text-zinc-300">›</span>
@@ -404,7 +409,7 @@ export default function FullabstractSubmission() {
               <div className="flex flex-wrap gap-4 reveal-up stagger-4">
                 <Link
                   href="/login"
-                  className="premium-btn inline-flex items-center gap-2 bg-linear-to-r from-[#0A2540] to-[#1a3a5c] text-white px-8 py-3 rounded-md font-semibold shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
+                  className="premium-btn inline-flex items-center gap-2 bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white px-8 py-3 rounded-md font-semibold shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
                 >
                   Submit Your Abstract <FaRegPaperPlane className="rotate-[-20deg]" />
                 </Link>
@@ -416,11 +421,14 @@ export default function FullabstractSubmission() {
         </div>
       </section>
 
-      {/* ================= SUBMISSION PROCESS ================= */}
-      <section ref={processScroll.ref} className="py-16">
+      {/* == SUBMISSION PROCESS == */}
+      <section ref={processScroll.ref} className="py-16 relative overflow-hidden">
+        {/* Ambient palette glows */}
+        <div aria-hidden className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-64 w-[70%] rounded-full bg-[#4FC3F7]/10 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-[#76B947]/10 blur-3xl" />
         <div
           ref={processReveal.ref}
-          className={`max-w-7xl mx-auto px-6 ${processReveal.inView ? "in-view" : ""}`}
+          className={`relative max-w-7xl mx-auto px-6 ${processReveal.inView ? "in-view" : ""}`}
         >
           <div className="text-center mb-12 reveal-up">
             <h2 className="text-3xl font-bold text-[#0A2540] uppercase">Submission Process</h2>
@@ -440,7 +448,7 @@ export default function FullabstractSubmission() {
                 className={`process-step flex flex-col items-center text-center relative reveal-up stagger-${idx + 1}`}
               >
                 {idx !== 4 && (
-                  <div className="absolute top-8 left-[60%] w-[80%] h-px bg-linear-to-r from-zinc-200 via-[#D5A54D]/40 to-zinc-200 hidden md:block"></div>
+                  <div className="absolute top-8 left-[60%] w-[80%] h-px bg-linear-to-r from-zinc-200 via-[#76B947]/50 to-zinc-200 hidden md:block"></div>
                 )}
 
                 <div className="process-icon animate-step w-16 h-16 bg-white border border-zinc-100 rounded-full flex items-center justify-center text-2xl text-[#0A2540] mb-4 shadow-sm relative z-10">
@@ -457,11 +465,12 @@ export default function FullabstractSubmission() {
         </div>
       </section>
 
-      {/* ================= GUIDELINES & SUBMIT ================= */}
-      <section ref={guidelinesScroll.ref} className="bg-white py-16 border-t border-zinc-100">
+      {/* == GUIDELINES & SUBMIT == */}
+      <section ref={guidelinesScroll.ref} className="bg-white py-16 border-t border-zinc-100 relative overflow-hidden">
+        <div aria-hidden className="pointer-events-none absolute top-0 left-0 h-56 w-56 rounded-full bg-[#F0C674]/10 blur-3xl" />
         <div
           ref={guidelinesReveal.ref}
-          className={`max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 ${guidelinesReveal.inView ? "in-view" : ""}`}
+          className={`relative max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 ${guidelinesReveal.inView ? "in-view" : ""}`}
         >
           {/* Left: Guidelines */}
           <div className="reveal-left">
@@ -479,7 +488,7 @@ export default function FullabstractSubmission() {
                 { icon: <FaSearch />, title: "Review Process", desc: "All submissions will undergo a double-blind peer review." },
               ].map((g, idx) => (
                 <div key={idx} className="guideline-item flex gap-4">
-                  <div className="guideline-icon w-10 h-10 rounded-full bg-[#F0F6FF] text-[#0A2540] flex items-center justify-center text-lg shrink-0">
+                  <div className="guideline-icon w-10 h-10 rounded-full bg-[#F2F9FF] text-[#0A2540] flex items-center justify-center text-lg shrink-0">
                     {g.icon}
                   </div>
                   <div>
@@ -496,7 +505,7 @@ export default function FullabstractSubmission() {
 
               {/* Important Dates */}
               <div className="guideline-item flex gap-4">
-                <div className="guideline-icon w-10 h-10 rounded-full bg-[#F0F6FF] text-[#0A2540] flex items-center justify-center text-lg shrink-0">
+                <div className="guideline-icon w-10 h-10 rounded-full bg-[#F2F9FF] text-[#0A2540] flex items-center justify-center text-lg shrink-0">
                   <FaRegCalendarAlt />
                 </div>
                 <div className="flex-1">
@@ -516,8 +525,8 @@ export default function FullabstractSubmission() {
             </div>
 
             {/* Info Note */}
-            <div className="premium-card mt-10 bg-[#F0F6FF] border border-blue-100 rounded-lg p-4 flex gap-4 items-start reveal-up">
-              <FaInfoCircle className="text-[#0A2540] text-xl mt-0.5 shrink-0" />
+            <div className="premium-card mt-10 bg-[#F2F9FF] border border-[#4FC3F7]/30 rounded-lg p-4 flex gap-4 items-start reveal-up">
+              <FaInfoCircle className="text-[#1D3D6D] text-xl mt-0.5 shrink-0" />
               <p className="text-sm text-zinc-600">
                 <span className="font-bold text-[#0A2540]">Incomplete or non-compliant submissions</span> may be desk rejected. Please ensure your abstract follows all guidelines.
               </p>
@@ -533,7 +542,7 @@ export default function FullabstractSubmission() {
             <div className="space-y-4 mb-10">
               <Link
                 href="/login"
-                className="premium-btn w-full bg-linear-to-r from-[#0A2540] to-[#1a3a5c] text-white py-4 rounded-md font-semibold flex items-center justify-center gap-2 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
+                className="premium-btn w-full bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white py-4 rounded-md font-semibold flex items-center justify-center gap-2 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
               >
                 <FaSignInAlt /> Login to Your Account
               </Link>
@@ -547,7 +556,7 @@ export default function FullabstractSubmission() {
 
               <Link
                 href="/register"
-                className="w-full border-2 border-[#0A2540] text-[#0A2540] py-4 rounded-md font-semibold flex items-center justify-center gap-2 hover:bg-[#0A2540] hover:text-white transition-all duration-300"
+                className="w-full border-2 border-[#0A5C0A] text-[#0A5C0A] py-4 rounded-md font-semibold flex items-center justify-center gap-2 hover:bg-[#0A5C0A] hover:text-white transition-all duration-300"
               >
                 <FaUserPlus /> Create a New Account
               </Link>
@@ -566,7 +575,7 @@ export default function FullabstractSubmission() {
                   "Supplementary Files (if any)"
                 ].map((item, idx) => (
                   <li key={idx} className="flex items-center gap-3 text-sm text-zinc-600 group cursor-default">
-                    <FaCheckCircle className="text-[#D5A54D] transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12" /> {item}
+                    <FaCheckCircle className="text-[#76B947] transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12" /> {item}
                   </li>
                 ))}
               </ul>
@@ -581,14 +590,14 @@ export default function FullabstractSubmission() {
 
               <div className="space-y-4">
                 <div className="flex items-center gap-3 text-sm text-zinc-600">
-                  <FaEnvelope className="text-[#0A2540] text-lg" />
+                  <FaEnvelope className="text-[#1D3D6D] text-lg" />
                   <span>
                     Email us at{" "}
-                    <span className="font-semibold text-[#0A2540]">info@icolloquium2025.org</span>
+                    <span className="font-semibold text-[#0A2540]">internationalsymposium@capsu.edu.ph</span>
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-sm text-zinc-600">
-                  <FaQuestionCircle className="text-[#0A2540] text-lg" />
+                  <FaQuestionCircle className="text-[#1D3D6D] text-lg" />
                   <span>Visit our FAQ</span>
                 </div>
               </div>
@@ -601,11 +610,12 @@ export default function FullabstractSubmission() {
         </div>
       </section>
 
-      {/* ================= FAQ SECTION ================= */}
-      <section className="bg-white py-16">
+      {/* == FAQ SECTION == */}
+      <section className="bg-white py-16 relative overflow-hidden">
+        <div aria-hidden className="pointer-events-none absolute -top-16 right-0 h-56 w-56 rounded-full bg-[#76B947]/10 blur-3xl" />
         <div
           ref={faqReveal.ref}
-          className={`max-w-7xl mx-auto px-6 ${faqReveal.inView ? "in-view" : ""}`}
+          className={`relative max-w-7xl mx-auto px-6 ${faqReveal.inView ? "in-view" : ""}`}
         >
           <div className="text-center mb-12 reveal-up">
             <h2 className="text-3xl font-bold text-[#0A2540] uppercase">
@@ -633,7 +643,7 @@ export default function FullabstractSubmission() {
                 >
                   <div className="p-5 flex items-center justify-between">
                     <span className="font-semibold text-[#0A2540] pr-4">{item.q}</span>
-                    <FaChevronDown className="faq-chevron text-[#D5A54D] shrink-0" />
+                    <FaChevronDown className="faq-chevron text-[#76B947] shrink-0" />
                   </div>
                   <div
                     className="grid transition-all duration-400 ease-out"
@@ -652,16 +662,18 @@ export default function FullabstractSubmission() {
         </div>
       </section>
 
-      {/* ================= BOTTOM CTA ================= */}
+      {/* == BOTTOM CTA == */}
       <section
         ref={ctaReveal.ref}
-        className={`bg-[#F0F6FF] py-8 ${ctaReveal.inView ? "in-view" : ""}`}
+        className={`bg-linear-to-b from-[#F8FBF5] to-white py-8 relative overflow-hidden ${ctaReveal.inView ? "in-view" : ""}`}
       >
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="premium-card reveal-up bg-white rounded-xl border border-blue-100 p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div aria-hidden className="pointer-events-none absolute top-0 left-0 h-40 w-40 rounded-full bg-[#F0C674]/10 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-40 w-40 rounded-full bg-[#4FC3F7]/10 blur-3xl" />
+        <div className="relative max-w-7xl mx-auto px-6">
+          <div className="premium-card reveal-up bg-white rounded-xl border border-zinc-200 p-8 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-              <div className="premium-icon w-16 h-16 bg-[#F0F6FF] rounded-full flex items-center justify-center">
-                <FaBullhorn className="text-[#0A2540] text-3xl" />
+              <div className="premium-icon w-16 h-16 bg-[#F2F9FF] rounded-full flex items-center justify-center ring-1 ring-[#4FC3F7]/30">
+                <FaBullhorn className="text-[#1D3D6D] text-3xl" />
               </div>
               <div>
                 <h3 className="text-xl font-bold text-[#0A2540]">Have a great abstract to share?</h3>
@@ -670,7 +682,7 @@ export default function FullabstractSubmission() {
             </div>
             <Link
               href="/login"
-              className="premium-btn bg-linear-to-r from-[#0A2540] to-[#1a3a5c] text-white px-8 py-3 rounded-md font-semibold transition-all duration-300 flex items-center gap-2 hover:-translate-y-0.5 hover:shadow-xl"
+              className="premium-btn bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white px-8 py-3 rounded-md font-semibold transition-all duration-300 flex items-center gap-2 hover:-translate-y-0.5 hover:shadow-xl"
             >
               Submit Your Abstract Now <FaArrowRight />
             </Link>

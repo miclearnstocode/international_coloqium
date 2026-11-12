@@ -101,7 +101,7 @@ function ScrollProgressBar() {
   return (
     <div className="fixed top-0 left-0 right-0 z-100 h-0.75 bg-transparent pointer-events-none">
       <div
-        className="h-full origin-left bg-linear-to-r from-[#D5A54D] via-[#F0C674] to-[#1D3D6D] shadow-[0_0_12px_rgba(213,165,77,0.6)]"
+        className="h-full origin-left bg-linear-to-r from-[#76B947] via-[#F0C674] to-[#1D3D6D] shadow-[0_0_12px_rgba(213,165,77,0.6)]"
         style={{ transform: `scaleX(${progress})`, transition: "transform 0.08s linear" }}
       />
     </div>
@@ -183,7 +183,6 @@ function Confetti({ duration = 4500, onDone }: { duration?: number; onDone?: () 
     };
 
     const particles: P[] = [];
-    // Two cannons from the bottom corners + a burst from the center
     for (let i = 0; i < 90; i++) particles.push(make(0, H, -Math.PI / 3, 0.9, 26));
     for (let i = 0; i < 90; i++) particles.push(make(W, H, (-2 * Math.PI) / 3, 0.9, 26));
     for (let i = 0; i < 70; i++) particles.push(make(W / 2, H * 0.45, -Math.PI / 2, Math.PI * 1.6, 15));
@@ -193,7 +192,7 @@ function Confetti({ duration = 4500, onDone }: { duration?: number; onDone?: () 
     let raf = 0;
 
     const tick = (now: number) => {
-      const dt = Math.min((now - last) / 16.67, 3); // normalized to 60fps
+      const dt = Math.min((now - last) / 16.67, 3);
       last = now;
       const elapsed = now - start;
       const fade = elapsed > duration - 1200 ? Math.max(0, (duration - elapsed) / 1200) : 1;
@@ -201,7 +200,7 @@ function Confetti({ duration = 4500, onDone }: { duration?: number; onDone?: () 
       ctx.clearRect(0, 0, W, H);
       for (const p of particles) {
         p.vx *= 0.985;
-        p.vy = p.vy * 0.985 + 0.38 * dt; // gravity
+        p.vy = p.vy * 0.985 + 0.38 * dt;
         p.x += p.vx * dt;
         p.y += p.vy * dt;
         p.rot += p.vr * dt;
@@ -211,7 +210,7 @@ function Confetti({ duration = 4500, onDone }: { duration?: number; onDone?: () 
         ctx.globalAlpha = fade;
         ctx.translate(p.x, p.y);
         ctx.rotate(p.rot);
-        ctx.scale(1, Math.cos(p.tilt)); // flutter effect
+        ctx.scale(1, Math.cos(p.tilt));
         ctx.fillStyle = p.color;
         if (p.round) {
           ctx.beginPath();
@@ -239,14 +238,13 @@ function Confetti({ duration = 4500, onDone }: { duration?: number; onDone?: () 
     <canvas
       ref={canvasRef}
       aria-hidden
-      className="fixed inset-0 z-[110] pointer-events-none"
+      className="fixed inset-0 z-110 pointer-events-none"
       style={{ width: "100vw", height: "100vh" }}
     />
   );
 }
 
-// ===== Call-for-abstract popup (shows on every page load) =====
-// Opens centered, auto-closes after 4s by flying into the hero card's position.
+// ===== Call-for-abstract popup =====
 const POPUP_AUTO_CLOSE_MS = 4000;
 
 function AbstractPopup({
@@ -269,7 +267,6 @@ function AbstractPopup({
     autoCloseRef.current = null;
   };
 
-  // Close immediately (used when navigating away via the button)
   const instantClose = () => {
     if (closingRef.current) return;
     closingRef.current = true;
@@ -278,7 +275,6 @@ function AbstractPopup({
     onDone();
   };
 
-  // Close by docking the card into the hero card's spot
   closeRef.current = () => {
     if (closingRef.current) return;
     closingRef.current = true;
@@ -306,7 +302,6 @@ function AbstractPopup({
 
     let anim: Animation;
     if (t && t.width > 0 && t.height > 0) {
-      // Fly + shrink into the hero card's rectangle
       const scale = Math.min(t.width / r.width, t.height / r.height);
       const dx = t.left + (t.width - r.width * scale) / 2 - r.left;
       const dy = t.top + (t.height - r.height * scale) / 2 - r.top;
@@ -319,7 +314,6 @@ function AbstractPopup({
         { duration: 800, easing: "cubic-bezier(0.65, 0, 0.35, 1)", fill: "forwards" }
       );
     } else {
-      // No hero card on this screen size (mobile) — just fade out
       anim = card.animate(
         [
           { opacity: 1, transform: "scale(1)" },
@@ -331,7 +325,6 @@ function AbstractPopup({
     anim.onfinish = finish;
   };
 
-  // Open shortly after every load/reload, then auto-close after 4s
   useEffect(() => {
     const openTimer = setTimeout(() => {
       setOpen(true);
@@ -346,7 +339,6 @@ function AbstractPopup({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Escape closes + lock page scroll while open
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -387,7 +379,7 @@ function AbstractPopup({
       {open && (
         <div
           ref={backdropRef}
-          className="popup-backdrop fixed inset-0 z-[100] flex items-center justify-center bg-[#0B2A4A]/50 backdrop-blur-sm p-4"
+          className="popup-backdrop fixed inset-0 z-100 flex items-center justify-center bg-[#0B2A4A]/50 backdrop-blur-sm p-4"
           onClick={() => closeRef.current()}
         >
           <div
@@ -398,7 +390,7 @@ function AbstractPopup({
             onClick={(e) => e.stopPropagation()}
             className="popup-card relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-[0_30px_80px_rgba(0,0,0,0.35)] border border-white/60 px-8 pt-10 pb-8 flex flex-col items-center text-center"
           >
-            <div className="absolute top-0 left-0 right-0 h-2 bg-linear-to-r from-[#F0C674] via-[#D5A54D] to-[#F0C674]" />
+            <div className="absolute top-0 left-0 right-0 h-2 bg-linear-to-r from-[#F0C674] via-[#D5A54D] to-[#76B947]" />
 
             <button
               type="button"
@@ -411,7 +403,6 @@ function AbstractPopup({
               </svg>
             </button>
 
-            {/* Call for abstract graphic */}
             <div className="mb-5 flex items-center justify-center gap-2">
               <div className="relative flex items-center justify-center shrink-0">
                 <svg className="absolute -top-3 -left-2 w-5 h-5 text-[#5c9a26] -rotate-30" viewBox="0 0 24 24" fill="currentColor">
@@ -462,18 +453,15 @@ function AbstractPopup({
 }
 
 // ===== Fluid hero scale =====
-// The hero is laid out with absolute pixel positions designed for a 1920px-wide
-// viewport. On narrower desktop/laptop screens we scale the whole hero down
-// proportionally so the layout stays identical instead of overlapping.
-const HERO_DESIGN_WIDTH = 1920; // width the hero was designed at
-const HERO_SCALE_MIN_VIEWPORT = 1024; // below this (tablet/mobile) use the normal responsive layout
+const HERO_DESIGN_WIDTH = 1920;
+const HERO_SCALE_MIN_VIEWPORT = 1024;
 
 function useHeroScale() {
   const [scale, setScale] = useState(1);
 
   useEffect(() => {
     const update = () => {
-      const w = document.documentElement.clientWidth; // excludes scrollbar
+      const w = document.documentElement.clientWidth;
       if (w < HERO_SCALE_MIN_VIEWPORT) setScale(1);
       else setScale(Math.min(1, w / HERO_DESIGN_WIDTH));
     };
@@ -498,7 +486,6 @@ function HomeInner() {
 
   const [countdownPulse, setCountdownPulse] = useState(false);
 
-  // Countdown ticker
   useEffect(() => {
     const id = setInterval(() => {
       setTimeLeft((prev) => {
@@ -518,36 +505,32 @@ function HomeInner() {
 
   const formatNumber = (num: number) => num.toString().padStart(2, "0");
 
-  // Reveal hooks
   const heroReveal = useInView<HTMLDivElement>();
   const contentReveal = useInView<HTMLDivElement>();
 
-  // Scroll progress hooks (parallax)
   const heroScroll = useScrollProgress<HTMLElement>();
   const heroScale = useHeroScale();
   const heroCardRef = useRef<HTMLDivElement | null>(null);
   const [popupDone, setPopupDone] = useState(false);
   const contentScroll = useScrollProgress<HTMLElement>();
 
-  // Parallax translations — disabled while editing
   const parallaxEnabled = !canEdit;
   const heroParallax = parallaxEnabled ? (heroScroll.progress - 0.5) * -20 : 0;
 
-  // ===== Fallback lists =====
   const fallbackAnnouncements = [
     {
-      month: "OCT", day: "05",
+      month: "NOV", day: "16",
       category: "CALL FOR ABSTRACTS",
       title: "Abstract Submission Opens",
-      description: "The Call for Abstracts and symposium registration officially open on October 5, 2026.",
+      description: "The Call for Abstracts and symposium registration officially open on November 16, 2026.",
       link_text: "View Call for Abstracts",
       link_url: "/abstract-submission",
     },
     {
-      month: "DEC", day: "18",
+      month: "JAN", day: "10",
       category: "REGISTRATION",
       title: "Early Registration Deadline",
-      description: "Participants may avail themselves of the applicable early registration rate until December 18, 2026.",
+      description: "Participants may avail themselves of the applicable early registration rate until January 10, 2027.",
       link_text: "Registration Details",
       link_url: "/registration",
     },
@@ -645,10 +628,10 @@ function HomeInner() {
         }
         .premium-card:hover {
           transform: translateY(-5px);
-          border-color: rgba(213, 165, 77, 0.35);
+          border-color: rgba(118, 185, 71, 0.35);
           box-shadow:
             0 10px 25px -5px rgba(11, 42, 74, 0.1),
-            0 20px 40px -10px rgba(11, 42, 74, 0.15);
+            0 20px 40px -10px rgba(118, 185, 71, 0.18);
         }
 
         .premium-icon {
@@ -656,7 +639,7 @@ function HomeInner() {
         }
         .premium-card:hover .premium-icon {
           transform: scale(1.08) rotate(-6deg);
-          box-shadow: 0 0 0 6px rgba(213,165,77,0.10), 0 8px 20px -8px rgba(213,165,77,0.45);
+          box-shadow: 0 0 0 6px rgba(76, 195, 247, 0.12), 0 8px 20px -8px rgba(76, 195, 247, 0.45);
         }
         
         .premium-accent {
@@ -682,12 +665,12 @@ function HomeInner() {
           bottom: -3px;
           width: 100%;
           height: 1.5px;
-          background: linear-gradient(90deg, #d5a54d, #f0c674);
+          background: linear-gradient(90deg, #76B947, #F0C674);
           transform: scaleX(0);
           transform-origin: left center;
           transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
         }
-        .premium-link:hover { color: #1d3d6d; gap: 0.75rem; }
+        .premium-link:hover { color: #1b5e20; gap: 0.75rem; }
         .premium-link:hover::after { transform: scaleX(1); }
         .premium-link .arrow {
           display: inline-block;
@@ -703,7 +686,7 @@ function HomeInner() {
           transition: background-color 0.35s ease, transform 0.35s ease;
         }
         .announcement-row:hover {
-          background-color: rgba(213, 165, 77, 0.06);
+          background-color: rgba(118, 185, 71, 0.08);
           transform: translateX(4px);
         }
         .announcement-row .ann-date { transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
@@ -716,7 +699,7 @@ function HomeInner() {
         }
         .attendee-item:hover { transform: translateX(6px); color: #0b2a4a; }
         .attendee-item svg { transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s ease; }
-        .attendee-item:hover svg { transform: scale(1.2) rotate(8deg); color: #b8892f; }
+        .attendee-item:hover svg { transform: scale(1.2) rotate(8deg); color: #4FC3F7; }
 
         .scroll-lift {
           will-change: transform;
@@ -742,7 +725,6 @@ function HomeInner() {
         className="relative pt-4 pb-12 lg:pt-8 lg:pb-16 overflow-hidden border-b border-gray-200 lg:min-h-187.5 flex flex-col justify-center"
         style={heroScale < 1 ? { zoom: heroScale } : undefined}
       >
-        {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <Image
             src="https://res.cloudinary.com/xbloqjom/image/upload/v1794383950/background.jpg"
@@ -751,11 +733,9 @@ function HomeInner() {
             priority
             className="object-cover object-center"
           />
-          {/* Subtle overlay to ensure text and cards remain readable */}
           <div className="absolute inset-0 bg-white/30"></div>
         </div>
 
-        {/* ===== LOGO ===== */}
         <div className="absolute -top-8 left-10 lg:-top-12 lg:left-30 z-10 w-64 md:w-96 lg:w-125 pointer-events-none">
           <Image
             src="https://res.cloudinary.com/xbloqjom/image/upload/v1794390154/isda2.png"
@@ -767,10 +747,8 @@ function HomeInner() {
           />
         </div>
 
-        {/* ===== TEXT & THEME BESIDE LOGO ===== */}
         <div className="absolute top-8 left-70 md:left-100 lg:top-12 lg:left-135 z-10 flex flex-row items-center gap-4 lg:gap-6 pointer-events-none">
           
-          {/* Left Side: Main Titles */}
           <div className="leading-[1.05] shrink-0">
             <h1 className="text-2xl md:text-4xl lg:text-[2.75rem] font-black text-[#1A5E20] tracking-tight">
               INTERNATIONAL
@@ -785,22 +763,15 @@ function HomeInner() {
             </h1>
           </div>
 
-          {/* Vertical Divider Line */}
-          <div className="hidden md:block w-[2px] h-24 lg:h-32 bg-[#76B947]/40 shrink-0"></div>
+          <div className="hidden md:block w-0.5 h-24 lg:h-32 bg-[#76B947]/40 shrink-0"></div>
 
-          {/* Right Side: Theme */}
-          <div className="flex flex-col justify-center max-w-[280px] md:max-w-[320px] lg:max-w-[380px]">
-            {/* Theme Badge */}
+          <div className="flex flex-col justify-center max-w-70 md:max-w-[320px] lg:max-w-95">
             <div className="bg-[#76B947] text-white text-[10px] md:text-xs font-bold px-3 py-1 rounded-full w-max mb-2 tracking-wider">
               THEME:
             </div>
-            
-            {/* Theme Title */}
             <h2 className="text-[#0B1C2C] font-bold text-sm md:text-base lg:text-lg leading-tight mb-1">
               Converging Frontiers in Agri-Life and Bioresource Sciences:
             </h2>
-            
-            {/* Theme Description */}
             <p className="text-[#0B1C2C] text-[10px] md:text-xs lg:text-sm leading-snug">
               Science, Innovation, and Collaboration for a Resilient and Sustainable Future
             </p>
@@ -811,22 +782,17 @@ function HomeInner() {
         {/* ===== FLOATING CALL FOR ABSTRACTS CARD ===== */}
         <div ref={heroCardRef} className={`hidden md:flex absolute top-10 right-10 lg:right-20 z-20 w-72 lg:w-85 bg-white/95 backdrop-blur-md rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white/60 p-5 flex-col items-center text-center overflow-hidden transition-opacity duration-300 ${popupDone ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
           
-          {/* Decorative Top Banner */}
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-linear-to-r from-[#F0C674] via-[#D5A54D] to-[#F0C674]"></div>
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-linear-to-r from-[#F0C674] via-[#D5A54D] to-[#76B947]"></div>
 
-          {/* Close Button */}
           <button className="absolute top-3 right-4 text-gray-400 hover:text-gray-700 transition-colors">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
 
-          {/* Custom "CALL FOR ABSTRACT" Icon Graphic */}
           <div className="mt-4 mb-4 flex items-center justify-center gap-1.5 w-full">
             
-            {/* Left Megaphone */}
             <div className="relative flex items-center justify-center shrink-0">
-               {/* Sound waves */}
                <svg className="absolute -top-2 -left-1 w-4 h-4 text-[#5c9a26] rotate-[-30deg]" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
                </svg>
@@ -834,7 +800,6 @@ function HomeInner() {
                   <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
                </svg>
                
-               {/* Megaphone Body */}
                <svg className="w-10 h-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M19 4L5 8V16L19 20V4Z" fill="#7cb342" stroke="#33691e" strokeWidth="1.5" strokeLinejoin="round"/>
                   <path d="M2 10V14" stroke="#33691e" strokeWidth="2" strokeLinecap="round"/>
@@ -842,13 +807,11 @@ function HomeInner() {
                </svg>
             </div>
 
-            {/* Green Pill Banner */}
             <div className="bg-[#4b8e18] rounded-md px-3 py-1 shadow-sm border border-[#33691e]/30 flex flex-col items-center justify-center transform -rotate-2">
               <span className="text-white font-black text-[10px] tracking-widest leading-none mb-0.5">CALL FOR</span>
               <span className="text-white font-black text-sm tracking-wider leading-none">ABSTRACT</span>
             </div>
 
-            {/* Right Sound Lines */}
             <div className="flex flex-col gap-1 ml-0.5 shrink-0">
               <div className="w-3 h-0.5 bg-[#5c9a26] rotate-30 rounded-full"></div>
               <div className="w-2.5 h-0.5 bg-[#5c9a26] rotate-45 rounded-full"></div>
@@ -856,20 +819,16 @@ function HomeInner() {
             
           </div>
 
-          {/* Title Context */}
           <p className="text-[#0B2A4A] font-bold text-sm leading-tight mb-2">
             3rd International Agri-Life &<br/>Bioresource Science Symposium
           </p>
 
-          {/* Gold Underline */}
           <div className="w-3/5 h-0.5 bg-[#F0C674] mb-4"></div>
 
-          {/* Description */}
           <p className="text-gray-600 text-[11px] leading-relaxed mb-5 px-1">
             Submit your research and share your scientific contributions with experts, educators, and industry leaders from the Philippines and around the world.
           </p>
 
-          {/* CTA Button */}
           <Link
             href="/abstract-submission"
             className="flex items-center justify-center gap-2 w-full py-2.5 rounded-full bg-[#0A5C0A] hover:bg-[#084a08] text-white text-xs font-bold shadow-md hover:-translate-y-0.5 transition-all duration-300"
@@ -888,19 +847,14 @@ function HomeInner() {
           style={{ transform: `translateY(${heroParallax * 0.1}px)` }}
         >
           
-          {/* 1. Spacer for Top Wide Banner */}
           <div className="w-full h-24 md:h-40 mb-6"></div>
 
-          {/* ===== Wrapper Div to move them down ===== */}
           <div className="relative top-35">
             
-            {/* 2. Information & Date Bar - Overlapping cleanly */}
             <div className="reveal-up stagger-1 bg-white/95 backdrop-blur-md w-[96%] max-w-325 mx-auto rounded-2xl shadow-[0_12px_40px_rgb(0,0,0,0.12)] border border-white/50 -mt-16 relative z-20 py-4 px-6 md:px-8 flex flex-col xl:flex-row items-center justify-between gap-4 overflow-x-auto">
               
-              {/* Left Side: Deadlines, Dates & Venue */}
               <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8 w-full whitespace-nowrap">
                 
-                {/* Abstract Submission & Registration */}
                 <div className="flex flex-col items-center gap-1.5">
                   <div className="flex items-center gap-1.5 text-[#1b5e20]">
                     <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -915,9 +869,8 @@ function HomeInner() {
                   </div>
                 </div>
 
-                <div className="hidden md:block w-px h-10 bg-gray-200 shrink-0"></div>
+                <div className="hidden md:block w-px h-10 bg-[#76B947]/30 shrink-0"></div>
 
-                {/* Abstract Submission Deadline */}
                 <div className="flex flex-col items-center gap-1.5">
                   <div className="flex items-center gap-1.5 text-[#1b5e20]">
                     <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -932,9 +885,8 @@ function HomeInner() {
                   </div>
                 </div>
 
-                <div className="hidden md:block w-px h-10 bg-gray-200 shrink-0"></div>
+                <div className="hidden md:block w-px h-10 bg-[#76B947]/30 shrink-0"></div>
 
-                {/* Event Dates */}
                 <div className="flex items-center gap-2 text-[#1b5e20]">
                   <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -945,9 +897,8 @@ function HomeInner() {
                   </div>
                 </div>
 
-                <div className="hidden md:block w-px h-10 bg-gray-200 shrink-0"></div>
+                <div className="hidden md:block w-px h-10 bg-[#76B947]/30 shrink-0"></div>
 
-                {/* Venue */}
                 <div className="flex items-center gap-2">
                   <svg className="w-6 h-6 text-[#1b5e20] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -963,11 +914,10 @@ function HomeInner() {
                   </div>
                 </div>
 
-                <div className="hidden xl:block w-px h-10 bg-gray-200 shrink-0"></div>
+                <div className="hidden xl:block w-px h-10 bg-[#76B947]/30 shrink-0"></div>
 
-                {/* Right Side: Co-Host Logos */}
                 <div className="flex items-center gap-2">
-                  <p className="text-[14px] font-bold text-[#0A2540] uppercase tracking-wider">CO-HOST:</p>
+                  <p className="text-[14px] font-bold text-[#0A2540] uppercase tracking-wider">CO-HOSTS:</p>
                   <div className="flex items-center gap-1">
                     <div className="relative w-15 h-15 rounded-full overflow-hidden border border-gray-200 bg-white">
                        <Image src="https://res.cloudinary.com/xbloqjom/image/upload/v1794368585/hiroshima-logo.webp" alt="Co-host 1" fill className="object-contain p-0.5" />
@@ -984,11 +934,11 @@ function HomeInner() {
               </div>
             </div>
 
-            {/* 3. Action Buttons */}
+            {/* 3. Action Buttons — tri-tone: green / navy / gold outline */}
             <div className="reveal-up stagger-2 flex flex-wrap items-center justify-center gap-4 mt-12">
               <Link
                 href="/abstract-submission"
-                className="flex items-center gap-2 px-6 py-3 rounded-full font-bold text-sm text-[#0A2540] bg-[#F0C674] hover:bg-[#E5B65A] shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                className="flex items-center gap-2 px-6 py-3 rounded-full font-bold text-sm text-white bg-[#0A5C0A] hover:bg-[#084a08] shadow-lg hover:-translate-y-0.5 transition-all duration-300"
               >
                 <FaFileAlt /> Submit Abstract →
               </Link>
@@ -1000,29 +950,27 @@ function HomeInner() {
               </Link>
               <Link
                 href="/program"
-                className="flex items-center gap-2 px-6 py-3 rounded-full font-bold text-sm text-[#0A2540] bg-white/90 backdrop-blur-sm border border-gray-300 hover:bg-white shadow-md hover:-translate-y-0.5 transition-all duration-300"
+                className="flex items-center gap-2 px-6 py-3 rounded-full font-bold text-sm text-[#0A2540] bg-white border-2 border-[#D5A54D] hover:bg-[#F0C674] shadow-md hover:-translate-y-0.5 transition-all duration-300"
               >
                 <FaCalendarAlt /> View Program →
               </Link>
             </div>
 
-            {/* 4. Integrated Countdown Bar */}
-            <div className="reveal-up stagger-3 mt-16 w-[90%] max-w-250 mx-auto bg-[#0B2A4A]/95 backdrop-blur-sm rounded-full py-4 px-6 md:px-12 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6 border-b-4 border-[#D5A54D]">
+            {/* 4. Integrated Countdown Bar — navy body, gold base, sky top */}
+            <div className="reveal-up stagger-3 mt-16 w-[90%] max-w-250 mx-auto bg-[#0B2A4A]/95 backdrop-blur-sm rounded-full py-4 px-6 md:px-12 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6 border-t-2 border-[#4FC3F7]/40 border-b-4">
               
-              {/* Countdown Label */}
               <div className="flex items-center gap-3">
                 <div className="bg-white/10 p-2 rounded-lg">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 text-[#4FC3F7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
                 <div className="text-white">
-                  <p className="text-sm font-bold tracking-widest text-[#D5A54D]">SYMPOSIUM</p>
+                  <p className="text-sm font-bold tracking-widest text-[#76B947]">SYMPOSIUM</p>
                   <p className="text-lg font-bold tracking-wider">COUNTDOWN</p>
                 </div>
               </div>
 
-              {/* Timer Blocks */}
               <div className="flex items-center gap-4 md:gap-8 divide-x divide-white/20">
                 {[
                   { key: "days" as const, label: "Days" },
@@ -1053,11 +1001,16 @@ function HomeInner() {
       {/* ================= THREE COLUMN CONTENT ================= */}
       <section
         ref={contentScroll.ref}
-        className="relative bg-white py-16 overflow-hidden"
+        className="relative bg-linear-to-b from-white via-[#F8FBF5] to-white py-16 overflow-hidden"
       >
+        {/* Ambient palette glows */}
+        <div aria-hidden className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-64 w-[70%] rounded-full bg-[#4FC3F7]/10 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-[#76B947]/10 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute bottom-10 left-0 h-48 w-48 rounded-full bg-[#F0C674]/10 blur-3xl" />
+
         <div
           aria-hidden
-          className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-[#D5A54D]/40 to-transparent"
+          className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-[#D5A54D]/50 to-transparent"
         />
         <div
           ref={contentReveal.ref}
@@ -1067,10 +1020,10 @@ function HomeInner() {
         >
           {/* Card 1: About */}
           <div
-            className="reveal-up stagger-1 premium-card scroll-lift bg-linear-to-b from-[#F8FAFC] to-white p-8 rounded-xl border border-gray-100"
+            className="reveal-up stagger-1 premium-card scroll-lift bg-linear-to-b from-[#F7FBF3] to-white p-8 rounded-xl border border-gray-100"
             style={{ ["--scroll-y" as any]: `${parallaxEnabled ? (1 - contentScroll.progress) * 30 : 0}px` }}
           >
-            <div className="premium-icon w-16 h-16 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm ring-1 ring-[#D5A54D]/20">
+            <div className="premium-icon w-16 h-16 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm ring-1 ring-[#76B947]/25">
               <svg className="w-8 h-8 text-[#1D3D6D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
               </svg>
@@ -1114,39 +1067,39 @@ function HomeInner() {
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                       <div>
                         <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Month</label>
-                        <input type="text" value={item.month || ""} onChange={(e) => onUpdate({ ...item, month: e.target.value.toUpperCase() })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-bold text-[#1D3D6D] focus:border-[#D5A54D] outline-none" />
+                        <input type="text" value={item.month || ""} onChange={(e) => onUpdate({ ...item, month: e.target.value.toUpperCase() })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-bold text-[#1D3D6D] focus:border-[#76B947] outline-none" />
                       </div>
                       <div>
                         <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Day</label>
-                        <input type="text" value={item.day || ""} onChange={(e) => onUpdate({ ...item, day: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-bold text-[#0B2A4A] focus:border-[#D5A54D] outline-none" />
+                        <input type="text" value={item.day || ""} onChange={(e) => onUpdate({ ...item, day: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-bold text-[#0B2A4A] focus:border-[#76B947] outline-none" />
                       </div>
                       <div>
                         <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Category</label>
-                        <input type="text" value={item.category || ""} onChange={(e) => onUpdate({ ...item, category: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-bold text-[#D5A54D] uppercase focus:border-[#D5A54D] outline-none" />
+                        <input type="text" value={item.category || ""} onChange={(e) => onUpdate({ ...item, category: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-bold text-[#D5A54D] uppercase focus:border-[#76B947] outline-none" />
                       </div>
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Title</label>
-                      <input type="text" value={item.title || ""} onChange={(e) => onUpdate({ ...item, title: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm font-semibold text-[#0B2A4A] focus:border-[#D5A54D] outline-none" />
+                      <input type="text" value={item.title || ""} onChange={(e) => onUpdate({ ...item, title: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm font-semibold text-[#0B2A4A] focus:border-[#76B947] outline-none" />
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Description</label>
-                      <textarea value={item.description || ""} onChange={(e) => onUpdate({ ...item, description: e.target.value })} rows={2} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs text-gray-700 focus:border-[#D5A54D] outline-none" />
+                      <textarea value={item.description || ""} onChange={(e) => onUpdate({ ...item, description: e.target.value })} rows={2} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs text-gray-700 focus:border-[#76B947] outline-none" />
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       <div>
                         <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Link Text</label>
-                        <input type="text" value={item.link_text || ""} onChange={(e) => onUpdate({ ...item, link_text: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-semibold text-[#1D3D6D] focus:border-[#D5A54D] outline-none" />
+                        <input type="text" value={item.link_text || ""} onChange={(e) => onUpdate({ ...item, link_text: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-semibold text-[#1b5e20] focus:border-[#76B947] outline-none" />
                       </div>
                       <div>
                         <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Link URL</label>
-                        <input type="text" value={item.link_url || ""} onChange={(e) => onUpdate({ ...item, link_url: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs text-gray-600 font-mono focus:border-[#D5A54D] outline-none" />
+                        <input type="text" value={item.link_url || ""} onChange={(e) => onUpdate({ ...item, link_url: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs text-gray-600 font-mono focus:border-[#76B947] outline-none" />
                       </div>
                     </div>
                   </div>
                 ) : (
                   <div className={`announcement-row flex gap-4 ${index < 2 ? "border-b border-gray-200 pb-4 mb-4" : ""}`}>
-                    <div className="ann-date flex flex-col items-center">
+                    <div className="ann-date flex flex-col items-center pl-2 border-l-2 border-[#76B947]">
                       <span className="text-xl font-bold text-[#1D3D6D]">{item.month}</span>
                       <span className="text-2xl font-bold text-[#0B2A4A]">{item.day}</span>
                     </div>
@@ -1167,10 +1120,10 @@ function HomeInner() {
 
           {/* Card 3: WHO SHOULD ATTEND */}
           <div
-            className="reveal-up stagger-3 premium-card scroll-lift bg-linear-to-b from-[#F8FAFC] to-white p-8 rounded-xl border border-gray-100"
+            className="reveal-up stagger-3 premium-card scroll-lift bg-linear-to-b from-[#F2F9FF] to-white p-8 rounded-xl border border-gray-100"
             style={{ ["--scroll-y" as any]: `${parallaxEnabled ? (1 - contentScroll.progress) * 10 : 0}px` }}
           >
-            <div className="premium-icon w-16 h-16 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm ring-1 ring-[#D5A54D]/20">
+            <div className="premium-icon w-16 h-16 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm ring-1 ring-[#4FC3F7]/30">
               <svg className="w-8 h-8 text-[#1D3D6D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
@@ -1189,11 +1142,11 @@ function HomeInner() {
                   editing ? (
                     <div className="p-3 bg-white">
                       <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Attendee Category</label>
-                      <input type="text" value={item.text || ""} onChange={(e) => onUpdate({ ...item, text: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs text-gray-800 font-medium focus:border-[#D5A54D] outline-none" />
+                      <input type="text" value={item.text || ""} onChange={(e) => onUpdate({ ...item, text: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs text-gray-800 font-medium focus:border-[#76B947] outline-none" />
                     </div>
                   ) : (
                     <li className="attendee-item flex items-center gap-3 text-gray-700 text-sm">
-                      <FaCheckCircle className="text-[#D5A54D] text-sm shrink-0" />
+                      <FaCheckCircle className="text-[#76B947] text-sm shrink-0" />
                       {item.text}
                     </li>
                   )

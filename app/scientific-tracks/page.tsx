@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { FaRegCheckCircle, FaRegPaperPlane, FaFileAlt } from "react-icons/fa";
 
-// ===== Reusable scroll-reveal hook =====
+//  Reusable scroll-reveal hook 
 function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
   const ref = useRef<T | null>(null);
   const [inView, setInView] = useState(false);
@@ -30,7 +30,7 @@ function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
   return { ref, inView };
 }
 
-// ===== Scroll progress hook =====
+//  Scroll progress hook 
 function useScrollProgress<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);
   const [progress, setProgress] = useState(0);
@@ -63,7 +63,7 @@ function useScrollProgress<T extends HTMLElement>() {
   return { ref, progress };
 }
 
-// ===== Page-wide scroll progress bar =====
+//  Page-wide scroll progress bar 
 function ScrollProgressBar() {
   const [progress, setProgress] = useState(0);
   useEffect(() => {
@@ -88,7 +88,7 @@ function ScrollProgressBar() {
   return (
     <div className="fixed top-0 left-0 right-0 z-100 h-0.75 bg-transparent pointer-events-none">
       <div
-        className="h-full origin-left bg-linear-to-r from-[#D5A54D] via-[#F0C674] to-[#1D3D6D] shadow-[0_0_12px_rgba(213,165,77,0.6)]"
+        className="h-full origin-left bg-linear-to-r from-[#76B947] via-[#F0C674] to-[#1D3D6D] shadow-[0_0_12px_rgba(213,165,77,0.6)]"
         style={{ transform: `scaleX(${progress})`, transition: "transform 0.08s linear" }}
       />
     </div>
@@ -209,7 +209,7 @@ export default function ScientificTracks() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans text-[#0A2540] flex flex-col overflow-x-hidden">
+    <div className="min-h-screen bg-linear-to-b from-white via-[#F8FBF5] to-white font-sans text-[#0A2540] flex flex-col overflow-x-hidden">
       <ScrollProgressBar />
 
       <style jsx global>{`
@@ -257,12 +257,12 @@ export default function ScientificTracks() {
         .stagger-6 { animation-delay: 0.70s; }
 
         .gold-underline {
-          background-image: linear-gradient(90deg, #D5A54D, #F0C674, #D5A54D);
+          background-image: linear-gradient(90deg, #76B947, #F0C674, #D5A54D);
           background-size: 200% 100%;
           animation: shimmerLine 4s linear infinite;
         }
 
-        /* ===== Premium track card ===== */
+        /*  Premium track card  */
         .track-card {
           position: relative;
           isolation: isolate;
@@ -281,7 +281,7 @@ export default function ScientificTracks() {
           inset: 0;
           border-radius: inherit;
           padding: 1px;
-          background: linear-gradient(135deg, rgba(213,165,77,0) 0%, rgba(213,165,77,0) 50%, rgba(213,165,77,0) 100%);
+          background: linear-gradient(135deg, rgba(118,185,71,0) 0%, rgba(118,185,71,0) 50%, rgba(118,185,71,0) 100%);
           -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
           -webkit-mask-composite: xor;
           mask-composite: exclude;
@@ -294,7 +294,7 @@ export default function ScientificTracks() {
           position: absolute;
           inset: -1px;
           border-radius: inherit;
-          background: radial-gradient(120% 80% at 50% 0%, rgba(213,165,77,0.18) 0%, rgba(213,165,77,0) 60%);
+          background: radial-gradient(120% 80% at 50% 0%, rgba(76,195,247,0.16) 0%, rgba(76,195,247,0) 60%);
           opacity: 0;
           transition: opacity 0.55s ease;
           pointer-events: none;
@@ -302,15 +302,15 @@ export default function ScientificTracks() {
         }
         .track-card:hover {
           transform: translateY(-10px);
-          border-color: rgba(213, 165, 77, 0.35);
+          border-color: rgba(118, 185, 71, 0.35);
           box-shadow:
             0 2px 4px rgba(11, 42, 74, 0.05),
             0 12px 24px -10px rgba(11, 42, 74, 0.16),
             0 32px 60px -20px rgba(11, 42, 74, 0.22),
-            0 0 0 1px rgba(213, 165, 77, 0.05);
+            0 0 0 1px rgba(118, 185, 71, 0.05);
         }
         .track-card:hover::before {
-          background: linear-gradient(135deg, rgba(213,165,77,0.9) 0%, rgba(29,61,109,0.35) 50%, rgba(213,165,77,0.9) 100%);
+          background: linear-gradient(135deg, rgba(118,185,71,0.9) 0%, rgba(213,165,77,0.5) 50%, rgba(76,195,247,0.9) 100%);
         }
         .track-card:hover::after { opacity: 1; }
 
@@ -319,7 +319,7 @@ export default function ScientificTracks() {
         }
         .track-card:hover .track-icon-bubble {
           transform: scale(1.08) rotate(-6deg);
-          box-shadow: 0 0 0 8px rgba(213,165,77,0.10), 0 12px 28px -10px rgba(213,165,77,0.45);
+          box-shadow: 0 0 0 8px rgba(76,195,247,0.12), 0 12px 28px -10px rgba(76,195,247,0.45);
         }
 
         .track-badge {
@@ -338,10 +338,11 @@ export default function ScientificTracks() {
           color: #0A2540;
         }
         .track-item svg {
-          transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+          transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s ease;
         }
         .track-item:hover svg {
           transform: scale(1.2) rotate(8deg);
+          color: #76B947;
         }
 
         .premium-btn {
@@ -378,11 +379,21 @@ export default function ScientificTracks() {
 
       <Header />
 
-      {/* ================= PAGE HERO ================= */}
+      {/* == PAGE HERO == */}
       <section
         ref={heroScroll.ref}
         className={`relative bg-white overflow-hidden border-b border-zinc-100 ${heroReveal.inView ? "in-view" : ""}`}
       >
+        {/* Decorative orbs — green + sky blue */}
+        <div
+          aria-hidden
+          className="absolute top-0 left-0 w-80 h-80 bg-linear-to-br from-[#76B947]/10 to-transparent rounded-full blur-3xl -translate-y-1/3 -translate-x-1/4 pointer-events-none"
+        />
+        <div
+          aria-hidden
+          className="absolute bottom-0 left-1/3 w-64 h-64 bg-linear-to-tr from-[#4FC3F7]/10 to-transparent rounded-full blur-3xl translate-y-1/4 pointer-events-none"
+        />
+
         {/* Globe background — subtle scroll parallax, no pulse */}
         <div
           aria-hidden
@@ -401,7 +412,7 @@ export default function ScientificTracks() {
           className="max-w-350 mx-auto px-8 py-16 relative z-10"
         >
           <div className="flex items-center gap-2 text-sm text-zinc-500 mb-8 reveal-up">
-            <Link href="/" className="hover:text-[#F5A623] transition-colors">
+            <Link href="/" className="hover:text-[#76B947] transition-colors">
               Home
             </Link>
             <span className="text-zinc-300">›</span>
@@ -419,11 +430,15 @@ export default function ScientificTracks() {
         </div>
       </section>
 
-      {/* ================= OUR SCIENTIFIC TRACKS ================= */}
-      <section ref={tracksScroll.ref} className="py-20">
+      {/* == OUR SCIENTIFIC TRACKS == */}
+      <section ref={tracksScroll.ref} className="py-20 relative overflow-hidden">
+        {/* Ambient palette glows */}
+        <div aria-hidden className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-64 w-[70%] rounded-full bg-[#4FC3F7]/10 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-[#76B947]/10 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute bottom-1/3 left-0 h-56 w-56 rounded-full bg-[#F0C674]/10 blur-3xl" />
         <div
           ref={tracksReveal.ref}
-          className={`max-w-350 mx-auto px-8 ${tracksReveal.inView ? "in-view" : ""}`}
+          className={`relative max-w-350 mx-auto px-8 ${tracksReveal.inView ? "in-view" : ""}`}
         >
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-[#0A2540] uppercase reveal-up">
@@ -458,15 +473,17 @@ export default function ScientificTracks() {
         </div>
       </section>
 
-      {/* ================= SUBMIT CTA ================= */}
+      {/* == SUBMIT CTA == */}
       <section
         ref={ctaReveal.ref}
-        className={`pb-20 ${ctaReveal.inView ? "in-view" : ""}`}
+        className={`pb-20 relative overflow-hidden ${ctaReveal.inView ? "in-view" : ""}`}
       >
-        <div className="max-w-350 mx-auto px-8">
+        <div aria-hidden className="pointer-events-none absolute top-0 left-0 h-40 w-40 rounded-full bg-[#F0C674]/10 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-40 w-40 rounded-full bg-[#4FC3F7]/10 blur-3xl" />
+        <div className="relative max-w-350 mx-auto px-8">
           <div className="track-card reveal-up bg-white rounded-xl border border-zinc-100 p-8 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-              <div className="track-icon-bubble w-16 h-16 bg-[#F0F6FF] rounded-full flex items-center justify-center">
+              <div className="track-icon-bubble w-16 h-16 bg-[#F2F9FF] rounded-full flex items-center justify-center ring-1 ring-[#4FC3F7]/30">
                 <FaFileAlt className="text-[#1D3D6D] text-3xl" />
               </div>
               <div>
@@ -478,7 +495,7 @@ export default function ScientificTracks() {
             </div>
             <Link
               href="/abstract-submission"
-              className="premium-btn bg-linear-to-r from-[#1D3D6D] to-[#16305a] text-white px-8 py-4 rounded-lg font-bold transition-all duration-300 flex items-center gap-2 shrink-0 hover:-translate-y-0.5 hover:shadow-xl"
+              className="premium-btn bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white px-8 py-4 rounded-lg font-bold transition-all duration-300 flex items-center gap-2 shrink-0 hover:-translate-y-0.5 hover:shadow-xl"
             >
               Submit Abstract <FaRegPaperPlane className="rotate-[-20deg]" />
             </Link>
@@ -491,7 +508,7 @@ export default function ScientificTracks() {
   );
 }
 
-// ===== Sub-component for each track card =====
+//  Sub-component for each track card 
 function TrackCard({
   track,
   index,
@@ -519,7 +536,7 @@ function TrackCard({
       }}
     >
       <div className="flex justify-center mb-8">
-        <div className="track-icon-bubble w-24 h-24 rounded-full bg-[#F0F6FF] p-2 flex items-center justify-center">
+        <div className="track-icon-bubble w-24 h-24 rounded-full bg-[#F2F9FF] p-2 flex items-center justify-center ring-1 ring-[#4FC3F7]/20">
           <Image
             src={track.icon}
             alt={track.title}

@@ -13,8 +13,8 @@ interface Venue {
 
 export default function VenueMap({
   venues,
-  center = [11.5867, 122.7506],
-  zoom = 16,
+  center = [11.9674, 121.9246], // Paradise Garden Resort, Boracay
+  zoom = 17,
 }: {
   venues: Venue[];
   center?: [number, number];
@@ -32,12 +32,13 @@ export default function VenueMap({
       shadowUrl: "/leaflet/marker-shadow.png",
     });
 
+    // Unified palette markers
     const defaultColors: Record<number, string> = {
-      1: "#1D3D6D",
-      2: "#4CAF50",
-      3: "#F57C00",
-      4: "#8E24AA",
-      5: "#E53935",
+      1: "#1D3D6D", // navy — main convention center
+      2: "#4CAF50", // green — hall A
+      3: "#F57C00", // orange — hall B
+      4: "#8E24AA", // purple — pavilion
+      5: "#E53935", // red — accommodation
     };
 
     const built: Record<number, any> = {};
@@ -56,7 +57,7 @@ export default function VenueMap({
 
   if (Object.keys(icons).length === 0) {
     return (
-      <div className="w-full h-full bg-zinc-100 flex items-center justify-center text-zinc-400 text-sm">
+      <div className="w-full h-full bg-[#F2F9FF] flex items-center justify-center text-zinc-400 text-sm">
         Loading map…
       </div>
     );
