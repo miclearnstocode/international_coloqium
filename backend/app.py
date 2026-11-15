@@ -31,21 +31,17 @@ jwt = JWTManager(app)
 
 # CORS configuration
 CORS(app, 
-     origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5000", "http://127.0.0.1:5000", "https://capsusymposium.capsu.edu.ph"],
+     origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5000", "http://127.0.0.1:5000", "https://symposium.capsu.edu.ph"],
      supports_credentials=True,
      allow_headers=["Content-Type", "Authorization", "Accept", "X-Requested-With"],
      expose_headers=["Content-Type", "Authorization"],
-     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-     max_age=3600
-)
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"], max_age=3600)
 
 
 @jwt.unauthorized_loader
 def missing_token_callback(reason):
-    return jsonify({
-        "detail": "Missing authorization token",
-        "error": "unauthorized"
-    }), 401
+    return jsonify({"detail": "Missing authorization token",
+        "error": "unauthorized"}), 401
 
 @jwt.invalid_token_loader
 def invalid_token_callback(reason):
