@@ -2,9 +2,10 @@
 import Image from "next/image";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import UnderDevelopment from "../components/UnderDevelopment";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
-import { FaRegCheckCircle, FaRegPaperPlane, FaFileAlt } from "react-icons/fa";
+import { FaRegCheckCircle, FaRegPaperPlane, FaFileAlt, FaUserTie, FaQuoteLeft } from "react-icons/fa";
 
 //  Reusable scroll-reveal hook 
 function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
@@ -99,11 +100,15 @@ export default function ScientificTracks() {
   // Reveal hooks
   const heroReveal = useInView<HTMLDivElement>();
   const tracksReveal = useInView<HTMLDivElement>();
+  const speakersReveal = useInView<HTMLDivElement>();
   const ctaReveal = useInView<HTMLDivElement>();
 
   // Scroll progress hooks
   const heroScroll = useScrollProgress<HTMLElement>();
   const tracksScroll = useScrollProgress<HTMLElement>();
+  const speakersScroll = useScrollProgress<HTMLElement>();
+
+  const [showDevModal, setShowDevModal] = useState(false);
 
   const checkColors = {
     green: "#4CAF50",
@@ -206,6 +211,13 @@ export default function ScientificTracks() {
         "Policy, governance, and sustainable development",
       ],
     },
+  ];
+
+  // Placeholder speakers data (Stakeholders can fill these in later)
+  const plenarySpeakers = [
+    { name: "To Be Announced", role: "Keynote Speaker", org: "International Organization", img: "" },
+    { name: "To Be Announced", role: "Plenary Speaker", org: "Academic Institution", img: "" },
+    { name: "To Be Announced", role: "Plenary Speaker", org: "Research Agency", img: "" },
   ];
 
   return (
@@ -384,7 +396,6 @@ export default function ScientificTracks() {
         ref={heroScroll.ref}
         className={`relative bg-white overflow-hidden border-b border-zinc-100 ${heroReveal.inView ? "in-view" : ""}`}
       >
-        {/* Decorative orbs — green + sky blue */}
         <div
           aria-hidden
           className="absolute top-0 left-0 w-80 h-80 bg-linear-to-br from-[#76B947]/10 to-transparent rounded-full blur-3xl -translate-y-1/3 -translate-x-1/4 pointer-events-none"
@@ -394,7 +405,6 @@ export default function ScientificTracks() {
           className="absolute bottom-0 left-1/3 w-64 h-64 bg-linear-to-tr from-[#4FC3F7]/10 to-transparent rounded-full blur-3xl translate-y-1/4 pointer-events-none"
         />
 
-        {/* Globe background — subtle scroll parallax, no pulse */}
         <div
           aria-hidden
           className="absolute right-0 top-0 bottom-0 w-1/2 pointer-events-none opacity-60"
@@ -432,7 +442,6 @@ export default function ScientificTracks() {
 
       {/* == OUR SCIENTIFIC TRACKS == */}
       <section ref={tracksScroll.ref} className="py-20 relative overflow-hidden">
-        {/* Ambient palette glows */}
         <div aria-hidden className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-64 w-[70%] rounded-full bg-[#4FC3F7]/10 blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-[#76B947]/10 blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute bottom-1/3 left-0 h-56 w-56 rounded-full bg-[#F0C674]/10 blur-3xl" />
@@ -447,7 +456,6 @@ export default function ScientificTracks() {
             <div className="w-16 h-1 gold-underline mx-auto mt-4 reveal-up stagger-1 rounded-full"></div>
           </div>
 
-          {/* Tracks 1-3 */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {tracks.slice(0, 3).map((track, idx) => (
               <TrackCard
@@ -459,7 +467,6 @@ export default function ScientificTracks() {
             ))}
           </div>
 
-          {/* Tracks 4 & 5 */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8 max-w-4xl mx-auto">
             {tracks.slice(3).map((track, idx) => (
               <TrackCard
@@ -469,6 +476,67 @@ export default function ScientificTracks() {
                 scrollProgress={tracksScroll.progress}
               />
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* == ABOUT THE PLENARY SPEAKERS == */}
+      <section ref={speakersScroll.ref} className="py-20 bg-white relative overflow-hidden border-t border-zinc-100">
+        <div aria-hidden className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-64 w-[60%] rounded-full bg-[#4FC3F7]/10 blur-3xl" />
+        <div
+          ref={speakersReveal.ref}
+          className={`relative max-w-350 mx-auto px-8 ${speakersReveal.inView ? "in-view" : ""}`}
+        >
+          <div className="text-center mb-12">
+            <div className="flex justify-center mb-4 reveal-up">
+              <div className="premium-icon w-16 h-16 rounded-full bg-[#F2F9FF] flex items-center justify-center ring-1 ring-[#4FC3F7]/30">
+                <FaUserTie className="text-[#1D3D6D] text-2xl" />
+              </div>
+            </div>
+            <h2 className="text-3xl font-bold text-[#0A2540] uppercase reveal-up stagger-1">
+              About the Plenary Speakers
+            </h2>
+            <div className="w-16 h-1 gold-underline mx-auto mt-4 reveal-up stagger-2 rounded-full"></div>
+            <p className="text-zinc-500 mt-4 max-w-2xl mx-auto reveal-up stagger-3">
+              Learn more about the distinguished experts and thought leaders who will be sharing their insights at the symposium.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {plenarySpeakers.map((speaker, idx) => (
+              <div
+                key={idx}
+                className="track-card scroll-lift bg-[#F8FBF5] rounded-xl border border-zinc-200 p-6 text-center reveal-up"
+                style={{ ["--scroll-y" as any]: `${(1 - speakersScroll.progress) * (25 - idx * 4)}px` }}
+              >
+                <div className="relative w-32 h-32 mx-auto mb-6 rounded-full overflow-hidden border-4 border-white shadow-lg bg-[#E2E8F0] flex items-center justify-center group">
+                  {speaker.img ? (
+                    <Image src={speaker.img} alt={speaker.name} fill className="object-cover" />
+                  ) : (
+                    <FaUserTie className="text-4xl text-zinc-400 group-hover:scale-110 transition-transform duration-500" />
+                  )}
+                </div>
+                <h3 className="font-bold text-[#0A2540] text-lg mb-1">{speaker.name}</h3>
+                <p className="text-sm font-semibold text-[#1b5e20] mb-1">{speaker.role}</p>
+                <p className="text-xs text-zinc-500 mb-4">{speaker.org}</p>
+                
+                <div className="bg-white rounded-lg p-4 border border-zinc-100 flex items-start gap-3">
+                  <FaQuoteLeft className="text-[#D5A54D] mt-1 shrink-0 text-sm" />
+                  <p className="text-xs text-zinc-500 italic text-left">
+                    Bionote and full profile will be published soon.
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 text-center reveal-up">
+            <button
+              onClick={() => setShowDevModal(true)}
+              className="premium-btn inline-flex items-center gap-2 bg-[#0A2540] hover:bg-[#0B2A4A] text-white px-6 py-3 rounded-lg font-bold text-sm transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-0.5"
+            >
+              View Full Speaker Profiles <FaFileAlt />
+            </button>
           </div>
         </div>
       </section>
@@ -502,6 +570,20 @@ export default function ScientificTracks() {
           </div>
         </div>
       </section>
+
+      {/* Under Development Modal */}
+      <UnderDevelopment
+        open={showDevModal}
+        onClose={() => setShowDevModal(false)}
+        title="Plenary Speaker Profiles Coming Soon"
+        description="We are currently finalizing the confirmed list of our distinguished plenary speakers. Their full photos and comprehensive bionotes will be published here shortly."
+        notes={[
+          "The scientific committee is confirming final speaker lineups.",
+          "High-resolution photos and full academic bionotes will be included.",
+          "An official announcement will be sent to all registered participants once live.",
+        ]}
+        contactEmail="internationalsymposium@capsu.edu.ph"
+      />
 
       <Footer />
     </div>

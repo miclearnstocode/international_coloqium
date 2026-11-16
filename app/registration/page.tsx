@@ -11,7 +11,7 @@ import {
   FaRegPaperPlane, FaUniversity, FaRegFileAlt, FaChevronRight,
   FaRegCheckCircle, FaPaperPlane, FaLaptop, FaSearch, FaEnvelopeOpenText,
   FaEnvelope, FaUserCheck, FaTimesCircle, FaCreditCard, FaCheckDouble,
-  FaUsersCog, FaClipboardList, FaBullseye,
+  FaUsersCog, FaClipboardList, FaBullseye, FaCheckCircle,
 } from "react-icons/fa";
 
 //  Reusable scroll-reveal hook 
@@ -122,6 +122,13 @@ export default function RegistrationPage() {
     { icon: <FaUserCircle />, text: "Undergraduate students" },
   ];
 
+  const inclusions = [
+    "Access to all sessions",
+    "Conference materials",
+    "Certificate",
+    "Meals & refreshments",
+  ];
+
   const importantDates = [
     { icon: <FaRegPaperPlane />, title: "Opening of Abstract Submission and Registration", date: "November 16, 2026" },
     { icon: <FaRegFileAlt />, title: "Abstract Submission Deadline", date: "January 20, 2027" },
@@ -131,7 +138,6 @@ export default function RegistrationPage() {
     { icon: <FaRegCalendarAlt />, title: "Submission of Full Papers", date: "Subject to confirmation of publication number" },
   ];
 
-  // Workflow steps derived from the 2nd image
   const workflowSteps = [
     { id: 1, icon: <FaLaptop />, title: "Abstract Submission", desc: "Author submits the abstract through the online submission portal." },
     { id: 2, icon: <FaSearch />, title: "Review & Evaluation", desc: "Scientific Committee/Reviewers evaluate the abstract based on the criteria." },
@@ -380,101 +386,13 @@ export default function RegistrationPage() {
         </div>
       </section>
 
-      {/* == FEES & INFORMATION == */}
-      <section ref={feesScroll.ref} className="py-16 relative overflow-hidden">
-        <div aria-hidden className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-64 w-[70%] rounded-full bg-[#4FC3F7]/10 blur-3xl" />
-        <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-[#76B947]/10 blur-3xl" />
-        <div
-          ref={feesReveal.ref}
-          className={`relative max-w-350 mx-auto px-8 ${feesReveal.inView ? "in-view" : ""}`}
-        >
-          <div className="flex flex-col md:flex-row gap-8 items-stretch">
-            {/* Left: Fees */}
-            <div className="w-full md:w-1/2 reveal-left">
-              <div className="bg-linear-to-r from-[#0B2A4A] to-[#1D3D6D] text-white p-5 flex items-center gap-3 rounded-t-xl">
-                <FaRegListAlt className="text-xl" />
-                <h2 className="text-lg font-bold uppercase">Registration Fees</h2>
-              </div>
-
-              <div className="premium-card bg-white border border-t-0 border-zinc-200 rounded-b-xl p-9 flex flex-col h-[530]">
-                <h3 className="text-sm font-bold text-[#0A2540] uppercase mb-6">A. Registration fees:</h3>
-                <p className="text-5xl font-bold text-[#0A2540] mb-8">P 4,500.00</p>
-
-                <ul className="space-y-4 mb-8">
-                  {fees.map((fee, idx) => (
-                    <li
-                      key={idx}
-                      className={`fee-item flex items-center gap-3 text-zinc-600 reveal-up stagger-${(idx % 6) + 1}`}
-                    >
-                      <span className="text-[#0A2540] text-lg">{fee.icon}</span>
-                      <span className="text-sm">{fee.text}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="mt-auto bg-[#F2F9FF] border border-[#4FC3F7]/30 rounded-lg p-4 flex gap-3 items-start">
-                  <FaInfoCircle className="text-[#1D3D6D] mt-0.5 shrink-0" />
-                  <p className="text-xs text-zinc-600">
-                    The registration fee covers participation in all sessions, conference materials, certificates, and meals during the event.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Right: Table */}
-            <div className="w-full md:w-1/2 reveal-right">
-              <div className="bg-linear-to-r from-[#0B2A4A] to-[#1D3D6D] text-white p-5 flex items-center gap-3 rounded-t-xl">
-                <FaUsers className="text-xl" />
-                <h2 className="text-lg font-bold uppercase">Registration Information by Participant</h2>
-              </div>
-
-              <div className="premium-card bg-white border border-t-0 border-zinc-200 rounded-b-xl overflow-hidden">
-                <table className="w-full text-sm text-left">
-                  <thead className="bg-[#1D3D6D] text-white uppercase text-xs">
-                    <tr>
-                      <th className="px-6 py-3">Participant Category</th>
-                      <th className="px-6 py-3">Description / Eligibility</th>
-                      <th className="px-6 py-3">Registration Fee (PHP)</th>
-                      <th className="px-6 py-3">Inclusions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-100 text-zinc-600">
-                    {[
-                      { cat: "International Participants", desc: "Participants from other countries", inc: ["Access to all sessions", "Conference materials", "Certificate", "Meals & refreshments"] },
-                      { cat: "Local Professionals / Researchers", desc: "Professionals and researchers in the field", inc: ["Access to all sessions", "Conference materials", "Certificate", "Meals & refreshments"] },
-                      { cat: "Faculty", desc: "Full-time faculty members", inc: ["Access to all sessions", "Conference materials", "Certificate", "Meals & refreshments"] },
-                      { cat: "Graduate Students", desc: "Currently enrolled graduate students", inc: ["Access to all sessions", "Conference materials", "Certificate", "Meals & refreshments"] },
-                      { cat: "Undergraduate Students", desc: "Currently enrolled undergraduate students", inc: ["Access to all sessions", "Conference materials", "Certificate", "Meals & refreshments"] },
-                    ].map((row, idx) => (
-                      <tr key={idx} className="pay-row">
-                        <td className="px-6 py-2 font-semibold text-[#0A2540]">{row.cat}</td>
-                        <td className="px-6 py-2">{row.desc}</td>
-                        <td className="px-6 py-2 font-medium">4,500.00</td>
-                        <td className="px-6 py-2">
-                          <ul className="space-y-0.5">
-                            {row.inc.map((item, i) => (
-                              <li key={i} className="flex items-start gap-1.5 text-xs whitespace-nowrap">
-                                <span className="text-[#76B947] mt-0.5">•</span> {item}
-                              </li>
-                            ))}
-                          </ul>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* == DATES, STEPS (WORKFLOW) & POLICY == */}
-      <section ref={infoReveal.ref} className={`bg-white py-16 border-t border-zinc-100 relative overflow-hidden ${infoReveal.inView ? "in-view" : ""}`}>
+      {/* == IMPORTANT DATES & WORKFLOW (Now Top Grid) == */}
+      <section ref={infoReveal.ref} className={`bg-white py-16 border-b border-zinc-100 relative overflow-hidden ${infoReveal.inView ? "in-view" : ""}`}>
         <div aria-hidden className="pointer-events-none absolute top-0 left-0 h-56 w-56 rounded-full bg-[#F0C674]/10 blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-56 w-56 rounded-full bg-[#4FC3F7]/10 blur-3xl" />
         
-        <div className="relative max-w-350 mx-auto px-8 grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+        {/* 2-Column Grid for larger sections */}
+        <div className="relative max-w-350 mx-auto px-8 grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
           
           {/* Important Dates */}
           <div className="reveal-up stagger-1 flex flex-col h-full">
@@ -527,15 +445,12 @@ export default function RegistrationPage() {
                       return (
                         <div key={step.id} className={`timeline-item flex gap-4 relative reveal-up stagger-${(idx % 6) + 1} pb-4`}>
                           <div className="w-10 flex flex-col items-center shrink-0 relative z-10">
-                            {/* Top half of the line (hidden for the first item) */}
                             <div className={`w-0.5 bg-zinc-200 ${idx === 0 ? 'h-0' : 'h-2 -mt-2 mb-1'}`}></div>
                             
-                            {/* The animated icon */}
                             <div className="timeline-icon animate-step w-10 h-10 rounded-full bg-[#F2F9FF] border-2 border-white text-[#1D3D6D] flex items-center justify-center text-lg shrink-0 font-bold">
                               <span className="text-sm leading-none tabular-nums">{step.id}</span>
                             </div>
 
-                            {/* Bottom half of the line (hidden for the LAST item) */}
                             {!isLast && (
                               <div className="w-0.5 bg-zinc-200 flex-1 mt-1 -mb-4"></div>
                             )}
@@ -549,7 +464,7 @@ export default function RegistrationPage() {
                       );
                     })}
 
-                    {/* Not Accepted Branch - Stretched full width */}
+                    {/* Not Accepted Branch */}
                     <div className="relative pt-2 pb-4 mt-2">
                       <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex gap-3 items-start">
                         <FaTimesCircle className="text-red-500 mt-0.5 shrink-0 text-lg" />
@@ -560,7 +475,7 @@ export default function RegistrationPage() {
                       </div>
                     </div>
 
-                    {/* Important Notes - Stretched full width */}
+                    {/* Important Notes */}
                     <div className="pt-2 pb-2">
                       <div className="bg-[#FEF9E7] border border-[#F0C674] rounded-lg p-4 flex gap-3 items-start">
                           <FaClipboardList className="text-[#D5A54D] mt-0.5 shrink-0 text-lg" />
@@ -580,14 +495,77 @@ export default function RegistrationPage() {
 
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* == REGISTRATION FEES & CANCEL POLICY (Now Bottom Grid) == */}
+      <section ref={feesScroll.ref} className="py-16 relative overflow-hidden">
+        <div aria-hidden className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-64 w-[70%] rounded-full bg-[#4FC3F7]/10 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-[#76B947]/10 blur-3xl" />
+        
+        <div
+          ref={feesReveal.ref}
+          className={`relative max-w-350 mx-auto px-8 grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch ${feesReveal.inView ? "in-view" : ""}`}
+        >
+          {/* Registration Fees Card */}
+          <div className="w-full reveal-up stagger-1 flex flex-col h-full">
+            <div className="bg-linear-to-r from-[#0B2A4A] to-[#1D3D6D] text-white p-5 flex items-center gap-3 rounded-t-xl shrink-0">
+              <FaRegListAlt className="text-xl" />
+              <h2 className="text-lg font-bold uppercase tracking-wide">Registration Fees</h2>
+            </div>
+
+            <div className="premium-card bg-white border border-t-0 border-zinc-200 rounded-b-xl p-8 flex-1 flex flex-col">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                {/* Left Column: Fee & Eligibility */}
+                <div>
+                  <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-widest mb-2">Registration Fee</h3>
+                  <p className="text-4xl font-extrabold text-[#0A2540] mb-6">P 4,500.00</p>
+                  
+                  <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">Who can register:</h3>
+                  <ul className="space-y-3">
+                    {fees.map((fee, idx) => (
+                      <li key={idx} className={`fee-item flex items-center gap-3 text-zinc-700 reveal-up stagger-${(idx % 6) + 1}`}>
+                        <div className="w-7 h-7 rounded-full bg-[#F2F9FF] flex items-center justify-center text-[#1D3D6D] shrink-0 text-xs">
+                          {fee.icon}
+                        </div>
+                        <span className="text-xs font-medium">{fee.text}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Right Column: Inclusions */}
+                <div>
+                  <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">What's Included:</h3>
+                  <div className="bg-[#F8FBF5] rounded-xl border border-[#76B947]/20 p-4">
+                    <ul className="space-y-3">
+                      {inclusions.map((item, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-xs text-zinc-700">
+                          <FaCheckCircle className="text-[#76B947] mt-0.5 shrink-0 text-sm" /> 
+                          <span className="font-medium">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-auto bg-[#F2F9FF] border border-[#4FC3F7]/30 rounded-lg p-4 flex gap-3 items-start">
+                <FaInfoCircle className="text-[#1D3D6D] mt-0.5 shrink-0 text-sm" />
+                <p className="text-[11px] text-zinc-600 leading-relaxed">
+                  The registration fee covers participation in all sessions, conference materials, certificates, and meals during the event.
+                </p>
+              </div>
+            </div>
+          </div>
 
           {/* Cancel Policy */}
-          <div className="reveal-up stagger-3 flex flex-col h-full">
+          <div className="reveal-up stagger-2 flex flex-col h-full">
             <div className="bg-linear-to-r from-[#0B2A4A] to-[#1D3D6D] text-white p-5 flex items-center gap-3 rounded-t-xl shrink-0 bg-clip-padding">
               <FaRegListAlt className="text-xl" />
               <h2 className="text-lg font-bold uppercase">Cancel Policy</h2>
             </div>
-            <div className="premium-card bg-white border border-t-0 border-zinc-200 rounded-b-xl p-6 flex-1 flex flex-col">
+            <div className="premium-card bg-white border border-t-0 border-zinc-200 rounded-b-xl p-8 flex-1 flex flex-col">
               <p className="text-sm text-zinc-600 mb-6">Cancellations must be sent in writing to the Secretariat.</p>
 
               <ul className="space-y-4 text-sm text-zinc-600 mb-8">
@@ -610,14 +588,13 @@ export default function RegistrationPage() {
               </div>
             </div>
           </div>
-
         </div>
       </section>
 
       {/* == PAYMENT INFO == */}
       <section
         ref={paymentReveal.ref}
-        className={`py-16 relative overflow-hidden ${paymentReveal.inView ? "in-view" : ""}`}
+        className={`py-16 bg-white border-t border-zinc-100 relative overflow-hidden ${paymentReveal.inView ? "in-view" : ""}`}
       >
         <div aria-hidden className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-64 w-[60%] rounded-full bg-[#76B947]/8 blur-3xl" />
         <div className="relative max-w-350 mx-auto px-8">
@@ -671,7 +648,7 @@ export default function RegistrationPage() {
       </section>
 
       {/* == BOTTOM CTA == */}
-      <section ref={ctaReveal.ref} className={`pb-20 relative overflow-hidden ${ctaReveal.inView ? "in-view" : ""}`}>
+      <section ref={ctaReveal.ref} className={`py-16 relative overflow-hidden ${ctaReveal.inView ? "in-view" : ""}`}>
         <div aria-hidden className="pointer-events-none absolute top-0 left-0 h-40 w-40 rounded-full bg-[#F0C674]/10 blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-40 w-40 rounded-full bg-[#4FC3F7]/10 blur-3xl" />
         <div className="relative max-w-350 mx-auto px-8">

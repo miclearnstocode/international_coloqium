@@ -20,8 +20,9 @@ unzip -q out.zip
 # 3. Handle the nested 'out' folder trap
 if [ -d "out" ]; then
   echo "📂 Moving files out of the nested 'out' folder..."
-  mv out/* .
-  mv out/.[!.]* . 2>/dev/null
+  # Move files, but PROTECT the existing .htaccess from being overwritten
+  mv -n out/* .
+  mv -n out/.[!.]* . 2>/dev/null
   rmdir out
 fi
 
@@ -33,26 +34,4 @@ find . -type d -exec chmod 755 {} \;
 find . -type f -exec chmod 644 {} \;
 chmod 644 .htaccess 2>/dev/null
 
-# 4. Ensure .htaccess has the correct caching and routing rules
-echo "⚙️ Verifying .htaccess routing rules..."
-cat > .htaccess <<'EOF'
-Options -Indexes
-RewriteEngine On
-
-# Serve .html files for extensionless URLs (e.g., /about -> about.html)
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_FILENAME}\.html -f
-RewriteRule ^(.*)$ $1.html [NC,L]
-
-# Prevent caching of HTML so updates show immediately
-<FilesMatch "\.html$">
-  Header set Cache-Control "no-cache, must-revalidate, max-age=0"
-</FilesMatch>
-
-# Cache static assets heavily (safe because of Next.js hashed filenames)
-<FilesMatch "\.(js|css|woff2?|png|jpg|jpeg|svg|webp|mp4)$">
-  Header set Cache-Control "public, max-age=31536000, immutable"
-</FilesMatch>
-EOF
-
-echo "✅ Deployment complete! Your site is live."
+echo "✅ Deployment complete! Your site is live. (Existing .htaccess was preserved)"

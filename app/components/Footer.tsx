@@ -14,14 +14,10 @@ import { fetchPublicEvents, pickFeaturedEvent } from "@/app/lib/events";
 const FALLBACK_TITLE_LINES = [
   "3RD INTERNATIONAL AGRI-",
   "LIFE & BIORESOURCE",
-  "SCIENCE SYMPOSIUM",
+  "SCIENCES SYMPOSIUM",
 ];
 
-/**
- * Break a title into up to 3 uppercase lines for the footer.
- * "3rd International Agri-Life & Bioresource Science Symposium"
- *   → ["3RD INTERNATIONAL", "AGRI-LIFE & BIORESOURCE", "SCIENCE SYMPOSIUM"]
- */
+
 function splitFooterTitle(title: string): string[] {
   const clean = (title || "").replace(/\s+/g, " ").trim().toUpperCase();
   if (!clean) return FALLBACK_TITLE_LINES;

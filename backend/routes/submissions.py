@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import os, re, tempfile, traceback
 from werkzeug.utils import secure_filename
-from google_drive import upload_file_to_drive
+from google_drive import upload_file_to_drive, trash_file_from_drive
 from models import db, AbstractSubmission, SUC
 from utils.pdf import generate_abstract_pdf
 from utils.decorators import staff_required
@@ -108,6 +108,7 @@ def submit_paper():
 
 
 @submissions_bp.route('/api/abstracts/submit', methods=['POST', 'OPTIONS'])
+@jwt_required()
 def submit_abstract():
     if request.method == 'OPTIONS':
         return jsonify({})
@@ -156,12 +157,7 @@ def submit_abstract():
             project_title=data['selected_track']
         )
         
-        # Get sender_id from the data (NO JWT verification)
-        sender_id = data.get('sender_id')
-        
-        # Validate sender_id
-        if not sender_id or sender_id == 0:
-            return jsonify({"detail": "User authentication required. Please login again."}), 401
+        sender_id = int(get_jwt_identity())
         
         # Save to database (REMOVED city_tour_option)
         new_sub = AbstractSubmission(
@@ -204,6 +200,156 @@ def submit_abstract():
     except Exception as e:
         if temp_file_path and os.path.exists(temp_file_path):
             os.remove(temp_file_path)
+        db.session.rollback()
+        traceback.print_exc()
+        return jsonify({"detail": str(e)}), 500
+
+
+@submissions_bp.route('/api/abstracts/<int:submission_id>', methods=['PUT', 'OPTIONS'])
+@jwt_required()
+def update_abstract(submission_id):
+    if request.method == 'OPTIONS':
+        return jsonify({})
+
+    temp_file_path = None
+    new_view_url = None
+    database_committed = False
+    try:
+        submission = AbstractSubmission.query.get(submission_id)
+        if not submission:
+            return jsonify({"detail": "Submission not found"}), 404
+
+        if str(get_jwt_identity()) != str(submission.sender_id):
+            return jsonify({"detail": "You can only edit your own submissions"}), 403
+
+        if (submission.status or '').lower() != 'pending':
+            return jsonify({"detail": "Only pending submissions can be edited"}), 400
+
+        data = request.get_json() or {}
+
+        required_fields = [
+            'selected_track', 'specific_track', 'research_title', 'author',
+            'presenter', 'email_address', 'university_agency', 'address',
+            'phone_number', 'presentation_type', 'abstract', 'keywords'
+        ]
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({"detail": f"{field.replace('_', ' ').title()} is required"}), 400
+
+        # Check if university/agency exists in database, if not add it
+        agency_name = data['university_agency'].strip()
+        existing_agency = SUC.query.filter_by(name=agency_name).first()
+        if not existing_agency:
+            new_agency = SUC(
+                name=agency_name,
+                region='National',
+                abbreviation='',
+                type='Other',
+                is_active=True
+            )
+            db.session.add(new_agency)
+
+        # Store old drive URLs to move to trash after uploading new file
+        old_view_url = submission.abstract_drive_view_url
+        old_download_url = submission.abstract_drive_download_url
+
+        # Generate new PDF
+        pdf_path = generate_abstract_pdf(data)
+        temp_file_path = pdf_path
+
+        # Filename: Surname of Author - Research Title
+        author_surname = data['author'].split(',')[0].split()[-1]
+        safe_research_title = re.sub(r'[^\w\s-]', '', data['research_title']).replace(' ', '_')[:50]
+        filename = f"{author_surname}_{safe_research_title}.pdf"
+
+        # Upload new PDF to Google Drive
+        new_view_url, new_download_url = upload_file_to_drive(
+            pdf_path,
+            filename,
+            project_title=data['selected_track']
+        )
+
+        # Update submission fields
+        submission.selected_track = data['selected_track']
+        submission.specific_track = data['specific_track']
+        submission.research_title = data['research_title']
+        submission.author = data['author']
+        submission.co_author = data.get('co_author')
+        submission.presenter = data['presenter']
+        submission.email_address = data['email_address']
+        submission.university_agency = agency_name
+        submission.address = data.get('address')
+        submission.phone_number = data.get('phone_number')
+        submission.presentation_type = data.get('presentation_type')
+        submission.abstract = data['abstract']
+        submission.keywords = data['keywords']
+        submission.abstract_drive_view_url = new_view_url
+        submission.abstract_drive_download_url = new_download_url
+
+        db.session.commit()
+        database_committed = True
+
+        warning = None
+        old_file_url = old_view_url or old_download_url
+        if old_file_url:
+            try:
+                trash_file_from_drive(old_file_url)
+            except Exception as trash_error:
+                warning = f"Abstract updated, but the previous PDF could not be moved to Drive trash: {trash_error}"
+
+        # Cleanup temp PDF
+        if temp_file_path and os.path.exists(temp_file_path):
+            os.remove(temp_file_path)
+
+        return jsonify({
+            "message": "Abstract updated successfully",
+            "submission_id": submission.id,
+            "view_url": new_view_url,
+            "download_url": new_download_url,
+            "status": submission.status,
+            "warning": warning
+        }), 200
+
+    except Exception as e:
+        if temp_file_path and os.path.exists(temp_file_path):
+            os.remove(temp_file_path)
+        db.session.rollback()
+        if new_view_url and not database_committed:
+            try:
+                trash_file_from_drive(new_view_url)
+            except Exception:
+                traceback.print_exc()
+        traceback.print_exc()
+        return jsonify({"detail": str(e)}), 500
+
+
+@submissions_bp.route('/api/abstracts/<int:submission_id>', methods=['DELETE', 'OPTIONS'])
+@jwt_required()
+def delete_abstract(submission_id):
+    if request.method == 'OPTIONS':
+        return jsonify({})
+    try:
+        submission = AbstractSubmission.query.get(submission_id)
+        if not submission:
+            return jsonify({"detail": "Submission not found"}), 404
+
+        if str(get_jwt_identity()) != str(submission.sender_id):
+            return jsonify({"detail": "You can only delete your own submissions"}), 403
+
+        if (submission.status or '').lower() != 'pending':
+            return jsonify({"detail": "Only pending submissions can be deleted"}), 400
+
+        # Move file to trash in Google Drive
+        old_file_url = submission.abstract_drive_view_url or submission.abstract_drive_download_url
+        if old_file_url:
+            trash_file_from_drive(old_file_url)
+
+        # Delete from DB
+        db.session.delete(submission)
+        db.session.commit()
+
+        return jsonify({"message": "Submission deleted successfully"}), 200
+    except Exception as e:
         db.session.rollback()
         traceback.print_exc()
         return jsonify({"detail": str(e)}), 500

@@ -9,9 +9,47 @@ import {
   FaCheck, FaUniversity, FaSearch, FaChevronDown, FaPlusCircle, FaFilePdf,
   FaEye, FaDownload, FaSync, FaList, FaExclamationTriangle, FaFolderOpen,
   FaFileAlt, FaMapMarkerAlt, FaMicrophone, FaImage,
-  FaArrowLeft, FaHourglassHalf, FaCheckCircle, FaTimesCircle, FaChevronRight
+  FaArrowLeft, FaHourglassHalf, FaCheckCircle, FaTimesCircle, FaChevronRight,
+  FaEdit, FaTrash
 } from "react-icons/fa";
 import { apiFetch } from "../lib/api";
+
+const emptyFormData = {
+  selected_track: "",
+  specific_track: "",
+  research_title: "",
+  author: "",
+  co_authors: [] as string[],
+  presenter: "",
+  email_address: "",
+  university_agency: "",
+  address: "",
+  phone_number: "",
+  presentation_type: "",
+  abstract: "",
+  keywords: ""
+};
+
+type AbstractSubmissionRecord = {
+  id: number;
+  status: string;
+  research_title: string;
+  selected_track?: string;
+  specific_track?: string;
+  author?: string;
+  co_author?: string | null;
+  presenter?: string;
+  email_address?: string;
+  university_agency?: string;
+  address?: string | null;
+  phone_number?: string | null;
+  presentation_type?: string;
+  abstract?: string;
+  keywords?: string;
+  abstract_drive_view_url?: string | null;
+  abstract_drive_download_url?: string | null;
+  created_at?: string | null;
+};
 
 export default function AbstractSubmissionPage() {
   const router = useRouter();
@@ -30,9 +68,11 @@ export default function AbstractSubmissionPage() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [submittedData, setSubmittedData] = useState<any>(null);
   const [previewGenerated, setPreviewGenerated] = useState(false);
-  const [mySubmissions, setMySubmissions] = useState<any[]>([]);
+  const [mySubmissions, setMySubmissions] = useState<AbstractSubmissionRecord[]>([]);
   const [submissionsLoading, setSubmissionsLoading] = useState(false);
-  const [viewingSubmission, setViewingSubmission] = useState<any>(null);
+  const [editingSubmissionId, setEditingSubmissionId] = useState<number | null>(null);
+  const [deletingSubmissionId, setDeletingSubmissionId] = useState<number | null>(null);
+  const [viewingSubmission, setViewingSubmission] = useState<AbstractSubmissionRecord | null>(null);
   const [showSubmissionModal, setShowSubmissionModal] = useState(false);
   const [pdfViewerUrl, setPdfViewerUrl] = useState("");
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -44,23 +84,9 @@ export default function AbstractSubmissionPage() {
   const agencyDropdownRef = useRef<HTMLDivElement>(null);
 
   // Form State
-  const [formData, setFormData] = useState({
-    selected_track: "",
-    specific_track: "",
-    research_title: "",
-    author: "",
-    co_authors: [] as string[],
-    presenter: "",
-    email_address: "",
-    university_agency: "",
-    address: "",
-    phone_number: "",
-    presentation_type: "",
-    abstract: "",
-    keywords: ""
-  });
+  const [formData, setFormData] = useState(emptyFormData);
 
-  // Track data with specific sub-tracks
+
   const trackData = {
     "Track 1 – Agriculture, Animal": [
       "Crop science and sustainable crop production",
@@ -302,11 +328,72 @@ export default function AbstractSubmissionPage() {
     generatePreview(formData);
   };
 
-  const viewSubmission = (submission: any) => {
+  const viewSubmission = (submission: AbstractSubmissionRecord) => {
     setViewingSubmission(submission);
     setShowSubmissionModal(true);
     if (submission.abstract_drive_view_url) {
       setPdfViewerUrl(submission.abstract_drive_view_url);
+    }
+  };
+
+  const editSubmission = (submission: AbstractSubmissionRecord) => {
+    setEditingSubmissionId(submission.id);
+    setPreviewUrl("");
+    setPreviewGenerated(false);
+    setFormData({
+      ...emptyFormData,
+      selected_track: submission.selected_track || "",
+      specific_track: submission.specific_track || "",
+      research_title: submission.research_title || "",
+      author: submission.author || "",
+      co_authors: submission.co_author
+        ? submission.co_author.split(",").map((author: string) => author.trim()).filter(Boolean)
+        : [],
+      presenter: submission.presenter || "",
+      email_address: submission.email_address || "",
+      university_agency: submission.university_agency || "",
+      address: submission.address || "",
+      phone_number: submission.phone_number || "",
+      presentation_type: submission.presentation_type || "",
+      abstract: submission.abstract || "",
+      keywords: submission.keywords || ""
+    });
+    const agencyExists = sucs.some((suc) => suc.name === submission.university_agency);
+    setShowCustomAgency(!agencyExists);
+    setCustomAgency(agencyExists ? "" : submission.university_agency || "");
+    setSelectedAgency(agencyExists ? submission.university_agency || "" : "");
+    setView("submit");
+  };
+
+  const cancelEdit = () => {
+    setEditingSubmissionId(null);
+    setPreviewUrl("");
+    setPreviewGenerated(false);
+    setFormData(emptyFormData);
+    setShowCustomAgency(false);
+    setCustomAgency("");
+    setSelectedAgency("");
+    setView("submissions");
+  };
+
+  const deleteSubmission = async (submission: AbstractSubmissionRecord) => {
+    if (!window.confirm(`Delete "${submission.research_title}"? This cannot be undone.`)) return;
+
+    setDeletingSubmissionId(submission.id);
+    try {
+      const res = await apiFetch(`/api/abstracts/${submission.id}`, { method: "DELETE" });
+      const result = await res.json();
+      if (!res.ok) {
+        alert(result.detail || "Failed to delete submission.");
+        return;
+      }
+      await fetchMySubmissions();
+      alert(result.warning || result.message || "Submission deleted.");
+    } catch (error) {
+      console.error("Error deleting submission", error);
+      alert("Failed to connect to the server.");
+    } finally {
+      setDeletingSubmissionId(null);
     }
   };
 
@@ -348,14 +435,32 @@ export default function AbstractSubmissionPage() {
         sender_id: userId
       };
 
-      const res = await apiFetch("/api/abstracts/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(submissionData)
-      });
+      const isEditing = editingSubmissionId !== null;
+      const res = await apiFetch(
+        isEditing ? `/api/abstracts/${editingSubmissionId}` : "/api/abstracts/submit",
+        {
+          method: isEditing ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(submissionData)
+        }
+      );
 
       if (res.ok) {
         const data = await res.json();
+        if (isEditing) {
+          setLoading(false);
+          setEditingSubmissionId(null);
+          setPreviewUrl("");
+          setPreviewGenerated(false);
+          setFormData(emptyFormData);
+          setShowCustomAgency(false);
+          setCustomAgency("");
+          setSelectedAgency("");
+          setView("submissions");
+          await fetchMySubmissions();
+          alert(data.warning || data.message || "Submission updated successfully.");
+          return;
+        }
         setSubmittedData(data);
         setShowSuccessModal(true);
         setLoading(false);
@@ -692,8 +797,8 @@ export default function AbstractSubmissionPage() {
                     <FaEye className="text-base" /> OPEN IN NEW TAB
                   </a>
                 )}
-                {viewingSubmission.abstract_download_url && (
-                  <a href={viewingSubmission.abstract_download_url} target="_blank" rel="noopener noreferrer"
+                {viewingSubmission.abstract_drive_download_url && (
+                  <a href={viewingSubmission.abstract_drive_download_url} target="_blank" rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-6 py-2.5 bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white font-bold text-sm tracking-wide rounded-lg hover:shadow-lg transition-all">
                     <FaDownload className="text-base" /> DOWNLOAD PDF
                   </a>
@@ -797,7 +902,11 @@ export default function AbstractSubmissionPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Submit Abstract Card */}
               <button
-                onClick={() => setView("submit")}
+                onClick={() => {
+                  setEditingSubmissionId(null);
+                  setFormData(emptyFormData);
+                  setView("submit");
+                }}
                 className="group bg-white rounded-2xl shadow-sm border border-zinc-200 p-8 text-left hover:shadow-xl hover:border-[#76B947]/40 transition-all"
               >
                 <div className="flex items-start justify-between mb-4">
@@ -867,14 +976,20 @@ export default function AbstractSubmissionPage() {
             {/* Back Button + Header */}
             <div className="flex items-center gap-4">
               <button
-                onClick={() => setView("landing")}
+              onClick={editingSubmissionId !== null ? cancelEdit : () => setView("landing")}
                 className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-zinc-600 hover:text-[#0A2540] hover:bg-[#F8FBF5] rounded-lg transition-colors"
               >
-                <FaArrowLeft /> Back
+              <FaArrowLeft /> {editingSubmissionId !== null ? "Cancel Edit" : "Back"}
               </button>
               <div>
-                <h1 className="text-2xl font-bold text-[#0A2540]">Submit Abstract</h1>
-                <p className="text-sm text-zinc-500">Fill out the form to submit your research abstract</p>
+              <h1 className="text-2xl font-bold text-[#0A2540]">
+                {editingSubmissionId !== null ? "Edit Abstract" : "Submit Abstract"}
+              </h1>
+              <p className="text-sm text-zinc-500">
+                {editingSubmissionId !== null
+                  ? "Update your pending research abstract"
+                  : "Fill out the form to submit your research abstract"}
+              </p>
               </div>
             </div>
 
@@ -1179,7 +1294,9 @@ export default function AbstractSubmissionPage() {
               {/* Submit Button */}
               <button type="submit" disabled={loading}
                 className="w-full bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white py-4 rounded-lg font-bold hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 disabled:bg-zinc-300 disabled:cursor-not-allowed">
-                {loading ? <><FaSpinner className="animate-spin" /> Generating PDF & Submitting...</> : <><FaPaperPlane /> Submit Abstract</>}
+                {loading
+                  ? <><FaSpinner className="animate-spin" /> {editingSubmissionId !== null ? "Updating Abstract..." : "Generating PDF & Submitting..."}</>
+                  : <>{editingSubmissionId !== null ? <FaCheck /> : <FaPaperPlane />} {editingSubmissionId !== null ? "Save Changes" : "Submit Abstract"}</>}
               </button>
             </form>
           </div>
@@ -1215,7 +1332,11 @@ export default function AbstractSubmissionPage() {
                 <div className="text-center py-12">
                   <FaExclamationTriangle className="text-4xl text-zinc-300 mx-auto mb-4" />
                   <p className="text-zinc-500">You haven't submitted any abstracts yet.</p>
-                  <button onClick={() => setView("submit")}
+                  <button onClick={() => {
+                    setEditingSubmissionId(null);
+                    setFormData(emptyFormData);
+                    setView("submit");
+                  }}
                     className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white rounded-lg hover:shadow-lg transition-all">
                     <FaPaperPlane /> Submit Your First Abstract
                   </button>
@@ -1229,7 +1350,7 @@ export default function AbstractSubmissionPage() {
                         <th className="py-3 px-4 text-sm font-semibold text-zinc-500">Type</th>
                         <th className="py-3 px-4 text-sm font-semibold text-zinc-500">Status</th>
                         <th className="py-3 px-4 text-sm font-semibold text-zinc-500">Date</th>
-                        <th className="py-3 px-4 text-sm font-semibold text-zinc-500">Actions</th>
+                        <th className="py-3 px-4 text-sm font-semibold text-zinc-500 text-center">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1253,10 +1374,28 @@ export default function AbstractSubmissionPage() {
                             <p className="text-sm text-zinc-500">{submission.created_at}</p>
                           </td>
                           <td className="py-3 px-4">
-                            <button onClick={() => viewSubmission(submission)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-[#1b5e20] hover:text-[#76B947] transition-colors">
-                              <FaEye className="text-xs" /> View
-                            </button>
+                            <div className="flex items-center gap-1">
+                              <button onClick={() => viewSubmission(submission)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-[#1b5e20] hover:text-[#76B947] transition-colors">
+                                <FaEye className="text-xs" /> View
+                              </button>
+                              {submission.status?.toLowerCase() === "pending" && (
+                                <>
+                                  <button onClick={() => editSubmission(submission)}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-[#1D3D6D] hover:text-[#4FC3F7] transition-colors">
+                                    <FaEdit className="text-xs" /> Edit
+                                  </button>
+                                  <button onClick={() => deleteSubmission(submission)}
+                                    disabled={deletingSubmissionId === submission.id}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-red-600 hover:text-red-800 disabled:opacity-50 transition-colors">
+                                    {deletingSubmissionId === submission.id
+                                      ? <FaSpinner className="text-xs animate-spin" />
+                                      : <FaTrash className="text-xs" />}
+                                    Delete
+                                  </button>
+                                </>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       ))}

@@ -102,3 +102,33 @@ def upload_file_to_drive(file_path, filename, project_title=None):
         return view_url, download_url
     except HttpError as e:
         raise e
+
+def extract_file_id(drive_url_or_id):
+    if not drive_url_or_id or not isinstance(drive_url_or_id, str):
+        return None
+    patterns = [
+        r'/file/d/([a-zA-Z0-9_-]+)',
+        r'/d/([a-zA-Z0-9_-]+)',
+        r'id=([a-zA-Z0-9_-]+)',
+        r'open\?id=([a-zA-Z0-9_-]+)',
+        r'([a-zA-Z0-9_-]{25,})'
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, drive_url_or_id)
+        if match:
+            return match.group(1).split('?')[0].split('&')[0]
+    return None
+
+def trash_file_from_drive(drive_url_or_id):
+    """Move an existing file in Google Drive to the trash."""
+    file_id = extract_file_id(drive_url_or_id)
+    if not file_id:
+        raise ValueError("Could not find a Google Drive file ID to move to trash")
+
+    service = get_drive_service()
+    service.files().update(
+        fileId=file_id,
+        body={'trashed': True},
+        supportsAllDrives=True
+    ).execute()
+    return True

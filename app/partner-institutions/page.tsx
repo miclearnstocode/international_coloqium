@@ -6,8 +6,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import UnderDevelopment from "../components/UnderDevelopment";
 import { useState, useEffect, useRef } from "react";
-import { FaCheckCircle, FaArrowRight, FaBuilding, FaStar, FaHandshake, } from "react-icons/fa";
-
+import { FaArrowRight, FaBuilding, FaStar, FaHandshake } from "react-icons/fa";
 
 interface Institution {
   name: string;
@@ -108,7 +107,6 @@ export default function PartnerInstitutionsPage() {
   const heroReveal = useInView<HTMLDivElement>();
   const hostReveal = useInView<HTMLDivElement>();
   const coHostReveal = useInView<HTMLDivElement>();
-  const roleReveal = useInView<HTMLDivElement>();
   const partnerReveal = useInView<HTMLDivElement>();
   const sponsorReveal = useInView<HTMLDivElement>();
   const ctaReveal = useInView<HTMLDivElement>();
@@ -118,6 +116,7 @@ export default function PartnerInstitutionsPage() {
   const hostScroll = useScrollProgress<HTMLElement>();
   const coHostScroll = useScrollProgress<HTMLElement>();
   const partnerScroll = useScrollProgress<HTMLElement>();
+  
   const [showDevModal, setShowDevModal] = useState(false);
 
   // == DATA ==
@@ -263,22 +262,6 @@ export default function PartnerInstitutionsPage() {
           filter: drop-shadow(0 12px 24px rgba(76,195,247,0.30));
         }
 
-        /*  Role list item  */
-        .role-item {
-          transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.35s ease;
-        }
-        .role-item:hover {
-          transform: translateX(4px);
-          background-color: rgba(118, 185, 71, 0.16);
-        }
-        .role-item svg {
-          transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s ease;
-        }
-        .role-item:hover svg {
-          transform: scale(1.2) rotate(8deg);
-          color: #76B947;
-        }
-
         .premium-btn {
           position: relative;
           overflow: hidden;
@@ -295,6 +278,7 @@ export default function PartnerInstitutionsPage() {
         }
         .premium-btn:hover::after { transform: translateX(100%); }
 
+        /* Dynamic scroll-lift */
         .scroll-lift {
           will-change: transform;
           transform: translate3d(0, var(--scroll-y, 0px), 0);
@@ -318,7 +302,6 @@ export default function PartnerInstitutionsPage() {
         ref={heroScroll.ref}
         className={`relative bg-white overflow-hidden border-b border-zinc-100 ${heroReveal.inView ? "in-view" : ""}`}
       >
-        {/* Decorative orbs — green + sky blue */}
         <div
           aria-hidden
           className="absolute top-0 right-0 w-96 h-96 bg-linear-to-br from-[#76B947]/10 to-transparent rounded-full blur-3xl -translate-y-1/3 translate-x-1/4 pointer-events-none"
@@ -352,7 +335,6 @@ export default function PartnerInstitutionsPage() {
 
       {/* == HOST INSTITUTION == */}
       <section ref={hostScroll.ref} className="py-12 relative overflow-hidden">
-        {/* Ambient palette glows */}
         <div aria-hidden className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-64 w-[70%] rounded-full bg-[#4FC3F7]/10 blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-[#76B947]/10 blur-3xl" />
         <div
@@ -429,7 +411,7 @@ export default function PartnerInstitutionsPage() {
             {coHosts.map((institution: Institution, idx: number) => (
               <div
                 key={idx}
-                className={`premium-card scroll-lift bg-[#F8FBF5] rounded-xl border border-zinc-200 p-6 text-center reveal-up stagger-${idx + 1}`}
+                className="premium-card scroll-lift bg-[#F8FBF5] rounded-xl border border-zinc-200 p-6 text-center"
                 style={{ ["--scroll-y" as any]: `${(1 - coHostScroll.progress) * (25 - idx * 4)}px` }}
               >
                 <div className="logo-bubble relative w-24 h-24 mx-auto mb-4">
@@ -465,78 +447,6 @@ export default function PartnerInstitutionsPage() {
         </div>
       </section>
 
-      {/* == THE ROLE OF PARTNER INSTITUTIONS == */}
-      <section
-        ref={roleReveal.ref}
-        className={`py-12 bg-linear-to-br from-[#0B2A4A] via-[#1D3D6D] to-[#153A61] relative overflow-hidden ${roleReveal.inView ? "in-view" : ""}`}
-      >
-        {/* Decorative glows — green + gold + sky */}
-        <div
-          aria-hidden
-          className="absolute inset-0 opacity-40 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(60% 50% at 20% 20%, rgba(118,185,71,0.22) 0%, rgba(0,0,0,0) 70%)",
-          }}
-        />
-        <div
-          aria-hidden
-          className="absolute inset-0 opacity-30 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(50% 50% at 80% 80%, rgba(76,195,247,0.20) 0%, rgba(0,0,0,0) 70%)",
-          }}
-        />
-        <div
-          aria-hidden
-          className="absolute inset-0 opacity-30 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(40% 40% at 90% 10%, rgba(213,165,77,0.18) 0%, rgba(0,0,0,0) 70%)",
-          }}
-        />
-
-        <div className="relative max-w-7xl mx-auto px-6">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-white uppercase reveal-up">
-              The Role of Partner Institutions
-            </h2>
-            <div className="w-12 h-1 gold-underline mx-auto mt-3 reveal-up stagger-1 rounded-full"></div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
-            {[
-              "Participation in Organizing and Scientific Committees",
-              "Promotion of the Call for Abstracts",
-              "Nomination of speakers and experts",
-              "Abstract review and evaluation",
-              "Session facilitation and moderation",
-              "Academic networking",
-              "Development of future research collaborations",
-              "Institutional partnerships",
-              "International scientific exchange",
-            ].map((item: string, idx: number) => (
-              <div
-                key={idx}
-                className={`role-item flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/10 reveal-up stagger-${(idx % 6) + 1}`}
-              >
-                <FaCheckCircle className="text-[#76B947] text-sm shrink-0" />
-                <span className="text-white text-sm leading-relaxed">{item}</span>
-              </div>
-            ))}
-          </div>
-
-          <p className="text-gray-300 text-sm text-center mt-6 max-w-3xl mx-auto reveal-up stagger-4">
-            Partner institutions contribute to the international and scientific
-            character of the symposium through participation in organizing and
-            scientific committees, promotion of the Call for Abstracts,
-            nomination of speakers and experts, abstract review, session
-            facilitation, academic networking, and the development of future
-            research and institutional collaborations.
-          </p>
-        </div>
-      </section>
-
       {/* == OTHER INSTITUTIONAL PARTNERS == */}
       <section ref={partnerScroll.ref} className="py-12 bg-white">
         <div
@@ -551,12 +461,11 @@ export default function PartnerInstitutionsPage() {
           </div>
 
           {institutionalPartners.length > 0 ? (
-            // Flex-wrap + justify-center keeps any number of partners centered.
             <div className="flex flex-wrap justify-center gap-6">
               {institutionalPartners.map((partner: Institution, idx: number) => (
                 <div
                   key={idx}
-                  className={`premium-card scroll-lift bg-[#F8FBF5] rounded-xl border border-zinc-200 p-6 text-center reveal-up stagger-${(idx % 6) + 1} w-full sm:w-1/2 lg:w-1/4 max-w-xs`}
+                  className="premium-card scroll-lift bg-[#F8FBF5] rounded-xl border border-zinc-200 p-6 text-center w-full sm:w-1/2 lg:w-1/4 max-w-xs"
                   style={{ ["--scroll-y" as any]: `${(1 - partnerScroll.progress) * (20 - idx * 2)}px` }}
                 >
                   <div className="logo-bubble relative w-24 h-24 mx-auto mb-3">
@@ -590,7 +499,6 @@ export default function PartnerInstitutionsPage() {
               ))}
             </div>
           ) : (
-            // Placeholder grid shown only when no partners are added yet
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {[...Array(4)].map((_, idx: number) => (
                 <div
@@ -714,7 +622,6 @@ export default function PartnerInstitutionsPage() {
             partnership may contact the Organizing Committee.
           </p>
           
-          {/* 🔁 Updated to trigger the modal */}
           <button
             onClick={() => setShowDevModal(true)}
             className="premium-btn inline-flex items-center gap-3 bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white px-8 py-4 rounded-lg font-bold shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl reveal-up stagger-4"

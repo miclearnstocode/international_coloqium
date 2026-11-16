@@ -15,8 +15,9 @@ import {
 import { ContentProvider, useContent } from "@/app/context/ContentContext";
 import EditableField from "@/app/components/EditableField";
 import EditableList from "@/app/components/EditableList";
+import { apiFetch } from "@/app/lib/api";
 
-// ===== Reusable scroll-reveal hook =====
+//  Reusable scroll-reveal hook 
 function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
   const ref = useRef<T | null>(null);
   const [inView, setInView] = useState(false);
@@ -37,7 +38,7 @@ function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
   return { ref, inView };
 }
 
-// ===== Scroll progress hook =====
+//  Scroll progress hook 
 function useScrollProgress<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);
   const [progress, setProgress] = useState(0);
@@ -74,7 +75,7 @@ function useScrollProgress<T extends HTMLElement>() {
   return { ref, progress };
 }
 
-// ===== Page-wide scroll progress bar =====
+//  Page-wide scroll progress bar 
 function ScrollProgressBar() {
   const [progress, setProgress] = useState(0);
 
@@ -108,7 +109,7 @@ function ScrollProgressBar() {
   );
 }
 
-// ===== Animated counter =====
+//  Animated counter 
 function AnimatedNumber({ value, className }: { value: number; className?: string }) {
   const [display, setDisplay] = useState(value);
   const prevRef = useRef(value);
@@ -135,7 +136,7 @@ function AnimatedNumber({ value, className }: { value: number; className?: strin
   return <span className={className}>{display.toString().padStart(2, "0")}</span>;
 }
 
-// ===== Confetti (canvas, no dependencies) =====
+//  Confetti (canvas, no dependencies) 
 function Confetti({ duration = 4500, onDone }: { duration?: number; onDone?: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -244,7 +245,7 @@ function Confetti({ duration = 4500, onDone }: { duration?: number; onDone?: () 
   );
 }
 
-// ===== Call-for-abstract popup =====
+//  Call-for-abstract popup 
 const POPUP_AUTO_CLOSE_MS = 4000;
 
 function AbstractPopup({
@@ -452,7 +453,7 @@ function AbstractPopup({
   );
 }
 
-// ===== Fluid hero scale =====
+//  Fluid hero scale 
 const HERO_DESIGN_WIDTH = 1920;
 const HERO_SCALE_MIN_VIEWPORT = 1024;
 
@@ -473,35 +474,152 @@ function useHeroScale() {
   return scale;
 }
 
+function getCountdownParts(targetAtMs: number, nowMs: number) {
+  const secondsRemaining = Math.max(0, Math.ceil((targetAtMs - nowMs) / 1000));
+  return {
+    days: Math.floor(secondsRemaining / 86400),
+    hours: Math.floor((secondsRemaining % 86400) / 3600),
+    minutes: Math.floor((secondsRemaining % 3600) / 60),
+    seconds: secondsRemaining % 60,
+  };
+}
+
+function parseEventDate(value: unknown, isEndDate = false) {
+  if (typeof value !== "string") return NaN;
+  const dateValue = value.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+    const time = isEndDate ? "23:59:59.999" : "00:00:00";
+    return Date.parse(`${dateValue}T${time}+08:00`);
+  }
+  return Date.parse(dateValue);
+}
+
 function HomeInner() {
   const { isEditMode, isSuperAdmin } = useContent();
   const canEdit = isEditMode && isSuperAdmin;
 
   const [timeLeft, setTimeLeft] = useState({
-    days: 119,
-    hours: 14,
-    minutes: 35,
-    seconds: 20,
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
   });
-
+  const [countdownClock, setCountdownClock] = useState<{
+    eventStartAtMs: number;
+    eventEndAtMs: number;
+    serverOffsetMs: number;
+  } | null>(null);
+  const [countdownError, setCountdownError] = useState(false);
   const [countdownPulse, setCountdownPulse] = useState(false);
 
   useEffect(() => {
-    const id = setInterval(() => {
-      setTimeLeft((prev) => {
-        let { days, hours, minutes, seconds } = prev;
-        seconds--;
-        if (seconds < 0) { seconds = 59; minutes--; }
-        if (minutes < 0) { minutes = 59; hours--; }
-        if (hours < 0) { hours = 23; days--; }
-        if (days < 0) { days = 0; hours = 0; minutes = 0; seconds = 0; }
-        return { days, hours, minutes, seconds };
-      });
-      setCountdownPulse(true);
-      setTimeout(() => setCountdownPulse(false), 350);
-    }, 1000);
-    return () => clearInterval(id);
+    let cancelled = false;
+
+    const fetchCountdown = async () => {
+      const requestStartedAt = Date.now();
+      try {
+        const response = await apiFetch("/api/events/countdown", { cache: "no-store" });
+        if (!response.ok) {
+          throw new Error(`Countdown request failed (${response.status})`);
+        }
+
+        const payload = await response.json() as {
+          event_start_at?: unknown;
+          event_end_at?: unknown;
+          server_now?: unknown;
+        };
+        const responseReceivedAt = Date.now();
+        let eventStartAtMs = parseEventDate(payload.event_start_at);
+        let eventEndAtMs = parseEventDate(payload.event_end_at, true);
+        const serverNowMs = typeof payload.server_now === "string"
+          ? Date.parse(payload.server_now)
+          : NaN;
+
+        if (!Number.isFinite(eventStartAtMs) || !Number.isFinite(eventEndAtMs)) {
+          const eventsResponse = await apiFetch("/api/events", { cache: "no-store" });
+          if (!eventsResponse.ok) {
+            throw new Error(`Could not load event dates (${eventsResponse.status})`);
+          }
+
+          const eventData: unknown = await eventsResponse.json();
+          if (!Array.isArray(eventData)) {
+            throw new Error("Events response has an invalid format");
+          }
+
+          const events = eventData as Array<{
+            date?: unknown;
+            endDate?: unknown;
+            featured?: boolean;
+          }>;
+          const event = events
+            .filter((item) => typeof item.date === "string")
+            .sort((a, b) => {
+              const featuredOrder = Number(Boolean(b.featured)) - Number(Boolean(a.featured));
+              return featuredOrder || parseEventDate(a.date) - parseEventDate(b.date);
+            })[0];
+
+          if (!event) {
+            throw new Error("No published event dates were found");
+          }
+          eventStartAtMs = parseEventDate(event.date);
+          eventEndAtMs = parseEventDate(event.endDate || event.date, true);
+        }
+
+        if (
+          !Number.isFinite(eventStartAtMs) ||
+          !Number.isFinite(eventEndAtMs) ||
+          !Number.isFinite(serverNowMs) ||
+          eventEndAtMs < eventStartAtMs
+        ) {
+          throw new Error("Countdown response has invalid event dates");
+        }
+
+        if (!cancelled) {
+          const serverOffsetMs = serverNowMs - (requestStartedAt + responseReceivedAt) / 2;
+          setCountdownClock({ eventStartAtMs, eventEndAtMs, serverOffsetMs });
+          const targetAtMs = serverNowMs < eventStartAtMs ? eventStartAtMs : eventEndAtMs;
+          setTimeLeft(getCountdownParts(targetAtMs, serverNowMs));
+          setCountdownError(false);
+        }
+      } catch (error) {
+        console.error("Failed to load event countdown", error);
+        if (!cancelled) setCountdownError(true);
+      }
+    };
+
+    void fetchCountdown();
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  useEffect(() => {
+    if (!countdownClock) return;
+
+    let pulseTimeout: ReturnType<typeof setTimeout>;
+    const updateCountdown = () => {
+      const serverNowMs = Date.now() + countdownClock.serverOffsetMs;
+      const targetAtMs = serverNowMs < countdownClock.eventStartAtMs
+        ? countdownClock.eventStartAtMs
+        : countdownClock.eventEndAtMs;
+      const nextTimeLeft = getCountdownParts(targetAtMs, serverNowMs);
+      setTimeLeft(nextTimeLeft);
+
+      if (nextTimeLeft.days > 0 || nextTimeLeft.hours > 0 || nextTimeLeft.minutes > 0 || nextTimeLeft.seconds > 0) {
+        setCountdownPulse(true);
+        clearTimeout(pulseTimeout);
+        pulseTimeout = setTimeout(() => setCountdownPulse(false), 350);
+      } else {
+        setCountdownPulse(false);
+      }
+    };
+
+    const intervalId = setInterval(updateCountdown, 1000);
+    return () => {
+      clearInterval(intervalId);
+      clearTimeout(pulseTimeout);
+    };
+  }, [countdownClock]);
 
   const formatNumber = (num: number) => num.toString().padStart(2, "0");
 
@@ -535,10 +653,10 @@ function HomeInner() {
       link_url: "/registration",
     },
     {
-      month: "JAN", day: "10",
+      month: "JAN", day: "20",
       category: "IMPORTANT",
       title: "Abstract Submission Deadline",
-      description: "Authors must submit their abstracts through the official symposium portal on or before January 10, 2027.",
+      description: "Authors must submit their abstracts through the official symposium portal on or before January 20, 2027.",
       link_text: "Submit Abstract",
       link_url: "/abstract-submission",
     },
@@ -613,116 +731,58 @@ function HomeInner() {
         
         .tick-pulse { animation: tickPulse 0.35s ease-out; }
 
-        /* ===== Premium card ===== */
         .premium-card {
           position: relative;
           isolation: isolate;
           background: #ffffff;
-          transition:
-            transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-            box-shadow 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-            border-color 0.4s ease;
-          box-shadow:
-            0 4px 6px -1px rgba(11, 42, 74, 0.05),
-            0 10px 15px -3px rgba(11, 42, 74, 0.05);
+          transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.55s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.4s ease;
+          box-shadow: 0 4px 6px -1px rgba(11, 42, 74, 0.05), 0 10px 15px -3px rgba(11, 42, 74, 0.05);
         }
         .premium-card:hover {
           transform: translateY(-5px);
           border-color: rgba(118, 185, 71, 0.35);
-          box-shadow:
-            0 10px 25px -5px rgba(11, 42, 74, 0.1),
-            0 20px 40px -10px rgba(118, 185, 71, 0.18);
+          box-shadow: 0 10px 25px -5px rgba(11, 42, 74, 0.1), 0 20px 40px -10px rgba(118, 185, 71, 0.18);
         }
 
-        .premium-icon {
-          transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.5s ease;
-        }
-        .premium-card:hover .premium-icon {
-          transform: scale(1.08) rotate(-6deg);
-          box-shadow: 0 0 0 6px rgba(76, 195, 247, 0.12), 0 8px 20px -8px rgba(76, 195, 247, 0.45);
-        }
+        .premium-icon { transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.5s ease; }
+        .premium-card:hover .premium-icon { transform: scale(1.08) rotate(-6deg); box-shadow: 0 0 0 6px rgba(76, 195, 247, 0.12), 0 8px 20px -8px rgba(76, 195, 247, 0.45); }
         
-        .premium-accent {
-          position: relative;
-          overflow: hidden;
-          transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-        }
+        .premium-accent { position: relative; overflow: hidden; transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
         .premium-card:hover .premium-accent { width: 4rem; }
 
-        .premium-link {
-          position: relative;
-          display: inline-flex;
-          align-items: center;
-          gap: 0.5rem;
-          color: #0b2a4a;
-          font-weight: 600;
-          transition: color 0.3s ease, gap 0.3s ease;
-        }
-        .premium-link::after {
-          content: "";
-          position: absolute;
-          left: 0;
-          bottom: -3px;
-          width: 100%;
-          height: 1.5px;
-          background: linear-gradient(90deg, #76B947, #F0C674);
-          transform: scaleX(0);
-          transform-origin: left center;
-          transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-        }
+        .premium-link { position: relative; display: inline-flex; align-items: center; gap: 0.5rem; color: #0b2a4a; font-weight: 600; transition: color 0.3s ease, gap 0.3s ease; }
+        .premium-link::after { content: ""; position: absolute; left: 0; bottom: -3px; width: 100%; height: 1.5px; background: linear-gradient(90deg, #76B947, #F0C674); transform: scaleX(0); transform-origin: left center; transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1); }
         .premium-link:hover { color: #1b5e20; gap: 0.75rem; }
         .premium-link:hover::after { transform: scaleX(1); }
-        .premium-link .arrow {
-          display: inline-block;
-          transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-        }
+        .premium-link .arrow { display: inline-block; transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
         .premium-link:hover .arrow { transform: translateX(4px); }
 
-        .announcement-row {
-          position: relative;
-          border-radius: 8px;
-          padding: 4px 6px;
-          margin: -4px -6px;
-          transition: background-color 0.35s ease, transform 0.35s ease;
-        }
-        .announcement-row:hover {
-          background-color: rgba(118, 185, 71, 0.08);
-          transform: translateX(4px);
-        }
+        .announcement-row { position: relative; border-radius: 8px; padding: 4px 6px; margin: -4px -6px; transition: background-color 0.35s ease, transform 0.35s ease; }
+        .announcement-row:hover { background-color: rgba(118, 185, 71, 0.08); transform: translateX(4px); }
         .announcement-row .ann-date { transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
         .announcement-row:hover .ann-date { transform: scale(1.06); }
         .announcement-row .ann-category { transition: letter-spacing 0.4s ease; }
         .announcement-row:hover .ann-category { letter-spacing: 0.08em; }
 
-        .attendee-item {
-          transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s ease;
-        }
+        .attendee-item { transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s ease; }
         .attendee-item:hover { transform: translateX(6px); color: #0b2a4a; }
         .attendee-item svg { transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s ease; }
         .attendee-item:hover svg { transform: scale(1.2) rotate(8deg); color: #4FC3F7; }
 
-        .scroll-lift {
-          will-change: transform;
-          transform: translate3d(0, var(--scroll-y, 0px), 0);
-          transition: transform 0.15s linear;
-        }
+        .scroll-lift { will-change: transform; transform: translate3d(0, var(--scroll-y, 0px), 0); transition: transform 0.15s linear; }
 
         @media (prefers-reduced-motion: reduce) {
-          *, *::before, *::after {
-            animation-duration: 0.001ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: 0.001ms !important;
-          }
+          *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
           .scroll-lift { transform: none !important; }
         }
       `}</style>
 
       <Header />
 
-      {/* ================= HERO & COUNTDOWN MERGED ================= */}
+      {/*  HERO & COUNTDOWN MERGED  */}
       <section
         ref={heroScroll.ref}
-        className="relative pt-4 pb-12 lg:pt-8 lg:pb-16 overflow-hidden border-b border-gray-200 lg:min-h-187.5 flex flex-col justify-center"
+        className="relative pt-4 pb-12 lg:pt-8 lg:pb-16 overflow-hidden border-b border-gray-200 flex flex-col justify-between min-h-[calc(100vh-80px)]"
         style={heroScale < 1 ? { zoom: heroScale } : undefined}
       >
         <div className="absolute inset-0 z-0">
@@ -748,7 +808,6 @@ function HomeInner() {
         </div>
 
         <div className="absolute top-8 left-70 md:left-100 lg:top-12 lg:left-135 z-10 flex flex-row items-center gap-4 lg:gap-6 pointer-events-none">
-          
           <div className="leading-[1.05] shrink-0">
             <h1 className="text-2xl md:text-4xl lg:text-[2.75rem] font-black text-[#1A5E20] tracking-tight">
               INTERNATIONAL
@@ -776,121 +835,79 @@ function HomeInner() {
               Science, Innovation, and Collaboration for a Resilient and Sustainable Future
             </p>
           </div>
-
         </div>
 
-        {/* ===== FLOATING CALL FOR ABSTRACTS CARD ===== */}
+        {/*  FLOATING CALL FOR ABSTRACTS CARD  */}
         <div ref={heroCardRef} className={`hidden md:flex absolute top-10 right-10 lg:right-20 z-20 w-72 lg:w-85 bg-white/95 backdrop-blur-md rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white/60 p-5 flex-col items-center text-center overflow-hidden transition-opacity duration-300 ${popupDone ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
-          
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-linear-to-r from-[#F0C674] via-[#D5A54D] to-[#76B947]"></div>
-
           <button className="absolute top-3 right-4 text-gray-400 hover:text-gray-700 transition-colors">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-
           <div className="mt-4 mb-4 flex items-center justify-center gap-1.5 w-full">
-            
             <div className="relative flex items-center justify-center shrink-0">
-               <svg className="absolute -top-2 -left-1 w-4 h-4 text-[#5c9a26] rotate-[-30deg]" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
-               </svg>
-               <svg className="absolute -top-1 right-0 w-3 h-3 text-[#5c9a26] rotate-20" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
-               </svg>
-               
+               <svg className="absolute -top-2 -left-1 w-4 h-4 text-[#5c9a26] rotate-[-30deg]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" /></svg>
+               <svg className="absolute -top-1 right-0 w-3 h-3 text-[#5c9a26] rotate-20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" /></svg>
                <svg className="w-10 h-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M19 4L5 8V16L19 20V4Z" fill="#7cb342" stroke="#33691e" strokeWidth="1.5" strokeLinejoin="round"/>
                   <path d="M2 10V14" stroke="#33691e" strokeWidth="2" strokeLinecap="round"/>
                   <path d="M10 16V22" stroke="#33691e" strokeWidth="2" strokeLinecap="round"/>
                </svg>
             </div>
-
             <div className="bg-[#4b8e18] rounded-md px-3 py-1 shadow-sm border border-[#33691e]/30 flex flex-col items-center justify-center transform -rotate-2">
               <span className="text-white font-black text-[10px] tracking-widest leading-none mb-0.5">CALL FOR</span>
               <span className="text-white font-black text-sm tracking-wider leading-none">ABSTRACT</span>
             </div>
-
             <div className="flex flex-col gap-1 ml-0.5 shrink-0">
               <div className="w-3 h-0.5 bg-[#5c9a26] rotate-30 rounded-full"></div>
               <div className="w-2.5 h-0.5 bg-[#5c9a26] rotate-45 rounded-full"></div>
             </div>
-            
           </div>
-
-          <p className="text-[#0B2A4A] font-bold text-sm leading-tight mb-2">
-            3rd International Agri-Life &<br/>Bioresource Sciences Symposium
-          </p>
-
+          <p className="text-[#0B2A4A] font-bold text-sm leading-tight mb-2">3rd International Agri-Life &<br/>Bioresource Sciences Symposium</p>
           <div className="w-3/5 h-0.5 bg-[#F0C674] mb-4"></div>
-
-          <p className="text-gray-600 text-[11px] leading-relaxed mb-5 px-1">
-            Submit your research and share your scientific contributions with experts, educators, and industry leaders from the Philippines and around the world.
-          </p>
-
-          <Link
-            href="/abstract-submission"
-            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-full bg-[#0A5C0A] hover:bg-[#084a08] text-white text-xs font-bold shadow-md hover:-translate-y-0.5 transition-all duration-300"
-          >
+          <p className="text-gray-600 text-[11px] leading-relaxed mb-5 px-1">Submit your research and share your scientific contributions with experts, educators, and industry leaders from the Philippines and around the world.</p>
+          <Link href="/abstract-submission" className="flex items-center justify-center gap-2 w-full py-2.5 rounded-full bg-[#0A5C0A] hover:bg-[#084a08] text-white text-xs font-bold shadow-md hover:-translate-y-0.5 transition-all duration-300">
             Submit Abstract →
           </Link>
-
         </div>
-
 
         <div
           ref={heroReveal.ref}
-          className={`relative z-10 mx-auto max-w-350 px-4 lg:px-8 ${
-            heroReveal.inView ? "in-view" : ""
-          }`}
+          className={`relative z-10 mx-auto w-full max-w-350 px-4 lg:px-8 flex flex-col justify-between h-full ${heroReveal.inView ? "in-view" : ""}`}
           style={{ transform: `translateY(${heroParallax * 0.1}px)` }}
         >
-          
-          <div className="w-full h-24 md:h-40 mb-6"></div>
+          {/* Spacer to clear the absolute header elements */}
+          <div className="w-full h-40 md:h-56 lg:h-110 shrink-0"></div>
 
-          <div className="relative top-35">
-            
-            <div className="reveal-up stagger-1 bg-white/95 backdrop-blur-md w-[96%] max-w-325 mx-auto rounded-2xl shadow-[0_12px_40px_rgb(0,0,0,0.12)] border border-white/50 -mt-16 relative z-20 py-4 px-6 md:px-8 flex flex-col xl:flex-row items-center justify-between gap-4 overflow-x-auto">
-              
+          {/* Bottom group (Info bar, buttons, countdown) */}
+          <div className="w-full flex flex-col justify-end mt-auto">
+            {/* Info Bar */}
+            <div className="reveal-up stagger-1 bg-white/95 backdrop-blur-md w-[96%] max-w-325 mx-auto rounded-2xl shadow-[0_12px_40px_rgb(0,0,0,0.12)] border border-white/50 relative z-20 py-4 px-6 md:px-8 flex flex-col xl:flex-row items-center justify-between gap-4 overflow-x-auto">
               <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8 w-full whitespace-nowrap">
                 
                 <div className="flex flex-col items-center gap-1.5">
                   <div className="flex items-center gap-1.5 text-[#1b5e20]">
-                    <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    <span className="text-sm font-bold text-[#0A2540] leading-tight text-center">
-                      Abstract Submission<br/>and Registration
-                    </span>
+                    <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    <span className="text-sm font-bold text-[#0A2540] leading-tight text-center">Abstract Submission<br/>and Registration</span>
                   </div>
-                  <div className="bg-[#0A5C0A] text-white text-[12px] font-bold px-4 py-1 rounded-full tracking-wider shadow-sm">
-                    NOVEMBER 16, 2026
-                  </div>
+                  <div className="bg-[#0A5C0A] text-white text-[12px] font-bold px-4 py-1 rounded-full tracking-wider shadow-sm">NOVEMBER 16, 2026</div>
                 </div>
 
                 <div className="hidden md:block w-px h-10 bg-[#76B947]/30 shrink-0"></div>
 
                 <div className="flex flex-col items-center gap-1.5">
                   <div className="flex items-center gap-1.5 text-[#1b5e20]">
-                    <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span className="text-xs font-bold text-[#0A2540] leading-tight text-center">
-                      Abstract Submission<br/>Deadline
-                    </span>
+                    <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    <span className="text-xs font-bold text-[#0A2540] leading-tight text-center">Abstract Submission<br/>Deadline</span>
                   </div>
-                  <div className="bg-[#0A5C0A] text-white text-[12px] font-bold px-4 py-1 rounded-full tracking-wider shadow-sm">
-                    JANUARY 20, 2027
-                  </div>
+                  <div className="bg-[#0A5C0A] text-white text-[12px] font-bold px-4 py-1 rounded-full tracking-wider shadow-sm">JANUARY 20, 2027</div>
                 </div>
 
                 <div className="hidden md:block w-px h-10 bg-[#76B947]/30 shrink-0"></div>
 
                 <div className="flex items-center gap-2 text-[#1b5e20]">
-                  <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
+                  <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                   <div className="flex flex-col">
                     <span className="text-[14px] font-bold tracking-widest uppercase leading-none mb-0.5">March</span>
                     <span className="text-sm font-bold leading-none text-[#0A2540]">11–13, 2027</span>
@@ -900,17 +917,10 @@ function HomeInner() {
                 <div className="hidden md:block w-px h-10 bg-[#76B947]/30 shrink-0"></div>
 
                 <div className="flex items-center gap-2">
-                  <svg className="w-6 h-6 text-[#1b5e20] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
+                  <svg className="w-6 h-6 text-[#1b5e20] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                   <div className="text-left">
-                    <p className="text-[14px] font-bold text-[#0A2540] leading-tight mb-0.5">
-                      Paradise Garden Resort<br/>Hotel & Convention Center
-                    </p>
-                    <p className="text-[12px] text-gray-500 leading-tight">
-                      Manoc-Manoc, Boracay Island,<br/>Malay, Aklan, Philippines
-                    </p>
+                    <p className="text-[14px] font-bold text-[#0A2540] leading-tight mb-0.5">Paradise Garden Resort<br/>Hotel & Convention Center</p>
+                    <p className="text-[12px] text-gray-500 leading-tight">Manoc-Manoc, Boracay Island,<br/>Malay, Aklan, Philippines</p>
                   </div>
                 </div>
 
@@ -919,51 +929,33 @@ function HomeInner() {
                 <div className="flex items-center gap-2">
                   <p className="text-[14px] font-bold text-[#0A2540] uppercase tracking-wider">CO-HOSTS:</p>
                   <div className="flex items-center gap-1">
-                    <div className="relative w-15 h-15 rounded-full overflow-hidden border border-gray-200 bg-white">
-                       <Image src="https://res.cloudinary.com/xbloqjom/image/upload/v1794368585/hiroshima-logo.webp" alt="Co-host 1" fill className="object-contain p-0.5" />
-                    </div>
-                    <div className="relative w-15 h-15 rounded-full overflow-hidden border border-gray-200 bg-white">
-                       <Image src="https://res.cloudinary.com/xbloqjom/image/upload/v1794368684/vsu-logo.png" alt="Co-host 2" fill className="object-contain p-0.5" />
-                    </div>
-                    <div className="relative w-15 h-15 rounded-full overflow-hidden border border-gray-200 bg-white">
-                       <Image src="https://res.cloudinary.com/xbloqjom/image/upload/v1794368844/usc-logo.svg" alt="Co-host 3" fill className="object-contain p-0.5" />
-                    </div>
+                    <div className="relative w-15 h-15 rounded-full overflow-hidden border border-gray-200 bg-white"><Image src="https://res.cloudinary.com/xbloqjom/image/upload/v1794368585/hiroshima-logo.webp" alt="Co-host 1" fill className="object-contain p-0.5" /></div>
+                    <div className="relative w-15 h-15 rounded-full overflow-hidden border border-gray-200 bg-white"><Image src="https://res.cloudinary.com/xbloqjom/image/upload/v1794368684/vsu-logo.png" alt="Co-host 2" fill className="object-contain p-0.5" /></div>
+                    <div className="relative w-15 h-15 rounded-full overflow-hidden border border-gray-200 bg-white"><Image src="https://res.cloudinary.com/xbloqjom/image/upload/v1794368844/usc-logo.svg" alt="Co-host 3" fill className="object-contain p-0.5" /></div>
                   </div>
                 </div>
 
               </div>
             </div>
 
-            {/* 3. Action Buttons — tri-tone: green / navy / gold outline */}
-            <div className="reveal-up stagger-2 flex flex-wrap items-center justify-center gap-4 mt-12">
-              <Link
-                href="/abstract-submission"
-                className="flex items-center gap-2 px-6 py-3 rounded-full font-bold text-sm text-white bg-[#0A5C0A] hover:bg-[#084a08] shadow-lg hover:-translate-y-0.5 transition-all duration-300"
-              >
+            {/* Action Buttons */}
+            <div className="reveal-up stagger-2 flex flex-wrap items-center justify-center gap-4 mt-6 lg:mt-8">
+              <Link href="/abstract-submission" className="flex items-center gap-2 px-6 py-3 rounded-full font-bold text-sm text-white bg-[#0A5C0A] hover:bg-[#084a08] shadow-lg hover:-translate-y-0.5 transition-all duration-300">
                 <FaFileAlt /> Submit Abstract →
               </Link>
-              <Link
-                href="/registration"
-                className="flex items-center gap-2 px-6 py-3 rounded-full font-bold text-sm text-white bg-[#0B2A4A] hover:bg-[#153A61] shadow-lg hover:-translate-y-0.5 transition-all duration-300"
-              >
+              <Link href="/registration" className="flex items-center gap-2 px-6 py-3 rounded-full font-bold text-sm text-white bg-[#0B2A4A] hover:bg-[#153A61] shadow-lg hover:-translate-y-0.5 transition-all duration-300">
                 <FaUser /> Register Now →
               </Link>
-              <Link
-                href="/program"
-                className="flex items-center gap-2 px-6 py-3 rounded-full font-bold text-sm text-[#0A2540] bg-white border-2 border-[#D5A54D] hover:bg-[#F0C674] shadow-md hover:-translate-y-0.5 transition-all duration-300"
-              >
+              <Link href="/program" className="flex items-center gap-2 px-6 py-3 rounded-full font-bold text-sm text-[#0A2540] bg-white border-2 border-[#D5A54D] hover:bg-[#F0C674] shadow-md hover:-translate-y-0.5 transition-all duration-300">
                 <FaCalendarAlt /> View Program →
               </Link>
             </div>
 
-            {/* 4. Integrated Countdown Bar — navy body, gold base, sky top */}
-            <div className="reveal-up stagger-3 mt-16 w-[90%] max-w-250 mx-auto bg-[#0B2A4A]/95 backdrop-blur-sm rounded-full py-4 px-6 md:px-12 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6 border-t-2 border-[#4FC3F7]/40 border-b-4">
-              
+            {/* Countdown Bar */}
+            <div className="reveal-up stagger-3 mt-8 lg:mt-10 w-[90%] max-w-250 mx-auto bg-[#0B2A4A]/95 backdrop-blur-sm rounded-full py-4 px-6 md:px-12 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6 border-t-2 border-[#4FC3F7]/40 border-b-4">
               <div className="flex items-center gap-3">
                 <div className="bg-white/10 p-2 rounded-lg">
-                  <svg className="w-6 h-6 text-[#4FC3F7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
+                  <svg className="w-6 h-6 text-[#4FC3F7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                 </div>
                 <div className="text-white">
                   <p className="text-sm font-bold tracking-widest text-[#76B947]">SYMPOSIUM</p>
@@ -971,34 +963,37 @@ function HomeInner() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 md:gap-8 divide-x divide-white/20">
-                {[
-                  { key: "days" as const, label: "Days" },
-                  { key: "hours" as const, label: "Hours" },
-                  { key: "minutes" as const, label: "Minutes" },
-                  { key: "seconds" as const, label: "Seconds" },
-                ].map((c, i) => (
-                  <div key={c.key} className={`flex flex-col items-center px-4 md:px-6 ${i === 0 ? 'pl-0' : ''}`}>
-                    {c.key === "seconds" ? (
-                      <span className={`text-3xl md:text-4xl font-bold text-[#F0C674] tabular-nums inline-block ${countdownPulse ? "tick-pulse" : ""}`}>
-                        {formatNumber(timeLeft.seconds)}
-                      </span>
-                    ) : (
-                      <AnimatedNumber value={timeLeft[c.key]} className="text-3xl md:text-4xl font-bold text-[#F0C674] tabular-nums" />
-                    )}
-                    <span className="text-[10px] md:text-xs font-semibold text-gray-300 mt-1 uppercase tracking-wider">{c.label}</span>
-                  </div>
-                ))}
+              <div aria-live="polite" className="flex items-center gap-4 md:gap-8 divide-x divide-white/20">
+                {countdownError ? (
+                  <p className="text-sm font-semibold text-white">Countdown unavailable</p>
+                ) : !countdownClock ? (
+                  <p className="text-sm font-semibold text-white">Loading countdown...</p>
+                ) : (
+                  [
+                    { key: "days" as const, label: "Days" },
+                    { key: "hours" as const, label: "Hours" },
+                    { key: "minutes" as const, label: "Minutes" },
+                    { key: "seconds" as const, label: "Seconds" },
+                  ].map((c, i) => (
+                    <div key={c.key} className={`flex flex-col items-center px-4 md:px-6 ${i === 0 ? 'pl-0' : ''}`}>
+                      {c.key === "seconds" ? (
+                        <span className={`text-3xl md:text-4xl font-bold text-[#F0C674] tabular-nums inline-block ${countdownPulse ? "tick-pulse" : ""}`}>
+                          {formatNumber(timeLeft.seconds)}
+                        </span>
+                      ) : (
+                        <AnimatedNumber value={timeLeft[c.key]} className="text-3xl md:text-4xl font-bold text-[#F0C674] tabular-nums" />
+                      )}
+                      <span className="text-[10px] md:text-xs font-semibold text-gray-300 mt-1 uppercase tracking-wider">{c.label}</span>
+                    </div>
+                  ))
+                )}
               </div>
-
             </div>
-
           </div>
-
         </div>
       </section>
 
-      {/* ================= THREE COLUMN CONTENT ================= */}
+      {/*  THREE COLUMN CONTENT  */}
       <section
         ref={contentScroll.ref}
         className="relative bg-linear-to-b from-white via-[#F8FBF5] to-white py-16 overflow-hidden"
@@ -1008,25 +1003,16 @@ function HomeInner() {
         <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-[#76B947]/10 blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute bottom-10 left-0 h-48 w-48 rounded-full bg-[#F0C674]/10 blur-3xl" />
 
-        <div
-          aria-hidden
-          className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-[#D5A54D]/50 to-transparent"
-        />
+        <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-[#D5A54D]/50 to-transparent" />
+
         <div
           ref={contentReveal.ref}
-          className={`relative mx-auto max-w-7xl px-6 grid grid-cols-1 md:grid-cols-3 gap-8 ${
-            contentReveal.inView ? "in-view" : ""
-          }`}
+          className={`relative mx-auto max-w-7xl px-6 grid grid-cols-1 md:grid-cols-3 gap-8 ${contentReveal.inView ? "in-view" : ""}`}
         >
           {/* Card 1: About */}
-          <div
-            className="reveal-up stagger-1 premium-card scroll-lift bg-linear-to-b from-[#F7FBF3] to-white p-8 rounded-xl border border-gray-100"
-            style={{ ["--scroll-y" as any]: `${parallaxEnabled ? (1 - contentScroll.progress) * 30 : 0}px` }}
-          >
+          <div className="reveal-up stagger-1 premium-card scroll-lift bg-linear-to-b from-[#F7FBF3] to-white p-8 rounded-xl border border-gray-100" style={{ ["--scroll-y" as any]: `${parallaxEnabled ? (1 - contentScroll.progress) * 30 : 0}px` }}>
             <div className="premium-icon w-16 h-16 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm ring-1 ring-[#76B947]/25">
-              <svg className="w-8 h-8 text-[#1D3D6D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
-              </svg>
+              <svg className="w-8 h-8 text-[#1D3D6D]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" /></svg>
             </div>
             <EditableField section="about_card" field="title" fallback="ABOUT THE SYMPOSIUM" as="h3" label="Card Title" className="text-xl font-bold text-[#0B2A4A] mb-4 block" />
             <div className="premium-accent w-10 h-1 bg-[#D5A54D] mb-6 rounded-full"></div>
@@ -1039,62 +1025,29 @@ function HomeInner() {
           </div>
 
           {/* Card 2: Announcements */}
-          <div
-            className="reveal-up stagger-2 premium-card scroll-lift bg-white border border-gray-200 p-8 rounded-xl shadow-sm"
-            style={{ ["--scroll-y" as any]: `${parallaxEnabled ? (1 - contentScroll.progress) * 20 : 0}px` }}
-          >
+          <div className="reveal-up stagger-2 premium-card scroll-lift bg-white border border-gray-200 p-8 rounded-xl shadow-sm" style={{ ["--scroll-y" as any]: `${parallaxEnabled ? (1 - contentScroll.progress) * 20 : 0}px` }}>
             <EditableField section="announcements" field="title" fallback="ANNOUNCEMENTS" as="h3" label="Section Title" className="text-xl font-bold text-[#0B2A4A] mb-4 block" />
             <div className="premium-accent w-10 h-1 bg-[#D5A54D] mb-6 rounded-full"></div>
-
             <EditableList
               section="announcements"
               title="Announcements List"
               subtitle="Manage event announcements and deadlines"
               itemLabel="Announcement"
               fallback={fallbackAnnouncements}
-              emptyItem={{
-                month: "MMM",
-                day: "00",
-                category: "CATEGORY",
-                title: "New announcement",
-                description: "Description here",
-                link_text: "Learn more",
-                link_url: "/",
-              }}
+              emptyItem={{ month: "MMM", day: "00", category: "CATEGORY", title: "New announcement", description: "Description here", link_text: "Learn more", link_url: "/" }}
               renderItem={(item, index, editing, onUpdate) =>
                 editing ? (
                   <div className="p-3.5 bg-white space-y-3">
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                      <div>
-                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Month</label>
-                        <input type="text" value={item.month || ""} onChange={(e) => onUpdate({ ...item, month: e.target.value.toUpperCase() })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-bold text-[#1D3D6D] focus:border-[#76B947] outline-none" />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Day</label>
-                        <input type="text" value={item.day || ""} onChange={(e) => onUpdate({ ...item, day: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-bold text-[#0B2A4A] focus:border-[#76B947] outline-none" />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Category</label>
-                        <input type="text" value={item.category || ""} onChange={(e) => onUpdate({ ...item, category: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-bold text-[#D5A54D] uppercase focus:border-[#76B947] outline-none" />
-                      </div>
+                      <div><label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Month</label><input type="text" value={item.month || ""} onChange={(e) => onUpdate({ ...item, month: e.target.value.toUpperCase() })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-bold text-[#1D3D6D] focus:border-[#76B947] outline-none" /></div>
+                      <div><label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Day</label><input type="text" value={item.day || ""} onChange={(e) => onUpdate({ ...item, day: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-bold text-[#0B2A4A] focus:border-[#76B947] outline-none" /></div>
+                      <div><label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Category</label><input type="text" value={item.category || ""} onChange={(e) => onUpdate({ ...item, category: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-bold text-[#D5A54D] uppercase focus:border-[#76B947] outline-none" /></div>
                     </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Title</label>
-                      <input type="text" value={item.title || ""} onChange={(e) => onUpdate({ ...item, title: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm font-semibold text-[#0B2A4A] focus:border-[#76B947] outline-none" />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Description</label>
-                      <textarea value={item.description || ""} onChange={(e) => onUpdate({ ...item, description: e.target.value })} rows={2} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs text-gray-700 focus:border-[#76B947] outline-none" />
-                    </div>
+                    <div><label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Title</label><input type="text" value={item.title || ""} onChange={(e) => onUpdate({ ...item, title: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm font-semibold text-[#0B2A4A] focus:border-[#76B947] outline-none" /></div>
+                    <div><label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Description</label><textarea value={item.description || ""} onChange={(e) => onUpdate({ ...item, description: e.target.value })} rows={2} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs text-gray-700 focus:border-[#76B947] outline-none" /></div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                      <div>
-                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Link Text</label>
-                        <input type="text" value={item.link_text || ""} onChange={(e) => onUpdate({ ...item, link_text: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-semibold text-[#1b5e20] focus:border-[#76B947] outline-none" />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Link URL</label>
-                        <input type="text" value={item.link_url || ""} onChange={(e) => onUpdate({ ...item, link_url: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs text-gray-600 font-mono focus:border-[#76B947] outline-none" />
-                      </div>
+                      <div><label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Link Text</label><input type="text" value={item.link_text || ""} onChange={(e) => onUpdate({ ...item, link_text: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-semibold text-[#1b5e20] focus:border-[#76B947] outline-none" /></div>
+                      <div><label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Link URL</label><input type="text" value={item.link_url || ""} onChange={(e) => onUpdate({ ...item, link_url: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs text-gray-600 font-mono focus:border-[#76B947] outline-none" /></div>
                     </div>
                   </div>
                 ) : (
@@ -1107,10 +1060,7 @@ function HomeInner() {
                       <p className="ann-category text-xs font-bold text-[#D5A54D] uppercase mb-1">{item.category}</p>
                       <p className="font-semibold text-[#0B2A4A] mb-1">{item.title}</p>
                       <p className="text-sm text-justify text-gray-500">{item.description}</p>
-                      <a href={item.link_url} className="premium-link mt-3 text-sm">
-                        {item.link_text}
-                        <span className="arrow" aria-hidden="true">→</span>
-                      </a>
+                      <a href={item.link_url} className="premium-link mt-3 text-sm">{item.link_text}<span className="arrow" aria-hidden="true">→</span></a>
                     </div>
                   </div>
                 )
@@ -1119,14 +1069,9 @@ function HomeInner() {
           </div>
 
           {/* Card 3: WHO SHOULD ATTEND */}
-          <div
-            className="reveal-up stagger-3 premium-card scroll-lift bg-linear-to-b from-[#F2F9FF] to-white p-8 rounded-xl border border-gray-100"
-            style={{ ["--scroll-y" as any]: `${parallaxEnabled ? (1 - contentScroll.progress) * 10 : 0}px` }}
-          >
+          <div className="reveal-up stagger-3 premium-card scroll-lift bg-linear-to-b from-[#F2F9FF] to-white p-8 rounded-xl border border-gray-100" style={{ ["--scroll-y" as any]: `${parallaxEnabled ? (1 - contentScroll.progress) * 10 : 0}px` }}>
             <div className="premium-icon w-16 h-16 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm ring-1 ring-[#4FC3F7]/30">
-              <svg className="w-8 h-8 text-[#1D3D6D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
+              <svg className="w-8 h-8 text-[#1D3D6D]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
             </div>
             <EditableField section="attendees_card" field="title" fallback="WHO SHOULD ATTEND" as="h3" label="Card Title" className="text-xl font-bold text-[#0B2A4A] mb-4 block" />
             <div className="premium-accent w-10 h-1 bg-[#D5A54D] mb-6 rounded-full"></div>

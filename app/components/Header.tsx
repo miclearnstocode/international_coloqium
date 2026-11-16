@@ -26,9 +26,10 @@ export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
 
-  // Only show logout when the user is inside the actual submission portal (/submission)
+  // Show logout only in authenticated submission and staff areas.
   const isSubmissionPage = pathname === "/submission" || pathname.startsWith("/submission/");
-  const showLogout = isLoggedIn && isSubmissionPage;
+  const isStaffDashboard = pathname === "/staff/dashboard" || pathname.startsWith("/staff/dashboard/");
+  const showLogout = isLoggedIn && (isSubmissionPage || isStaffDashboard);
 
 
   // Subtle shadow once the page is scrolled

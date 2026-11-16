@@ -1,12 +1,60 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity
+from datetime import date, datetime, time, timedelta, timezone
 import traceback
 from models import db, Event, ContentAuditLog
 from utils.decorators import super_admin_required
 
 events_bp = Blueprint('events', __name__)
+EVENT_TIMEZONE = timezone(timedelta(hours=8))
 
 # ================= EVENTS (News & Events) =================
+
+@events_bp.route('/api/events/countdown', methods=['GET', 'OPTIONS'])
+def get_event_countdown():
+    if request.method == 'OPTIONS':
+        return jsonify({})
+
+    try:
+        event = (
+            Event.query
+            .filter(
+                Event.status == 'Published',
+                Event.date.isnot(None),
+                Event.date != '',
+            )
+            .order_by(Event.featured.desc(), Event.date.asc())
+            .first()
+        )
+        if not event:
+            return jsonify({"detail": "No published event with a start date is configured"}), 404
+
+        start_date = date.fromisoformat(event.date.strip())
+        end_date = date.fromisoformat((event.end_date or event.date).strip())
+        if end_date < start_date:
+            return jsonify({"detail": "Event end date cannot be before its start date"}), 500
+
+        event_start_at = datetime.combine(start_date, time.min, EVENT_TIMEZONE)
+        event_end_at = datetime.combine(end_date, time(23, 59, 59), EVENT_TIMEZONE)
+        server_now = datetime.now(EVENT_TIMEZONE)
+        target_at = event_start_at if server_now < event_start_at else event_end_at
+        remaining_seconds = max(0, int((target_at - server_now).total_seconds()))
+
+        response = jsonify({
+            "event_start_at": event_start_at.isoformat(),
+            "event_end_at": event_end_at.isoformat(),
+            "target_at": target_at.isoformat(),
+            "server_now": server_now.isoformat(),
+            "remaining_seconds": remaining_seconds,
+        })
+        response.headers["Cache-Control"] = "no-store"
+        return response, 200
+    except (TypeError, ValueError):
+        return jsonify({"detail": "Event start and end dates must use YYYY-MM-DD format"}), 500
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"detail": str(e)}), 500
+
 
 @events_bp.route('/api/events', methods=['GET', 'OPTIONS'])
 def list_events():
