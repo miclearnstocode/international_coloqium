@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import UnderDevelopment from "../components/UnderDevelopment";
 import { ContentProvider, useContent } from "@/app/context/ContentContext";
 import { 
   FaCoffee, FaBullhorn, FaMicrophoneAlt, FaGraduationCap, FaUtensils, 
@@ -105,7 +106,7 @@ function ScrollProgressBar() {
   );
 }
 
-// Helper to map string icon names from DB to React Icons
+
 const getIcon = (iconName: string) => {
   const icons: Record<string, React.ReactNode> = {
     // Original Icons
@@ -149,27 +150,22 @@ const getIcon = (iconName: string) => {
 function ProgramPageInner() {
   const [activeDay, setActiveDay] = useState(1);
   const { getField, getList } = useContent();
-
-  // Reveal hooks
   const heroReveal = useInView<HTMLDivElement>();
   const keyDatesReveal = useInView<HTMLDivElement>();
   const glanceReveal = useInView<HTMLDivElement>();
   const scheduleReveal = useInView<HTMLDivElement>();
   const downloadReveal = useInView<HTMLDivElement>();
-
-  // Scroll progress hooks
   const heroScroll = useScrollProgress<HTMLElement>();
   const keyDatesScroll = useScrollProgress<HTMLElement>();
   const glanceScroll = useScrollProgress<HTMLElement>();
   const scheduleScroll = useScrollProgress<HTMLElement>();
-
-  // Fetch data dynamically from the database (No fallback arrays)
   const keyDatesData = getList('key_dates_items') || [];
   const glanceData = getList('glance_items') || [];
   const day1Schedule = getList('day1_schedule') || [];
   const day2Schedule = getList('day2_schedule') || [];
   const day3Schedule = getList('day3_schedule') || [];
   const highlightsData = getList('highlights_items') || [];
+  const [showDevModal, setShowDevModal] = useState(false);
 
   const getScheduleData = () => {
     switch(activeDay) {
@@ -585,14 +581,15 @@ function ProgramPageInner() {
               <p className="text-gray-600 text-sm mb-4">
                 {getField('download.description')}
               </p>
-              <a 
-                href={getField('download.file_url')} 
-                target="_blank"
-                rel="noopener noreferrer"
+              
+              {/* 🔁 Updated Button to trigger modal */}
+              <button 
+                onClick={() => setShowDevModal(true)}
                 className="inline-flex items-center gap-2 bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white px-4 py-2 rounded-md font-bold text-sm hover:shadow-xl hover:-translate-y-0.5 transition-all"
               >
                 <FaDownload /> {getField('download.button_text')}
-              </a>
+              </button>
+
             </div>
             <div className="w-32 shrink-0 bg-white shadow-lg border border-zinc-200 p-3 rounded-lg flex flex-col items-center text-center">
               <div className="w-20 h-28 bg-[#F2F9FF] mb-2 relative overflow-hidden rounded">
@@ -622,6 +619,19 @@ function ProgramPageInner() {
 
         </div>
       </section>
+      {/* Modal for PDF Download */}
+      <UnderDevelopment
+        open={showDevModal}
+        onClose={() => setShowDevModal(false)}
+        title="Full Program PDF Coming Soon"
+        description="The full scientific program is currently being finalized by the committee. You will be able to download the complete PDF soon."
+        notes={[
+          "The final schedule of sessions and speakers is being confirmed.",
+          "The PDF will include the full abstract book and floor plans.",
+          "An official announcement will be sent once it is published."
+        ]}
+        contactEmail="internationalsymposium@capsu.edu.ph"
+      />
 
       <Footer />
     </div>

@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import UnderDevelopment from "../components/UnderDevelopment";
 import { useState, useEffect, useRef } from "react";
 import { 
   FaFileAlt, FaCheckCircle, FaClock, FaUsers, FaLaptop, 
@@ -10,7 +11,6 @@ import {
   FaImage, FaRuler, FaPalette, FaShareAlt, FaEnvelope, FaUserGraduate, FaUniversity 
 } from "react-icons/fa";
 
-//  Reusable scroll-reveal hook 
 function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
   const ref = useRef<T | null>(null);
   const [inView, setInView] = useState(false);
@@ -34,7 +34,6 @@ function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
   return { ref, inView };
 }
 
-//  Scroll progress hook 
 function useScrollProgress<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);
   const [progress, setProgress] = useState(0);
@@ -67,7 +66,6 @@ function useScrollProgress<T extends HTMLElement>() {
   return { ref, progress };
 }
 
-//  Page-wide scroll progress bar 
 function ScrollProgressBar() {
   const [progress, setProgress] = useState(0);
   useEffect(() => {
@@ -100,18 +98,16 @@ function ScrollProgressBar() {
 }
 
 export default function PresentationGuidelinesPage() {
-  // Reveal hooks
   const heroReveal = useInView<HTMLDivElement>();
   const oralReveal = useInView<HTMLDivElement>();
   const paperReveal = useInView<HTMLDivElement>();
   const posterReveal = useInView<HTMLDivElement>();
   const contactReveal = useInView<HTMLDivElement>();
   const downloadReveal = useInView<HTMLDivElement>();
-
-  // Scroll progress hooks
   const heroScroll = useScrollProgress<HTMLElement>();
   const oralScroll = useScrollProgress<HTMLElement>();
   const posterScroll = useScrollProgress<HTMLElement>();
+  const [showDevModal, setShowDevModal] = useState(false);
 
   const oralGuidelines = [
     { title: "Talk Duration", description: "Each talk is allocated 10 minutes for presentation plus 5 minutes for Q&A, making 15 minutes total.", icon: <FaClock /> },
@@ -637,17 +633,31 @@ export default function PresentationGuidelinesPage() {
               Get the full presentation guidelines document in PDF format.
             </p>
 
-            <Link
-              href="/documents/presentation-guidelines.pdf"
-              download
+            {/* 🔁 Updated to trigger the modal instead of downloading directly */}
+            <button
+              onClick={() => setShowDevModal(true)}
               className="premium-btn inline-flex items-center gap-3 bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white px-8 py-4 rounded-lg font-bold transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-0.5"
             >
               <FaDownload className="text-lg" />
               Download Presentation Guidelines (PDF)
-            </Link>
+            </button>
           </div>
         </div>
       </section>
+      
+      {/* Modal for PDF Download */}
+      <UnderDevelopment
+        open={showDevModal}
+        onClose={() => setShowDevModal(false)}
+        title="Guidelines PDF Coming Soon"
+        description="The complete presentation guidelines document is currently being finalized and will be available for download soon."
+        notes={[
+          "The final formatting requirements and templates are being reviewed.",
+          "The PDF will include detailed instructions for both oral and poster presenters.",
+          "An email announcement will be sent to all registered participants once published."
+        ]}
+        contactEmail="internationalsymposium@capsu.edu.ph"
+      />
 
       <Footer />
     </div>

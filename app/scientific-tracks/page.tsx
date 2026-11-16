@@ -425,7 +425,7 @@ export default function ScientificTracks() {
           <div className="w-16 h-1 gold-underline mb-6 reveal-up stagger-2 rounded-full"></div>
           
           <p className="text-lg text-zinc-600 max-w-2xl leading-relaxed reveal-up stagger-3">
-            The 3rd International Agri-Life & Bioresource Science Symposium welcomes original research and innovative ideas across a wide range of scientific disciplines.
+            The 3rd International Agri-Life & Bioresource Sciences Symposium welcomes original research and innovative ideas across a wide range of scientific disciplines.
           </p>
         </div>
       </section>

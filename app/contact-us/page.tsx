@@ -442,7 +442,7 @@ export default function ContactPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-[#F8FBF5] rounded-lg border border-zinc-100">
               {[
                 { icon: <FaRegBuilding className="text-[#76B947] text-lg" />, title: "Symposium Secretariat", sub: "3rd International Agri-Life & Bioresource Sciences Symposium" },
-                { icon: <FaUniversity className="text-[#76B947] text-lg" />, title: "Capiz State University", sub: "Roxas City, Capiz, Philippines" },
+                { icon: <FaUniversity className="text-[#76B947] text-lg" />, title: "Capiz State University", sub: "Fuentes Drive, Roxas City, Capiz, Philippines" },
                 { icon: <FaEnvelope className="text-[#76B947] text-lg" />, title: "Email", sub: "internationalsymposium@capsu.edu.ph", href: "mailto:internationalsymposium@capsu.edu.ph" },
                 { icon: <FaPhone className="text-[#76B947] text-lg" />, title: "Phone / Telephone", sub: "+63 927 477 8024 / (036) 522 9756" },
               ].map((item, idx) => (
@@ -615,7 +615,7 @@ export default function ContactPage() {
                       { icon: <FaEnvelope />, title: "Email", sub: "internationalsymposium@capsu.edu.ph", href: "mailto:internationalsymposium@capsu.edu.ph" },
                       { icon: <FaMobile />, title: "Mobile / Phone", sub: "+63 927 477 8024" },
                       { icon: <FaPhone />, title: "Telephone", sub: "(036) 522 9756" },
-                      { icon: <FaMapMarkerAlt />, title: "Address", sub: "Capiz State University\nRoxas City, Capiz, Philippines" },
+                      { icon: <FaMapMarkerAlt />, title: "Address", sub: "Capiz State University\nFuentes Drive, Roxas City, Capiz, Philippines" },
                     ].map((item, idx) => (
                       <div
                         key={idx}

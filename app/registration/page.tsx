@@ -2,6 +2,7 @@
 import Image from "next/image";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import UnderDevelopment from "../components/UnderDevelopment";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { 
@@ -109,10 +110,9 @@ export default function RegistrationPage() {
   const infoReveal = useInView<HTMLDivElement>();
   const paymentReveal = useInView<HTMLDivElement>();
   const ctaReveal = useInView<HTMLDivElement>();
-
-  // Scroll progress hooks
   const heroScroll = useScrollProgress<HTMLElement>();
   const feesScroll = useScrollProgress<HTMLElement>();
+  const [showDevModal, setShowDevModal] = useState(false);
 
   const fees = [
     { icon: <FaGlobeAsia />, text: "International participants" },
@@ -632,19 +632,19 @@ export default function RegistrationPage() {
                 <div className="space-y-6">
                   <div className="grid grid-cols-[160px_1fr] gap-4 text-sm">
                     <span className="font-bold text-[#0A2540] whitespace-nowrap">Account Name</span>
-                    <span className="text-zinc-600">IC2025 Organizing Committee</span>
+                    <span className="text-zinc-600">To be announced</span>
 
                     <span className="font-bold text-[#0A2540] whitespace-nowrap">Bank Name</span>
-                    <span className="text-zinc-600">Banco de Oro (BDO)</span>
+                    <span className="text-zinc-600">To be announced</span>
 
                     <span className="font-bold text-[#0A2540] whitespace-nowrap">Account Number</span>
-                    <span className="text-zinc-600">0123 4567 8901</span>
+                    <span className="text-zinc-600">To be announced</span>
 
                     <span className="font-bold text-[#0A2540] whitespace-nowrap">Account Type</span>
-                    <span className="text-zinc-600">Savings Account</span>
+                    <span className="text-zinc-600">To be announced</span>
 
                     <span className="font-bold text-[#0A2540] whitespace-nowrap">SWIFT/BIC</span>
-                    <span className="text-zinc-600">BNORPHMM</span>
+                    <span className="text-zinc-600">To be announced</span>
                   </div>
                 </div>
 
@@ -687,12 +687,31 @@ export default function RegistrationPage() {
                 </p>
               </div>
             </div>
-            <button className="premium-btn bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white px-8 py-4 rounded-lg font-bold transition-all duration-300 flex items-center gap-2 shrink-0 hover:-translate-y-0.5 hover:shadow-xl">
+            <button
+              onClick={() => setShowDevModal(true)}
+              className="premium-btn bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white px-8 py-4 rounded-lg font-bold transition-all duration-300 flex items-center gap-2 shrink-0 hover:-translate-y-0.5 hover:shadow-xl"
+            >
               Register Now <FaChevronRight />
             </button>
           </div>
         </div>
       </section>
+
+      {/* 🔁 Modal */}
+      <UnderDevelopment
+        open={showDevModal}
+        onClose={() => setShowDevModal(false)}
+        title="Registration Form Coming Soon"
+        description="The online registration portal is currently under development and will open soon."
+        notes={[
+          "Online registration will open on November 16, 2026.",
+          "Early bird payment deadline: January 10, 2027.",
+          "Final registration and payment deadline: February 06, 2027.",
+        ]}
+        contactEmail="internationalsymposium@capsu.edu.ph"
+        zIndex={9999}
+      />
+
 
       <Footer />
     </div>

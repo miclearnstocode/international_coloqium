@@ -4,17 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import UnderDevelopment from "../components/UnderDevelopment";
 import { useState, useEffect, useRef } from "react";
-import {
-  FaCheckCircle,
-  FaArrowRight,
-  FaEnvelope,
-  FaBuilding,
-  FaStar,
-  FaHandshake,
-} from "react-icons/fa";
+import { FaCheckCircle, FaArrowRight, FaBuilding, FaStar, FaHandshake, } from "react-icons/fa";
 
-// == TYPE DEFINITIONS ==
+
 interface Institution {
   name: string;
   logo: string;
@@ -23,7 +17,6 @@ interface Institution {
   role?: string;
 }
 
-//  Reusable scroll-reveal hook 
 function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
   const ref = useRef<T | null>(null);
   const [inView, setInView] = useState(false);
@@ -47,7 +40,6 @@ function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
   return { ref, inView };
 }
 
-//  Scroll progress hook 
 function useScrollProgress<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);
   const [progress, setProgress] = useState(0);
@@ -80,7 +72,6 @@ function useScrollProgress<T extends HTMLElement>() {
   return { ref, progress };
 }
 
-//  Page-wide scroll progress bar 
 function ScrollProgressBar() {
   const [progress, setProgress] = useState(0);
   useEffect(() => {
@@ -127,6 +118,7 @@ export default function PartnerInstitutionsPage() {
   const hostScroll = useScrollProgress<HTMLElement>();
   const coHostScroll = useScrollProgress<HTMLElement>();
   const partnerScroll = useScrollProgress<HTMLElement>();
+  const [showDevModal, setShowDevModal] = useState(false);
 
   // == DATA ==
   const hostInstitution: Institution = {
@@ -721,14 +713,30 @@ export default function PartnerInstitutionsPage() {
             institutional participation, sponsorship, or other forms of
             partnership may contact the Organizing Committee.
           </p>
-          <Link
-            href="#"
+          
+          {/* 🔁 Updated to trigger the modal */}
+          <button
+            onClick={() => setShowDevModal(true)}
             className="premium-btn inline-flex items-center gap-3 bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white px-8 py-4 rounded-lg font-bold shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl reveal-up stagger-4"
           >
             Contact the Secretariat <FaArrowRight />
-          </Link>
+          </button>
         </div>
       </section>
+
+      {/* Modal for Partner Contact */}
+      <UnderDevelopment
+        open={showDevModal}
+        onClose={() => setShowDevModal(false)}
+        title="Partnership Portal Coming Soon"
+        description="We are currently setting up our dedicated partnership portal to streamline communication with potential collaborators and sponsors."
+        notes={[
+          "An official partnership prospectus will be available for download soon.",
+          "You will be able to submit partnership inquiries directly through the portal.",
+          "For urgent matters, you may still reach us via the email below."
+        ]}
+        contactEmail="internationalsymposium@capsu.edu.ph"
+      />
 
       <Footer />
     </div>

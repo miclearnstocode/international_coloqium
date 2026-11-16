@@ -3,13 +3,11 @@
 import dynamic from "next/dynamic";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import UnderDevelopment from "../components/UnderDevelopment";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
-import {
-  FaMapMarkerAlt, FaBuilding, FaUsers, FaBed, FaUniversity, FaPlus, FaMinus, FaChevronRight,
-  FaInfoCircle, FaCar, FaPlane, FaWalking, FaDownload, FaGlobeAsia,
-} from "react-icons/fa";
+import { FaMapMarkerAlt, FaBuilding, FaUsers, FaBed, FaUniversity, FaPlus, FaMinus, FaChevronRight, FaInfoCircle, FaCar, FaPlane, FaWalking, FaDownload, } from "react-icons/fa";
 
 const VenueMap = dynamic(() => import("./VenueMap"), {
   ssr: false,
@@ -117,10 +115,9 @@ export default function HotelMapping() {
 
   const heroScroll = useScrollProgress<HTMLElement>();
   const mapScroll = useScrollProgress<HTMLElement>();
+  const [showMapModal, setShowMapModal] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
 
-  //  APPROVED VENUE (Paradise Garden Resort, Boracay) 
-  // Coordinates for Paradise Garden Resort Hotel & Convention Center,
-  // Station 3, Manoc-Manoc, Boracay Island.
   const PRIMARY_VENUE = {
     name: "Paradise Garden Resort Hotel & Convention Center",
     shortName: "Paradise Garden Resort",
@@ -650,9 +647,15 @@ export default function HotelMapping() {
                   <p className="text-sm text-zinc-500 mb-4">
                     Get the Paradise Garden Resort venue map in PDF format for offline use.
                   </p>
-                  <button className="premium-btn bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white px-6 py-2.5 rounded-md text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl flex items-center gap-2">
+                  
+                  {/* 🔁 Updated to trigger modal */}
+                  <button 
+                    onClick={() => setShowMapModal(true)}
+                    className="premium-btn bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white px-6 py-2.5 rounded-md text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl flex items-center gap-2"
+                  >
                     Download PDF <FaDownload />
                   </button>
+
                 </div>
               </div>
             </div>
@@ -677,12 +680,46 @@ export default function HotelMapping() {
                 </p>
               </div>
             </div>
-            <button className="premium-btn bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white px-8 py-4 rounded-lg font-bold transition-all duration-300 flex items-center gap-2 shrink-0 hover:-translate-y-0.5 hover:shadow-xl">
+            
+            {/* 🔁 Updated to trigger modal */}
+            <button 
+              onClick={() => setShowContactModal(true)}
+              className="premium-btn bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white px-8 py-4 rounded-lg font-bold transition-all duration-300 flex items-center gap-2 shrink-0 hover:-translate-y-0.5 hover:shadow-xl"
+            >
               Contact Secretariat <FaChevronRight />
             </button>
+
           </div>
         </div>
       </section>
+
+      {/* Modal for Map Download */}
+      <UnderDevelopment
+        open={showMapModal}
+        onClose={() => setShowMapModal(false)}
+        title="Venue Map PDF Coming Soon"
+        description="The official venue map is currently being finalized. You will be able to download the complete PDF guide shortly."
+        notes={[
+          "The map will include detailed walking paths between halls.",
+          "Floor plans for the convention center will be included.",
+          "Signage will also be posted on-site for easy navigation."
+        ]}
+        contactEmail="internationalsymposium@capsu.edu.ph"
+      />
+
+      {/* Modal for Contact Secretariat */}
+      <UnderDevelopment
+        open={showContactModal}
+        onClose={() => setShowContactModal(false)}
+        title="Secretariat Portal Coming Soon"
+        description="We are currently setting up a dedicated support portal to assist you better with travel and venue inquiries."
+        notes={[
+          "You will soon be able to submit inquiries via a web form.",
+          "Live chat support will be available closer to the event date.",
+          "For immediate concerns, please reach out via the email below."
+        ]}
+        contactEmail="internationalsymposium@capsu.edu.ph"
+      />
 
       <Footer />
     </div>
