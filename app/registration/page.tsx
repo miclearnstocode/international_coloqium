@@ -374,7 +374,7 @@ export default function RegistrationPage() {
             </h1>
             <div className="w-16 h-1 gold-underline mb-6 reveal-up stagger-2 rounded-full"></div>
             <p className="text-lg text-zinc-600 leading-relaxed reveal-up stagger-3">
-              Join researchers, innovators, and professionals from around the world and be part of the International Colloquium 2025.
+              Join researchers, innovators, and professionals from around the world and be part of the 3rd International Agri-Life & Bioresource Sciences Symposium 2026.
             </p>
           </div>
         </div>

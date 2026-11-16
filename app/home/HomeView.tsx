@@ -430,7 +430,7 @@ function AbstractPopup({
             </div>
 
             <p className="text-[#0B2A4A] font-bold text-lg leading-tight mb-3">
-              3rd International Agri-Life &amp;<br />Bioresource Science Symposium
+              3rd International Agri-Life &amp;<br />Bioresource Sciences Symposium
             </p>
             <div className="w-3/5 h-0.5 bg-[#F0C674] mb-4" />
 
@@ -756,7 +756,7 @@ function HomeInner() {
             <h1 className="text-3xl md:text-5xl lg:text-[3.5rem] font-black text-[#0B1C2C] tracking-tighter drop-shadow-sm leading-[1.1] my-0.5">
               AGRI-LIFE &<br/>
               BIORESOURCE<br/>
-              SCIENCE
+              SCIENCES
             </h1>
             <h1 className="text-xl md:text-3xl lg:text-[2.25rem] font-bold text-[#76B947] tracking-[0.15em] mt-1">
               SYMPOSIUM
@@ -820,7 +820,7 @@ function HomeInner() {
           </div>
 
           <p className="text-[#0B2A4A] font-bold text-sm leading-tight mb-2">
-            3rd International Agri-Life &<br/>Bioresource Science Symposium
+            3rd International Agri-Life &<br/>Bioresource Sciences Symposium
           </p>
 
           <div className="w-3/5 h-0.5 bg-[#F0C674] mb-4"></div>

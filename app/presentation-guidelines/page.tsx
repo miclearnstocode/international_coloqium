@@ -364,7 +364,7 @@ export default function PresentationGuidelinesPage() {
               3rd International Agri-Life and Bioresource Sciences Symposium
             </p>
             <p className="text-sm text-gray-500 mt-1 reveal-up stagger-4">
-              March 10-13, 2027 | Roxas City, Capiz, Philippines – The Seafood Capital of the Philippines
+              March 11-13, 2027 | Boracay Island, Malay, Aklan, Philippines – The Beach Capital of the Philippines
             </p>
           </div>
         </div>
