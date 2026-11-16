@@ -61,10 +61,16 @@ def login():
         if not user or not bcrypt.check_password_hash(user.password_hash, data['password']):
             return jsonify({"detail": "Invalid email or password"}), 401
 
+        remember_me = bool(data.get('remember_me', False))
+        access_expiry = timedelta(days=30) if remember_me else timedelta(days=7)
+        refresh_expiry = timedelta(days=60) if remember_me else timedelta(days=14)
+
         access_token = create_access_token(
-            identity=str(user.id), expires_delta=timedelta(days=7)
+            identity=str(user.id), expires_delta=access_expiry
         )
-        refresh_token = create_refresh_token(identity=str(user.id))
+        refresh_token = create_refresh_token(
+            identity=str(user.id), expires_delta=refresh_expiry
+        )
         return jsonify({
             "message": "Login successful",
             "access_token": access_token,
@@ -74,6 +80,21 @@ def login():
                 "email": user.email, "role": user.role,
             },
         }), 200
+    except Exception as e:
+        return jsonify({"detail": str(e)}), 500
+
+
+@auth_bp.route('/api/refresh', methods=['POST', 'OPTIONS'])
+@jwt_required(refresh=True)
+def refresh_token():
+    if request.method == 'OPTIONS':
+        return jsonify({}), 200
+    try:
+        user_id = get_jwt_identity()
+        new_access_token = create_access_token(
+            identity=str(user_id), expires_delta=timedelta(days=7)
+        )
+        return jsonify({"access_token": new_access_token}), 200
     except Exception as e:
         return jsonify({"detail": str(e)}), 500
 

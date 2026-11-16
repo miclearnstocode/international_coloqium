@@ -40,31 +40,20 @@ CORS(app,
 
 @jwt.unauthorized_loader
 def missing_token_callback(reason):
-    return jsonify({"detail": "Missing authorization token",
-        "error": "unauthorized"}), 401
+    return jsonify({ "detail": "Missing authorization token", "error": "unauthorized"}), 401
 
 @jwt.invalid_token_loader
 def invalid_token_callback(reason):
-    return jsonify({
-        "detail": "Invalid authorization token",
-        "error": "invalid_token"
-    }), 422
+    return jsonify({ "detail": "Invalid authorization token", "error": "invalid_token" }), 422
 
 @jwt.expired_token_loader
 def expired_token_callback(jwt_header, jwt_payload):
-    return jsonify({
-        "detail": "Token has expired. Please login again.",
-        "error": "token_expired"
-    }), 401
+    return jsonify({ "detail": "Token has expired. Please login again.", "error": "token_expired" }), 401
 
 @jwt.revoked_token_loader
 def revoked_token_callback(jwt_header, jwt_payload):
-    return jsonify({
-        "detail": "Token has been revoked",
-        "error": "token_revoked"
-    }), 401
+    return jsonify({ "detail": "Token has been revoked", "error": "token_revoked"}), 401
     
-# Create tables
 with app.app_context():
     db.create_all()
 
@@ -136,11 +125,8 @@ def register():
         
         access_token = create_access_token(identity=str(new_user.id), expires_delta=timedelta(days=7))
         
-        return jsonify({
-            "message": "User created successfully",
-            "access_token": access_token,
-            "user": {"id": new_user.id, "full_name": new_user.full_name, "email": new_user.email, "role": new_user.role}
-        }), 201
+        return jsonify({ "message": "User created successfully", "access_token": access_token,
+            "user": {"id": new_user.id, "full_name": new_user.full_name, "email": new_user.email, "role": new_user.role}}), 201
         
     except Exception as e:
         db.session.rollback()
@@ -159,16 +145,31 @@ def login():
         if not user or not bcrypt.check_password_hash(user.password_hash, data['password']):
             return jsonify({"detail": "Invalid email or password"}), 401
         
-        access_token = create_access_token(identity=str(user.id), expires_delta=timedelta(days=7))
-        refresh_token = create_refresh_token(identity=str(user.id))
+        remember_me = bool(data.get('remember_me', False))
+        access_expiry = timedelta(days=30) if remember_me else timedelta(days=7)
+        refresh_expiry = timedelta(days=60) if remember_me else timedelta(days=14)
+
+        access_token = create_access_token(identity=str(user.id), expires_delta=access_expiry)
+        refresh_token = create_refresh_token(identity=str(user.id), expires_delta=refresh_expiry)
         
-        return jsonify({
-            "message": "Login successful",
-            "access_token": access_token,
+        return jsonify({ "message": "Login successful", "access_token": access_token,
             "refresh_token": refresh_token,
             "user": {"id": user.id, "full_name": user.full_name, "email": user.email, "role": user.role}
         }), 200
         
+    except Exception as e:
+        return jsonify({"detail": str(e)}), 500
+
+
+@app.route('/api/refresh', methods=['POST', 'OPTIONS'])
+@jwt_required(refresh=True)
+def refresh_token():
+    if request.method == 'OPTIONS':
+        return jsonify({}), 200
+    try:
+        user_id = get_jwt_identity()
+        new_access_token = create_access_token(identity=str(user_id), expires_delta=timedelta(days=7))
+        return jsonify({"access_token": new_access_token}), 200
     except Exception as e:
         return jsonify({"detail": str(e)}), 500
 
@@ -190,23 +191,12 @@ def add_suc():
         if existing_suc:
             return jsonify({"message": "University/Agency already exists", "id": existing_suc.id}), 200
         
-        # Create new SUC entry
-        new_suc = SUC(
-            name=name,
-            region=region,
-            abbreviation='',
-            type='Other',
-            is_active=True
-        )
+        new_suc = SUC(name=name,region=region, abbreviation='', type='Other', is_active=True)
         
         db.session.add(new_suc)
         db.session.commit()
         
-        return jsonify({
-            "message": "University/Agency added successfully",
-            "id": new_suc.id,
-            "name": new_suc.name
-        }), 201
+        return jsonify({ "message": "University/Agency added successfully", "id": new_suc.id, "name": new_suc.name}), 201
         
     except Exception as e:
         db.session.rollback()
