@@ -513,11 +513,11 @@ export default function FullabstractSubmission() {
                   <div className="flex flex-wrap gap-4">
                     <div className="premium-card flex-1 min-w-35 rounded-lg p-4 border border-zinc-200">
                       <p className="text-xs font-semibold text-[#0A2540] uppercase mb-1">Submission Deadline</p>
-                      <p className="font-bold text-[#0A2540]">June 15, 2025</p>
+                      <p className="font-bold text-[#0A2540]">January 20, 2027</p>
                     </div>
                     <div className="premium-card flex-1 min-w-35 rounded-lg p-4 border border-zinc-200">
                       <p className="text-xs font-semibold text-[#0A2540] uppercase mb-1">Notification of Acceptance</p>
-                      <p className="font-bold text-[#0A2540]">July 15, 2025</p>
+                      <p className="font-bold text-[#0A2540]">January 25, 2027</p>
                     </div>
                   </div>
                 </div>
