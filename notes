@@ -1,5 +1,9 @@
 npm run dev -- -H 127.0.0.1 -p 3000 start this server
 
+NEXT_PUBLIC_API_URL=http://127.0.0.1:5200
+
+npm run build
+
 virtual env creation
 .\.venv\Scripts\Activate.ps1
 venv\Scripts\activate
@@ -17,15 +21,16 @@ Hyber62nate11
 restart the server
 ~/repositories/international_coloqium/backend/flask_ctl.sh restarts
 
-
+updating the frontend
 cd ~/repositories/international_coloqium
 \cp -Rf out/* ~/public_html/
 \cp -Rf out/.[!.]* ~/public_html/ 2>/dev/null
 
 to start the backend
+cd ~/repositories/international_coloqium/backend
 nohup venv/bin/gunicorn app:app \
   --bind 127.0.0.1:5100 \
-  --workers 2 \
+  --workers 3 \
   --timeout 120 \
   --access-logfile ~/logs/flask-access.log \
   --error-logfile ~/logs/flask-error.log \
@@ -67,3 +72,33 @@ cd ~/repositories/international_coloqium
 git pull
 
 ~/restart-backend.sh
+
+
+
+# Disable directory listing and content negotiation
+Options -Indexes -MultiViews
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteCond %{REQUEST_FILENAME}/index.html -f
+    RewriteRule ^ - [L]
+    RewriteCond %{DOCUMENT_ROOT}/$1.html -f
+    RewriteRule ^(.+?)/$ /$1.html [L]
+    RewriteCond %{DOCUMENT_ROOT}/$1.html -f
+    RewriteRule ^(.+?)$ /$1.html [L]
+    RewriteCond %{REQUEST_URI} ^/api(/.*)?$ [NC]
+    RewriteRule ^api(/.*)?$ http://127.0.0.1:5100/api$1 [P,L,QSA]
+</IfModule>
+
+ErrorDocument 404 /404.html
+
+# php -- BEGIN cPanel-generated handler, do not edit
+# Set the “ea-php82” package as the default “PHP” programming language.
+<IfModule mime_module>
+  AddHandler application/x-httpd-ea-php82 .php .php8 .phtml
+</IfModule>
+# php -- END cPanel-generated handler, do not edit
