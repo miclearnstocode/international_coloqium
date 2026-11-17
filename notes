@@ -21,10 +21,6 @@ Hyber62nate11
 restart the server
 ~/repositories/international_coloqium/backend/flask_ctl.sh restarts
 
-updating the frontend
-cd ~/repositories/international_coloqium
-\cp -Rf out/* ~/public_html/
-\cp -Rf out/.[!.]* ~/public_html/ 2>/dev/null
 
 to start the backend
 cd ~/repositories/international_coloqium/backend

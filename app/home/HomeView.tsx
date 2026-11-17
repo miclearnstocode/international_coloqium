@@ -6,15 +6,11 @@ import Image from "next/image";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import { 
-  FaCheckCircle, 
   FaFileAlt, 
   FaUser, 
   FaCalendarAlt, 
-  FaMapMarkerAlt 
 } from "react-icons/fa";
 import { ContentProvider, useContent } from "@/app/context/ContentContext";
-import EditableField from "@/app/components/EditableField";
-import EditableList from "@/app/components/EditableList";
 import { apiFetch } from "@/app/lib/api";
 
 //  Reusable scroll-reveal hook 
@@ -519,21 +515,26 @@ function HomeInner() {
       const requestStartedAt = Date.now();
       try {
         const response = await apiFetch("/api/events/countdown", { cache: "no-store" });
-        if (!response.ok) {
+        const responseReceivedAt = Date.now();
+        if (!response.ok && response.status !== 404) {
           throw new Error(`Countdown request failed (${response.status})`);
         }
 
-        const payload = await response.json() as {
-          event_start_at?: unknown;
-          event_end_at?: unknown;
-          server_now?: unknown;
-        };
-        const responseReceivedAt = Date.now();
-        let eventStartAtMs = parseEventDate(payload.event_start_at);
-        let eventEndAtMs = parseEventDate(payload.event_end_at, true);
-        const serverNowMs = typeof payload.server_now === "string"
-          ? Date.parse(payload.server_now)
-          : NaN;
+        let eventStartAtMs = NaN;
+        let eventEndAtMs = NaN;
+        let serverNowMs = NaN;
+        if (response.ok) {
+          const payload = await response.json() as {
+            event_start_at?: unknown;
+            event_end_at?: unknown;
+            server_now?: unknown;
+          };
+          eventStartAtMs = parseEventDate(payload.event_start_at);
+          eventEndAtMs = parseEventDate(payload.event_end_at, true);
+          serverNowMs = typeof payload.server_now === "string"
+            ? Date.parse(payload.server_now)
+            : NaN;
+        }
 
         if (!Number.isFinite(eventStartAtMs) || !Number.isFinite(eventEndAtMs)) {
           const eventsResponse = await apiFetch("/api/events", { cache: "no-store" });
@@ -565,6 +566,9 @@ function HomeInner() {
           eventEndAtMs = parseEventDate(event.endDate || event.date, true);
         }
 
+        const hasServerClock = Number.isFinite(serverNowMs);
+        if (!hasServerClock) serverNowMs = Date.now();
+
         if (
           !Number.isFinite(eventStartAtMs) ||
           !Number.isFinite(eventEndAtMs) ||
@@ -575,7 +579,9 @@ function HomeInner() {
         }
 
         if (!cancelled) {
-          const serverOffsetMs = serverNowMs - (requestStartedAt + responseReceivedAt) / 2;
+          const serverOffsetMs = hasServerClock
+            ? serverNowMs - (requestStartedAt + responseReceivedAt) / 2
+            : 0;
           setCountdownClock({ eventStartAtMs, eventEndAtMs, serverOffsetMs });
           const targetAtMs = serverNowMs < eventStartAtMs ? eventStartAtMs : eventEndAtMs;
           setTimeLeft(getCountdownParts(targetAtMs, serverNowMs));
@@ -624,51 +630,14 @@ function HomeInner() {
   const formatNumber = (num: number) => num.toString().padStart(2, "0");
 
   const heroReveal = useInView<HTMLDivElement>();
-  const contentReveal = useInView<HTMLDivElement>();
 
   const heroScroll = useScrollProgress<HTMLElement>();
   const heroScale = useHeroScale();
   const heroCardRef = useRef<HTMLDivElement | null>(null);
   const [popupDone, setPopupDone] = useState(false);
-  const contentScroll = useScrollProgress<HTMLElement>();
 
   const parallaxEnabled = !canEdit;
   const heroParallax = parallaxEnabled ? (heroScroll.progress - 0.5) * -20 : 0;
-
-  const fallbackAnnouncements = [
-    {
-      month: "NOV", day: "16",
-      category: "CALL FOR ABSTRACTS",
-      title: "Abstract Submission Opens",
-      description: "The Call for Abstracts and symposium registration officially open on November 16, 2026.",
-      link_text: "View Call for Abstracts",
-      link_url: "/abstract-submission",
-    },
-    {
-      month: "JAN", day: "10",
-      category: "REGISTRATION",
-      title: "Early Registration Deadline",
-      description: "Participants may avail themselves of the applicable early registration rate until January 10, 2027.",
-      link_text: "Registration Details",
-      link_url: "/registration",
-    },
-    {
-      month: "JAN", day: "20",
-      category: "IMPORTANT",
-      title: "Abstract Submission Deadline",
-      description: "Authors must submit their abstracts through the official symposium portal on or before January 20, 2027.",
-      link_text: "Submit Abstract",
-      link_url: "/abstract-submission",
-    },
-  ];
-
-  const fallbackAttendees = [
-    { text: "Researchers & Scientists" },
-    { text: "Faculty & Educators" },
-    { text: "Graduate & Undergraduate Students" },
-    { text: "Government & Research Institutions" },
-    { text: "Industry & Development Partners" },
-  ];
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F5F6FA] font-sans text-[#0B2A4A] overflow-x-hidden">
@@ -989,119 +958,6 @@ function HomeInner() {
                 )}
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/*  THREE COLUMN CONTENT  */}
-      <section
-        ref={contentScroll.ref}
-        className="relative bg-linear-to-b from-white via-[#F8FBF5] to-white py-16 overflow-hidden"
-      >
-        {/* Ambient palette glows */}
-        <div aria-hidden className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-64 w-[70%] rounded-full bg-[#4FC3F7]/10 blur-3xl" />
-        <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-[#76B947]/10 blur-3xl" />
-        <div aria-hidden className="pointer-events-none absolute bottom-10 left-0 h-48 w-48 rounded-full bg-[#F0C674]/10 blur-3xl" />
-
-        <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-[#D5A54D]/50 to-transparent" />
-
-        <div
-          ref={contentReveal.ref}
-          className={`relative mx-auto max-w-7xl px-6 grid grid-cols-1 md:grid-cols-3 gap-8 ${contentReveal.inView ? "in-view" : ""}`}
-        >
-          {/* Card 1: About */}
-          <div className="reveal-up stagger-1 premium-card scroll-lift bg-linear-to-b from-[#F7FBF3] to-white p-8 rounded-xl border border-gray-100" style={{ ["--scroll-y" as any]: `${parallaxEnabled ? (1 - contentScroll.progress) * 30 : 0}px` }}>
-            <div className="premium-icon w-16 h-16 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm ring-1 ring-[#76B947]/25">
-              <svg className="w-8 h-8 text-[#1D3D6D]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" /></svg>
-            </div>
-            <EditableField section="about_card" field="title" fallback="ABOUT THE SYMPOSIUM" as="h3" label="Card Title" className="text-xl font-bold text-[#0B2A4A] mb-4 block" />
-            <div className="premium-accent w-10 h-1 bg-[#D5A54D] mb-6 rounded-full"></div>
-            <EditableField section="about_card" field="paragraph1" fallback="The 3rd International Agri-Life & Bioresource Sciences Symposium brings together researchers, faculty members, students, scientists, government representatives, industry partners, and other stakeholders from the Philippines and abroad." as="p" label="Paragraph 1" className="text-gray-600 text-justify mb-6 block" multiline />
-            <EditableField section="about_card" field="paragraph2" fallback="Through research presentations, scientific discussions, and collaborative activities, the symposium provides a platform for sharing knowledge and advancing innovative and sustainable solutions in agriculture, life sciences, and bioresource sciences." as="p" label="Paragraph 2" className="text-gray-600 text-justify mb-6 block" multiline />
-            <a href="/about" className="premium-link">
-              <EditableField section="about_card" field="link_text" fallback="Read More" as="span" label="Link Text" />
-              <span className="arrow" aria-hidden="true">→</span>
-            </a>
-          </div>
-
-          {/* Card 2: Announcements */}
-          <div className="reveal-up stagger-2 premium-card scroll-lift bg-white border border-gray-200 p-8 rounded-xl shadow-sm" style={{ ["--scroll-y" as any]: `${parallaxEnabled ? (1 - contentScroll.progress) * 20 : 0}px` }}>
-            <EditableField section="announcements" field="title" fallback="ANNOUNCEMENTS" as="h3" label="Section Title" className="text-xl font-bold text-[#0B2A4A] mb-4 block" />
-            <div className="premium-accent w-10 h-1 bg-[#D5A54D] mb-6 rounded-full"></div>
-            <EditableList
-              section="announcements"
-              title="Announcements List"
-              subtitle="Manage event announcements and deadlines"
-              itemLabel="Announcement"
-              fallback={fallbackAnnouncements}
-              emptyItem={{ month: "MMM", day: "00", category: "CATEGORY", title: "New announcement", description: "Description here", link_text: "Learn more", link_url: "/" }}
-              renderItem={(item, index, editing, onUpdate) =>
-                editing ? (
-                  <div className="p-3.5 bg-white space-y-3">
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                      <div><label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Month</label><input type="text" value={item.month || ""} onChange={(e) => onUpdate({ ...item, month: e.target.value.toUpperCase() })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-bold text-[#1D3D6D] focus:border-[#76B947] outline-none" /></div>
-                      <div><label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Day</label><input type="text" value={item.day || ""} onChange={(e) => onUpdate({ ...item, day: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-bold text-[#0B2A4A] focus:border-[#76B947] outline-none" /></div>
-                      <div><label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Category</label><input type="text" value={item.category || ""} onChange={(e) => onUpdate({ ...item, category: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-bold text-[#D5A54D] uppercase focus:border-[#76B947] outline-none" /></div>
-                    </div>
-                    <div><label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Title</label><input type="text" value={item.title || ""} onChange={(e) => onUpdate({ ...item, title: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm font-semibold text-[#0B2A4A] focus:border-[#76B947] outline-none" /></div>
-                    <div><label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Description</label><textarea value={item.description || ""} onChange={(e) => onUpdate({ ...item, description: e.target.value })} rows={2} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs text-gray-700 focus:border-[#76B947] outline-none" /></div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                      <div><label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Link Text</label><input type="text" value={item.link_text || ""} onChange={(e) => onUpdate({ ...item, link_text: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs font-semibold text-[#1b5e20] focus:border-[#76B947] outline-none" /></div>
-                      <div><label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Link URL</label><input type="text" value={item.link_url || ""} onChange={(e) => onUpdate({ ...item, link_url: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs text-gray-600 font-mono focus:border-[#76B947] outline-none" /></div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className={`announcement-row flex gap-4 ${index < 2 ? "border-b border-gray-200 pb-4 mb-4" : ""}`}>
-                    <div className="ann-date flex flex-col items-center pl-2 border-l-2 border-[#76B947]">
-                      <span className="text-xl font-bold text-[#1D3D6D]">{item.month}</span>
-                      <span className="text-2xl font-bold text-[#0B2A4A]">{item.day}</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="ann-category text-xs font-bold text-[#D5A54D] uppercase mb-1">{item.category}</p>
-                      <p className="font-semibold text-[#0B2A4A] mb-1">{item.title}</p>
-                      <p className="text-sm text-justify text-gray-500">{item.description}</p>
-                      <a href={item.link_url} className="premium-link mt-3 text-sm">{item.link_text}<span className="arrow" aria-hidden="true">→</span></a>
-                    </div>
-                  </div>
-                )
-              }
-            />
-          </div>
-
-          {/* Card 3: WHO SHOULD ATTEND */}
-          <div className="reveal-up stagger-3 premium-card scroll-lift bg-linear-to-b from-[#F2F9FF] to-white p-8 rounded-xl border border-gray-100" style={{ ["--scroll-y" as any]: `${parallaxEnabled ? (1 - contentScroll.progress) * 10 : 0}px` }}>
-            <div className="premium-icon w-16 h-16 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm ring-1 ring-[#4FC3F7]/30">
-              <svg className="w-8 h-8 text-[#1D3D6D]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-            </div>
-            <EditableField section="attendees_card" field="title" fallback="WHO SHOULD ATTEND" as="h3" label="Card Title" className="text-xl font-bold text-[#0B2A4A] mb-4 block" />
-            <div className="premium-accent w-10 h-1 bg-[#D5A54D] mb-6 rounded-full"></div>
-            <EditableField section="attendees_card" field="description" fallback="The symposium welcomes members of the academic, scientific, government, and industry communities who are interested in advancing research, innovation, and collaboration in agri-life and bioresource sciences." as="p" label="Description" className="text-gray-600 text-justify mb-4 block" multiline />
-            <ul className="space-y-2 mb-6">
-              <EditableList
-                section="attendees"
-                title="Attendees List"
-                itemLabel="Attendee Group"
-                fallback={fallbackAttendees}
-                emptyItem={{ text: "New attendee type" }}
-                renderItem={(item, index, editing, onUpdate) =>
-                  editing ? (
-                    <div className="p-3 bg-white">
-                      <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Attendee Category</label>
-                      <input type="text" value={item.text || ""} onChange={(e) => onUpdate({ ...item, text: e.target.value })} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs text-gray-800 font-medium focus:border-[#76B947] outline-none" />
-                    </div>
-                  ) : (
-                    <li className="attendee-item flex items-center gap-3 text-gray-700 text-sm">
-                      <FaCheckCircle className="text-[#76B947] text-sm shrink-0" />
-                      {item.text}
-                    </li>
-                  )
-                }
-              />
-            </ul>
-            <a href="/scientific-tracks" className="premium-link">
-              <EditableField section="attendees_card" field="link_text" fallback="See Who Can Participate" as="span" label="Link Text" />
-              <span className="arrow" aria-hidden="true">→</span>
-            </a>
           </div>
         </div>
       </section>

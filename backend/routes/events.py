@@ -8,7 +8,6 @@ from utils.decorators import super_admin_required
 events_bp = Blueprint('events', __name__)
 EVENT_TIMEZONE = timezone(timedelta(hours=8))
 
-# ================= EVENTS (News & Events) =================
 
 @events_bp.route('/api/events/countdown', methods=['GET', 'OPTIONS'])
 def get_event_countdown():
@@ -40,13 +39,9 @@ def get_event_countdown():
         target_at = event_start_at if server_now < event_start_at else event_end_at
         remaining_seconds = max(0, int((target_at - server_now).total_seconds()))
 
-        response = jsonify({
-            "event_start_at": event_start_at.isoformat(),
-            "event_end_at": event_end_at.isoformat(),
-            "target_at": target_at.isoformat(),
-            "server_now": server_now.isoformat(),
-            "remaining_seconds": remaining_seconds,
-        })
+        response = jsonify({ "event_start_at": event_start_at.isoformat(),
+            "event_end_at": event_end_at.isoformat(), "target_at": target_at.isoformat(),
+            "server_now": server_now.isoformat(), "remaining_seconds": remaining_seconds, })
         response.headers["Cache-Control"] = "no-store"
         return response, 200
     except (TypeError, ValueError):

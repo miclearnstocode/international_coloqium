@@ -126,7 +126,7 @@ export default function RegistrationPage() {
     "Access to all sessions",
     "Conference materials",
     "Certificate",
-    "Meals & refreshments",
+    "Meals during the event",
   ];
 
   const importantDates = [
@@ -548,13 +548,6 @@ export default function RegistrationPage() {
                     </ul>
                   </div>
                 </div>
-              </div>
-
-              <div className="mt-auto bg-[#F2F9FF] border border-[#4FC3F7]/30 rounded-lg p-4 flex gap-3 items-start">
-                <FaInfoCircle className="text-[#1D3D6D] mt-0.5 shrink-0 text-sm" />
-                <p className="text-[11px] text-zinc-600 leading-relaxed">
-                  The registration fee covers participation in all sessions, conference materials, certificates, and meals during the event.
-                </p>
               </div>
             </div>
           </div>
