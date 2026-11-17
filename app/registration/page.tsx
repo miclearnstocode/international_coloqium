@@ -11,7 +11,7 @@ import {
   FaRegPaperPlane, FaUniversity, FaRegFileAlt, FaChevronRight,
   FaRegCheckCircle, FaPaperPlane, FaLaptop, FaSearch, FaEnvelopeOpenText,
   FaEnvelope, FaUserCheck, FaTimesCircle, FaCreditCard, FaCheckDouble,
-  FaUsersCog, FaClipboardList, FaBullseye, FaCheckCircle,
+  FaUsersCog, FaClipboardList, FaBullseye, FaCheckCircle, FaBookOpen,
 } from "react-icons/fa";
 
 //  Reusable scroll-reveal hook 
@@ -133,9 +133,9 @@ export default function RegistrationPage() {
     { icon: <FaRegPaperPlane />, title: "Opening of Abstract Submission and Registration", date: "November 16, 2026" },
     { icon: <FaRegFileAlt />, title: "Abstract Submission Deadline", date: "January 20, 2027" },
     { icon: <FaRegCheckCircle />, title: "Notification of Acceptance", date: "January 25, 2027" },
-    { icon: <FaDollarSign />, title: "Early Bird Payment Deadline", date: "January 10, 2027" },
     { icon: <FaRegUser />, title: "Final Registration and Payment Deadline", date: "February 06, 2027" },
     { icon: <FaRegCalendarAlt />, title: "Submission of Full Papers", date: "Subject to confirmation of publication number" },
+    { icon: <FaRegFileAlt />, title: "Release of Final Scientific Program", date: "February 26, 2027" },
   ];
 
   const workflowSteps = [
@@ -147,6 +147,7 @@ export default function RegistrationPage() {
     { id: 6, icon: <FaCreditCard />, title: "Payment", desc: "Payment of the registration fee. through the available payment channels. Upload proof of payment in the portal." },
     { id: 7, icon: <FaCheckDouble />, title: "Confirmation", desc: "Registration is verified and confirmed. A confirmation email with receipt is sent." },
     { id: 8, icon: <FaUsersCog />, title: "Inclusion in Final Program", desc: "The abstract is included in the final scientific program after registration is confirmed." },
+    { id: 9, icon: <FaBookOpen />, title: "Processing of Papers for Journal Publication", desc: "Selected and eligible full papers may be endorsed to the Annals of Tropical Research (ATR), the symposium's partner journal, for possible publication, subject to the journal's submission guidelines, peer-review process, and editorial approval." },
   ];
 
   return (
@@ -335,7 +336,7 @@ export default function RegistrationPage() {
 
       <Header />
 
-      {/* == PAGE HERO == */}
+      {/* PAGE HERO */}
       <section
         ref={heroScroll.ref}
         className={`relative bg-white overflow-hidden border-b border-zinc-100 ${heroReveal.inView ? "in-view" : ""}`}
@@ -386,7 +387,7 @@ export default function RegistrationPage() {
         </div>
       </section>
 
-      {/* == IMPORTANT DATES & WORKFLOW (Now Top Grid) == */}
+      {/* IMPORTANT DATES & WORKFLOW */}
       <section ref={infoReveal.ref} className={`bg-white py-16 border-b border-zinc-100 relative overflow-hidden ${infoReveal.inView ? "in-view" : ""}`}>
         <div aria-hidden className="pointer-events-none absolute top-0 left-0 h-56 w-56 rounded-full bg-[#F0C674]/10 blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-56 w-56 rounded-full bg-[#4FC3F7]/10 blur-3xl" />
@@ -445,12 +446,15 @@ export default function RegistrationPage() {
                       return (
                         <div key={step.id} className={`timeline-item flex gap-4 relative reveal-up stagger-${(idx % 6) + 1} pb-4`}>
                           <div className="w-10 flex flex-col items-center shrink-0 relative z-10">
+                            {/* Top connector line */}
                             <div className={`w-0.5 bg-zinc-200 ${idx === 0 ? 'h-0' : 'h-2 -mt-2 mb-1'}`}></div>
                             
+                            {/* Icon Circle - Fixed to render step.icon instead of step.id */}
                             <div className="timeline-icon animate-step w-10 h-10 rounded-full bg-[#F2F9FF] border-2 border-white text-[#1D3D6D] flex items-center justify-center text-lg shrink-0 font-bold">
-                              <span className="text-sm leading-none tabular-nums">{step.id}</span>
+                              {step.icon}
                             </div>
 
+                            {/* Bottom connector line */}
                             {!isLast && (
                               <div className="w-0.5 bg-zinc-200 flex-1 mt-1 -mb-4"></div>
                             )}
@@ -478,15 +482,16 @@ export default function RegistrationPage() {
                     {/* Important Notes */}
                     <div className="pt-2 pb-2">
                       <div className="bg-[#FEF9E7] border border-[#F0C674] rounded-lg p-4 flex gap-3 items-start">
-                          <FaClipboardList className="text-[#D5A54D] mt-0.5 shrink-0 text-lg" />
-                          <div>
-                            <p className="font-bold text-[#0A2540] text-xs uppercase tracking-wider mb-2">Important Notes</p>
-                            <ul className="text-[11px] text-zinc-600 space-y-1.5 list-disc pl-3 marker:text-[#D5A54D]">
-                              <li>Registration is required for accepted presenters within the prescribed registration period.</li>
-                              <li>At least one author of each accepted abstract must register.</li>
-                              <li>Only registered presenters will be included in the final scientific program.</li>
-                            </ul>
-                          </div>
+                        <FaClipboardList className="text-[#D5A54D] mt-0.5 shrink-0 text-lg" />
+                        <div>
+                          <p className="font-bold text-[#0A2540] text-xs uppercase tracking-wider mb-2">Important Notes</p>
+                          <ul className="text-[11px] text-zinc-600 space-y-1.5 list-disc pl-3 marker:text-[#D5A54D]">
+                            <li>Registration is required for accepted presenters within the prescribed registration period.</li>
+                            <li>At least one author of each accepted abstract must register.</li>
+                            <li>Only registered presenters will be included in the final scientific program.</li>
+                            <li>Acceptance for symposium presentation does not guarantee journal publication. All endorsed manuscripts must undergo the journal's independent evaluation and peer-review process.</li>
+                          </ul>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -498,7 +503,7 @@ export default function RegistrationPage() {
         </div>
       </section>
 
-      {/* == REGISTRATION FEES & CANCEL POLICY (Now Bottom Grid) == */}
+      {/* == REGISTRATION FEES & CANCEL POLICY == */}
       <section ref={feesScroll.ref} className="py-16 relative overflow-hidden">
         <div aria-hidden className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-64 w-[70%] rounded-full bg-[#4FC3F7]/10 blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-[#76B947]/10 blur-3xl" />
@@ -515,12 +520,12 @@ export default function RegistrationPage() {
             </div>
 
             <div className="premium-card bg-white border border-t-0 border-zinc-200 rounded-b-xl p-8 flex-1 flex flex-col">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 items-start">
                 {/* Left Column: Fee & Eligibility */}
                 <div>
                   <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-widest mb-2">Registration Fee</h3>
                   <p className="text-4xl font-extrabold text-[#0A2540] mb-6">P 4,500.00</p>
-                  
+
                   <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">Who can register:</h3>
                   <ul className="space-y-3">
                     {fees.map((fee, idx) => (
@@ -534,14 +539,14 @@ export default function RegistrationPage() {
                   </ul>
                 </div>
 
-                {/* Right Column: Inclusions */}
-                <div>
+                {/* Right Column: Inclusions — aligned with "Who can register" heading */}
+                <div className="md:pt-23">
                   <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">What's Included:</h3>
                   <div className="bg-[#F8FBF5] rounded-xl border border-[#76B947]/20 p-4">
                     <ul className="space-y-3">
                       {inclusions.map((item, idx) => (
                         <li key={idx} className="flex items-start gap-2 text-xs text-zinc-700">
-                          <FaCheckCircle className="text-[#76B947] mt-0.5 shrink-0 text-sm" /> 
+                          <FaCheckCircle className="text-[#76B947] mt-0.5 shrink-0 text-sm" />
                           <span className="font-medium">{item}</span>
                         </li>
                       ))}
@@ -626,7 +631,7 @@ export default function RegistrationPage() {
                   <div className="flex items-start gap-3">
                     <FaRegFileAlt className="text-[#1D3D6D] mt-1 text-xl shrink-0" />
                     <div>
-                      <p className="font-bold text-[#0A2540] text-sm mb-2">Please email or upload your proof of payment</p>
+                      <p className="font-bold text-[#0A2540] text-sm mb-2">Please upload your proof of payment</p>
                       <div className="text-xs text-zinc-600 space-y-1">
                         <p>Email: <span className="font-semibold text-[#0A2540]">internationalsymposium@capsu.edu.ph</span></p>
                         <p>Subject: <span className="font-semibold text-[#0A2540]">IC2025 Payment – [Your Name]</span></p>
