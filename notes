@@ -23,15 +23,11 @@ restart the server
 
 
 to start the backend
+kill $(cat ~/logs/flask.pid) && sleep 2
 cd ~/repositories/international_coloqium/backend
-nohup venv/bin/gunicorn app:app \
-  --bind 127.0.0.1:5100 \
-  --workers 3 \
-  --timeout 120 \
-  --access-logfile ~/logs/flask-access.log \
-  --error-logfile ~/logs/flask-error.log \
-  --pid ~/logs/flask.pid \
-  --daemon
+nohup venv/bin/gunicorn app:app --bind 127.0.0.1:5100 --workers 3 --timeout 120 \
+  --access-logfile ~/logs/flask-access.log --error-logfile ~/logs/flask-error.log \
+  --pid ~/logs/flask.pid --daemon
 
 
 sleep 3
@@ -77,6 +73,11 @@ Options -Indexes -MultiViews
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /
+
+    # Next.js RSC prefetch: /about/__next.about.__PAGE__.txt -> /about/__next.about/__PAGE__.txt
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(.+)/(__next\.[^/.]+)\.(.+\.txt)$ $1/$2/$3 [L]
+
     RewriteCond %{REQUEST_FILENAME} -f
     RewriteRule ^ - [L]
     RewriteCond %{REQUEST_FILENAME} -d

@@ -9,9 +9,13 @@ import {
   FaFileAlt, 
   FaUser, 
   FaCalendarAlt, 
+  FaUserTie,
+  FaQuoteLeft,
+  FaTimes,
 } from "react-icons/fa";
 import { ContentProvider, useContent } from "@/app/context/ContentContext";
 import { apiFetch } from "@/app/lib/api";
+import { plenarySpeakers, type Speaker } from "@/app/data/plenarySpeakers";
 
 //  Reusable scroll-reveal hook 
 function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
@@ -636,6 +640,30 @@ function HomeInner() {
   const heroCardRef = useRef<HTMLDivElement | null>(null);
   const [popupDone, setPopupDone] = useState(false);
 
+  const [showScrollHint, setShowScrollHint] = useState(true);
+  useEffect(() => {
+    const onScroll = () => setShowScrollHint(window.scrollY < 30);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const speakersReveal = useInView<HTMLDivElement>();
+  const speakersScroll = useScrollProgress<HTMLElement>();
+  const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null);
+
+  useEffect(() => {
+    if (!selectedSpeaker) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setSelectedSpeaker(null); };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [selectedSpeaker]);
+
   const parallaxEnabled = !canEdit;
   const heroParallax = parallaxEnabled ? (heroScroll.progress - 0.5) * -20 : 0;
 
@@ -669,6 +697,24 @@ function HomeInner() {
         @keyframes fadeSlideInRight {
           from { opacity: 0; transform: translateX(24px); }
           to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes scrollHintBounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(8px); }
+        }
+        .scroll-hint-bounce { animation: scrollHintBounce 1.6s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .scroll-hint-bounce { animation: none; }
+        }
+
+        @keyframes scaleIn {
+          from { opacity: 0; transform: scale(0.94); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
 
         .float-slow { animation: floatSlow 9s ease-in-out infinite; }
@@ -748,6 +794,25 @@ function HomeInner() {
 
       <Header />
 
+      {/* Scroll-down indicator: fades out once the user starts scrolling */}
+      <button
+        type="button"
+        aria-label="Scroll down"
+        aria-hidden={!showScrollHint}
+        tabIndex={showScrollHint ? 0 : -1}
+        onClick={() => document.getElementById("plenary-speakers")?.scrollIntoView({ behavior: "smooth" })}
+        className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-1 rounded-full bg-white/70 backdrop-blur px-4 py-2 shadow-md text-[#0A2540] transition-all duration-500 ${
+          showScrollHint ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
+        }`}
+      >
+        <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Scroll</span>
+        <span className="scroll-hint-bounce">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </span>
+      </button>
+
       {/*  HERO & COUNTDOWN MERGED  */}
       <section
         ref={heroScroll.ref}
@@ -807,9 +872,9 @@ function HomeInner() {
         </div>
 
         {/*  FLOATING CALL FOR ABSTRACTS CARD  */}
-        <div ref={heroCardRef} className={`hidden md:flex absolute top-10 right-10 lg:right-20 z-20 w-72 lg:w-85 bg-white/95 backdrop-blur-md rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white/60 p-5 flex-col items-center text-center overflow-hidden transition-opacity duration-300 ${popupDone ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+        <div ref={heroCardRef} className={`hidden md:flex absolute top-10 right-10 lg:top-46.5 lg:-translate-y-1/2 lg:right-30 z-20 w-72 lg:w-88 bg-white/95 backdrop-blur-md rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white/60 p-5 lg:p-7 flex-col items-center text-center overflow-hidden transition-opacity duration-300 ${popupDone ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-linear-to-r from-[#F0C674] via-[#D5A54D] to-[#76B947]"></div>
-          <button className="absolute top-3 right-4 text-gray-400 hover:text-gray-700 transition-colors">
+          <button className="absolute top-3 right-4 lg:top-4 lg:right-5 text-gray-400 hover:text-gray-700 transition-colors">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -818,25 +883,25 @@ function HomeInner() {
             <div className="relative flex items-center justify-center shrink-0">
                <svg className="absolute -top-2 -left-1 w-4 h-4 text-[#5c9a26] rotate-[-30deg]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" /></svg>
                <svg className="absolute -top-1 right-0 w-3 h-3 text-[#5c9a26] rotate-20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" /></svg>
-               <svg className="w-10 h-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+               <svg className="w-10 h-10 lg:w-12 lg:h-12 drop-shadow-sm" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M19 4L5 8V16L19 20V4Z" fill="#7cb342" stroke="#33691e" strokeWidth="1.5" strokeLinejoin="round"/>
                   <path d="M2 10V14" stroke="#33691e" strokeWidth="2" strokeLinecap="round"/>
                   <path d="M10 16V22" stroke="#33691e" strokeWidth="2" strokeLinecap="round"/>
                </svg>
             </div>
-            <div className="bg-[#4b8e18] rounded-md px-3 py-1 shadow-sm border border-[#33691e]/30 flex flex-col items-center justify-center transform -rotate-2">
-              <span className="text-white font-black text-[10px] tracking-widest leading-none mb-0.5">CALL FOR</span>
-              <span className="text-white font-black text-sm tracking-wider leading-none">ABSTRACT</span>
+            <div className="bg-[#4b8e18] rounded-md px-3 py-1 lg:px-4 lg:py-1.5 shadow-sm border border-[#33691e]/30 flex flex-col items-center justify-center transform -rotate-2">
+              <span className="text-white font-black text-[10px] lg:text-xs tracking-widest leading-none mb-0.5">CALL FOR</span>
+              <span className="text-white font-black text-sm lg:text-lg tracking-wider leading-none">ABSTRACT</span>
             </div>
             <div className="flex flex-col gap-1 ml-0.5 shrink-0">
               <div className="w-3 h-0.5 bg-[#5c9a26] rotate-30 rounded-full"></div>
               <div className="w-2.5 h-0.5 bg-[#5c9a26] rotate-45 rounded-full"></div>
             </div>
           </div>
-          <p className="text-[#0B2A4A] font-bold text-sm leading-tight mb-2">3rd International Agri-Life &<br/>Bioresource Sciences Symposium</p>
+          <p className="text-[#0B2A4A] font-bold text-sm lg:text-base leading-tight mb-2">3rd International Agri-Life &<br/>Bioresource Sciences Symposium</p>
           <div className="w-3/5 h-0.5 bg-[#F0C674] mb-4"></div>
-          <p className="text-gray-600 text-[11px] leading-relaxed mb-5 px-1">Submit your research and share your scientific contributions with experts, educators, and industry leaders from the Philippines and around the world.</p>
-          <Link href="/abstract-submission" className="flex items-center justify-center gap-2 w-full py-2.5 rounded-full bg-[#0A5C0A] hover:bg-[#084a08] text-white text-xs font-bold shadow-md hover:-translate-y-0.5 transition-all duration-300">
+          <p className="text-gray-600 text-[11px] lg:text-xs leading-relaxed mb-5 px-1">Submit your research and share your scientific contributions with experts, educators, and industry leaders from the Philippines and around the world.</p>
+          <Link href="/abstract-submission" className="flex items-center justify-center gap-2 w-full py-2.5 lg:py-3 rounded-full bg-[#0A5C0A] hover:bg-[#084a08] text-white text-xs lg:text-sm font-bold shadow-md hover:-translate-y-0.5 transition-all duration-300">
             Submit Abstract →
           </Link>
         </div>
@@ -961,6 +1026,112 @@ function HomeInner() {
           </div>
         </div>
       </section>
+
+      {/*  PLENARY SPEAKERS  */}
+      <section
+        id="plenary-speakers"
+        ref={speakersScroll.ref}
+        className="py-20 bg-white relative overflow-hidden border-b border-gray-200"
+      >
+        <div aria-hidden className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-64 w-[60%] rounded-full bg-[#4FC3F7]/10 blur-3xl" />
+        <div
+          ref={speakersReveal.ref}
+          className={`relative max-w-350 mx-auto px-4 lg:px-8 ${speakersReveal.inView ? "in-view" : ""}`}
+        >
+          <div className="text-center mb-12">
+            <div className="flex justify-center mb-4 reveal-up">
+              <div className="premium-icon w-16 h-16 rounded-full bg-[#F2F9FF] flex items-center justify-center ring-1 ring-[#4FC3F7]/30">
+                <FaUserTie className="text-[#1D3D6D] text-2xl" />
+              </div>
+            </div>
+            <h2 className="text-3xl font-bold text-[#0A2540] uppercase reveal-up stagger-1">
+              Plenary Speakers
+            </h2>
+            <div className="w-16 h-1 gold-underline mx-auto mt-4 reveal-up stagger-2 rounded-full"></div>
+            <p className="text-zinc-500 mt-4 max-w-2xl mx-auto reveal-up stagger-3">
+              Distinguished experts and thought leaders sharing their insights at the symposium. Click a profile to read their bionote.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {plenarySpeakers.map((speaker, idx) => (
+              <div
+                key={speaker.name}
+                role="button"
+                tabIndex={0}
+                onClick={() => setSelectedSpeaker(speaker)}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedSpeaker(speaker); } }}
+                className="premium-card scroll-lift bg-[#F8FBF5] rounded-xl border border-zinc-200 p-6 text-center reveal-up cursor-pointer group"
+                style={{ ["--scroll-y" as any]: parallaxEnabled ? `${(1 - speakersScroll.progress) * (25 - idx * 4)}px` : "0px" }}
+              >
+                <div className="relative w-32 h-32 mx-auto mb-6 rounded-full overflow-hidden border-4 border-white shadow-lg bg-[#E2E8F0] flex items-center justify-center transition-transform duration-500 group-hover:scale-105">
+                  {speaker.img ? (
+                    <Image src={speaker.img} alt={speaker.name} fill className="object-cover" />
+                  ) : (
+                    <FaUser className="text-5xl text-zinc-400 group-hover:scale-110 transition-transform duration-500" />
+                  )}
+                </div>
+                <h3 className="font-bold text-[#0A2540] text-lg mb-1 group-hover:text-[#1b5e20] transition-colors">{speaker.name}</h3>
+                <p className="text-sm font-semibold text-[#1b5e20] mb-1">{speaker.role}</p>
+                <p className="text-xs text-zinc-500 mb-4">{speaker.org}</p>
+                <div className="bg-white rounded-lg p-4 border border-zinc-100 flex items-center justify-center gap-2 text-sm text-[#0A2540] font-medium group-hover:bg-[#f0f7eb] transition-colors">
+                  <FaFileAlt className="text-[#D5A54D]" />
+                  View Bionote
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Speaker bionote modal */}
+      {selectedSpeaker && (
+        <div className="fixed inset-0 z-200 flex items-center justify-center p-4 sm:p-6 md:p-8" role="dialog" aria-modal="true" aria-label={`${selectedSpeaker.name} bionote`}>
+          <div
+            className="absolute inset-0 bg-[#0A2540]/70 backdrop-blur-sm"
+            style={{ animation: "fadeIn 0.3s ease-out" }}
+            onClick={() => setSelectedSpeaker(null)}
+          />
+          <div
+            className="relative w-full max-w-4xl max-h-[90vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row"
+            style={{ animation: "scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1)" }}
+          >
+            <button
+              onClick={() => setSelectedSpeaker(null)}
+              aria-label="Close"
+              className="absolute top-4 right-4 z-10 w-10 h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-zinc-500 hover:text-red-500 hover:bg-white transition-all shadow-sm"
+            >
+              <FaTimes />
+            </button>
+
+            <div className="w-full md:w-2/5 h-64 md:h-auto relative bg-[#E2E8F0] shrink-0">
+              {selectedSpeaker.img ? (
+                <Image src={selectedSpeaker.img} alt={selectedSpeaker.name} fill className="object-cover object-top" />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center text-zinc-400">
+                  <FaUser className="text-6xl mb-4 opacity-50" />
+                  <span className="text-sm font-medium">Image Coming Soon</span>
+                </div>
+              )}
+              <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent md:hidden pointer-events-none" />
+            </div>
+
+            <div className="w-full md:w-3/5 p-6 md:p-10 flex flex-col overflow-y-auto">
+              <div className="mb-6">
+                <h3 className="text-2xl md:text-3xl font-bold text-[#0A2540] mb-2">{selectedSpeaker.name}</h3>
+                <p className="text-[#1b5e20] font-semibold mb-1">{selectedSpeaker.role}</p>
+                <p className="text-sm text-zinc-500">{selectedSpeaker.org}</p>
+              </div>
+              <div className="relative">
+                <FaQuoteLeft className="absolute top-0 left-0 text-[#D5A54D] text-2xl opacity-20 -z-10" />
+                <p className="text-zinc-600 leading-relaxed text-sm md:text-base text-justify whitespace-pre-line relative z-10 pl-4 border-l-2 border-[#D5A54D]/30">
+                  {selectedSpeaker.bionote}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

@@ -130,7 +130,7 @@ export default function PresentationGuidelinesPage() {
   ];
 
   const fullPaperStructure = [
-    { page: "Page 1", content: "Complete authors' and/or co-authors name, designation, agency/institutional affiliation, mailing addresses, email addresses" },
+    { page: "Page 1", content: "Complete authors' and/or co-authors name, designation, agency/institutional affiliation, mailing addresses, email addresses to be considered for publication in the Special Issue of the Annals of Tropical Research, subject to journal’s publication policy" },
     { page: "Page 2", content: "Title of Article\nAbstract (at most 200 words in one paragraph)\nKey words (at least two)" },
     { page: "Page 3 onwards", content: "INTRODUCTION (with clearly specified objectives)\nMATERIALS AND METHODS\nRESULTS AND DISCUSSIONS\nCONCLUSIONS AND RECOMMENDATIONS\nACKNOWLEDGMENT (if any)\nREFERENCES" }
   ];
