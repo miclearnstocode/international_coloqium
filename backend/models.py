@@ -1,7 +1,30 @@
-from datetime import datetime
+from datetime import datetime, date
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
+
+
+def _to_date(value):
+    """Convert str / datetime / date to a date, or None if empty/unparseable."""
+    if not value:
+        return None
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+    try:
+        return datetime.strptime(str(value).strip()[:10], '%Y-%m-%d').date()
+    except ValueError:
+        return None
+
+
+def _to_str(value):
+    """Return an ISO 'YYYY-MM-DD' string when parseable, else the raw string or None."""
+    d = _to_date(value)
+    if d:
+        return d.isoformat()
+    return str(value) if value else None
+
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -69,6 +92,7 @@ class AbstractSubmission(db.Model):
             'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None
         }
 
+
 class SUC(db.Model):
     __tablename__ = 'sucs_agency'
     id = db.Column(db.Integer, primary_key=True)
@@ -87,6 +111,7 @@ class SUC(db.Model):
             'type': self.type,
             'is_active': self.is_active
         }
+
 
 class PasswordResetCode(db.Model):
     __tablename__ = 'password_reset_codes'
@@ -178,41 +203,38 @@ class ContentAuditLog(db.Model):
             'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None
         }
 
+
 class Event(db.Model):
     __tablename__ = 'events'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(500), nullable=False)
     description = db.Column(db.Text, nullable=True)
-    date = db.Column(db.String(50), nullable=True)        
-    end_date = db.Column(db.String(50), nullable=True)    
-    submission_deadline = db.Column(db.String(50), nullable=True) 
-    
-    # ONLY THIS BOOLEAN
-    is_submission_open = db.Column(db.Boolean, default=True, nullable=False) 
-    
+    date = db.Column(db.String(50), nullable=True)
+    end_date = db.Column(db.String(50), nullable=True)
+    submission_deadline = db.Column(db.String(50), nullable=True)
+
+    is_submission_open = db.Column(db.Boolean, default=True, nullable=False)
+
     location = db.Column(db.String(255), nullable=True)
     category = db.Column(db.String(100), nullable=False, default='Announcement')
     status = db.Column(db.Enum('Draft', 'Published'), nullable=False, default='Draft')
     featured = db.Column(db.Boolean, default=False)
-    item_order = db.Column(db.Integer, default=0)         
+    item_order = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
-    created_by = db.Column(db.Integer, nullable=True)     
+    created_by = db.Column(db.Integer, nullable=True)
 
     @property
     def is_deadline_passed(self):
-        if not self.submission_deadline:
+        deadline = _to_date(self.submission_deadline)
+        if not deadline:
             return False
-        try:
-            deadline = datetime.strptime(self.submission_deadline, '%Y-%m-%d').date()
-            return datetime.now().date() > deadline
-        except ValueError:
-            return False
+        return datetime.now().date() > deadline
 
     @property
     def can_accept_submissions(self):
         return (
-            self.is_submission_open 
+            self.is_submission_open
             and not self.is_deadline_passed
         )
 
@@ -221,9 +243,9 @@ class Event(db.Model):
             'id': self.id,
             'title': self.title,
             'description': self.description,
-            'date': self.date,
-            'endDate': self.end_date,
-            'submission_deadline': self.submission_deadline,
+            'date': _to_str(self.date),
+            'endDate': _to_str(self.end_date),
+            'submission_deadline': _to_str(self.submission_deadline),
             'is_submission_open': self.is_submission_open,
             'is_deadline_passed': self.is_deadline_passed,
             'can_accept_submissions': self.can_accept_submissions,

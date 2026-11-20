@@ -8,18 +8,26 @@ from utils.decorators import super_admin_required
 events_bp = Blueprint('events', __name__)
 EVENT_TIMEZONE = timezone(timedelta(hours=8))
 
+
 def parse_date_safe(value):
-    """Helper to safely convert string or date object to a date object."""
+    """Safely convert a string, datetime, or date to a date object."""
     if not value:
         return None
-    if isinstance(value, date) and not isinstance(value, datetime):
-        return value
     if isinstance(value, datetime):
         return value.date()
+    if isinstance(value, date):
+        return value
     try:
-        return date.fromisoformat(str(value).strip())
+        return date.fromisoformat(str(value).strip()[:10])
     except (ValueError, TypeError):
         return None
+
+
+def date_str_safe(value):
+    """Normalize input to an ISO 'YYYY-MM-DD' string (columns are String(50))."""
+    d = parse_date_safe(value)
+    return d.isoformat() if d else None
+
 
 @events_bp.route('/api/events/countdown', methods=['GET', 'OPTIONS'])
 def get_event_countdown():
@@ -42,12 +50,9 @@ def get_event_countdown():
 
         start_date = parse_date_safe(event.date)
         end_date = parse_date_safe(event.end_date) or start_date
-        
+
         if not start_date:
             return jsonify({"detail": "Event start date is invalid"}), 500
-            
-        if not end_date:
-            end_date = start_date
 
         if end_date < start_date:
             return jsonify({"detail": "Event end date cannot be before its start date"}), 500
@@ -58,12 +63,12 @@ def get_event_countdown():
         target_at = event_start_at if server_now < event_start_at else event_end_at
         remaining_seconds = max(0, int((target_at - server_now).total_seconds()))
 
-        response = jsonify({ 
+        response = jsonify({
             "event_start_at": event_start_at.isoformat(),
-            "event_end_at": event_end_at.isoformat(), 
+            "event_end_at": event_end_at.isoformat(),
             "target_at": target_at.isoformat(),
-            "server_now": server_now.isoformat(), 
-            "remaining_seconds": remaining_seconds, 
+            "server_now": server_now.isoformat(),
+            "remaining_seconds": remaining_seconds,
         })
         response.headers["Cache-Control"] = "no-store"
         return response, 200
@@ -78,7 +83,7 @@ def list_events():
         return jsonify({})
     try:
         include_drafts = request.args.get('include_drafts') == '1'
-        
+
         q = Event.query
         if not include_drafts:
             q = q.filter_by(status='Published')
@@ -121,9 +126,9 @@ def create_event():
         new_event = Event(
             title=title,
             description=data.get('description') or '',
-            date=data.get('date') or None,
-            end_date=data.get('endDate') or None,
-            submission_deadline=data.get('submissionDeadline') or None,
+            date=date_str_safe(data.get('date')),
+            end_date=date_str_safe(data.get('endDate')),
+            submission_deadline=date_str_safe(data.get('submissionDeadline')),
             is_submission_open=bool(data.get('isSubmissionOpen', True)),
             location=data.get('location') or '',
             category=data.get('category') or 'Announcement',
@@ -183,17 +188,17 @@ def update_event(event_id):
             changed = True
 
         if 'date' in data:
-            event.date = data['date'] or None
+            event.date = date_str_safe(data['date'])
             changed = True
 
         if 'endDate' in data:
-            event.end_date = data['endDate'] or None
+            event.end_date = date_str_safe(data['endDate'])
             changed = True
-            
+
         if 'submissionDeadline' in data:
-            event.submission_deadline = data['submissionDeadline'] or None
+            event.submission_deadline = date_str_safe(data['submissionDeadline'])
             changed = True
-            
+
         if 'isSubmissionOpen' in data:
             event.is_submission_open = bool(data['isSubmissionOpen'])
             changed = True
@@ -253,14 +258,15 @@ def delete_event(event_id):
         if not event:
             return jsonify({"detail": "Event not found"}), 404
 
+        old_title = event.title
         db.session.delete(event)
-        
+
         db.session.add(ContentAuditLog(
             admin_id=user_id,
             page_slug='news-events',
             action='delete',
             field_key=f"event.{event_id}",
-            old_value=event.title,
+            old_value=old_title,
             new_value=None,
         ))
         db.session.commit()
@@ -323,28 +329,27 @@ def bulk_save_events():
             if event_id:
                 ev = Event.query.get(event_id)
                 if not ev:
-                    ev = Event() 
-                    event_id = None
+                    ev = Event()
             else:
                 ev = Event()
 
             ev.title = (item.get('title') or '').strip() or 'Untitled event'
             ev.description = item.get('description') or ''
-            ev.date = item.get('date') or None
-            ev.end_date = item.get('endDate') or None
-            ev.submission_deadline = item.get('submissionDeadline') or None
+            ev.date = date_str_safe(item.get('date'))
+            ev.end_date = date_str_safe(item.get('endDate'))
+            ev.submission_deadline = date_str_safe(item.get('submissionDeadline'))
             ev.is_submission_open = bool(item.get('isSubmissionOpen', True))
             ev.location = item.get('location') or ''
             ev.category = item.get('category') or 'Announcement'
             ev.status = 'Published' if item.get('status') == 'Published' else 'Draft'
             ev.featured = bool(item.get('featured'))
             ev.item_order = idx
-            
+
             if not ev.created_by:
                 ev.created_by = user_id
 
             db.session.add(ev)
-            db.session.flush() 
+            db.session.flush()
             incoming_ids.add(ev.id)
             saved.append(ev)
 
