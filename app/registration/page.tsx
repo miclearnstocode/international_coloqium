@@ -493,7 +493,7 @@ export default function RegistrationPage() {
         </div>
       </section>
 
-      {/* == REGISTRATION FEES & CANCEL POLICY == */}
+      {/* == REGISTRATION FEES == */}
       <section ref={feesScroll.ref} className="py-16 relative overflow-hidden">
         <div aria-hidden className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-64 w-[70%] rounded-full bg-[#4FC3F7]/10 blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-[#76B947]/10 blur-3xl" />
@@ -543,36 +543,6 @@ export default function RegistrationPage() {
                     </ul>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Cancel Policy */}
-          <div className="reveal-up stagger-2 flex flex-col h-full">
-            <div className="bg-linear-to-r from-[#0B2A4A] to-[#1D3D6D] text-white p-5 flex items-center gap-3 rounded-t-xl shrink-0 bg-clip-padding">
-              <FaRegListAlt className="text-xl" />
-              <h2 className="text-lg font-bold uppercase">Cancel Policy</h2>
-            </div>
-            <div className="premium-card bg-white border border-t-0 border-zinc-200 rounded-b-xl p-8 flex-1 flex flex-col">
-              <p className="text-sm text-zinc-600 mb-6">Cancellations must be sent in writing to the Secretariat.</p>
-
-              <ul className="space-y-4 text-sm text-zinc-600 mb-8">
-                <li className="flex gap-2">
-                  <span className="font-bold text-[#0A2540]">•</span> On or before June 30, 2025 <br /> – 50% refund
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-bold text-[#0A2540]">•</span> On or before July 31, 2025 <br /> – 25% refund
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-bold text-[#0A2540]">•</span> After July 31, 2025 <br /> – No refund
-                </li>
-              </ul>
-
-              <div className="mt-auto bg-[#FFF5F5] border border-red-100 rounded-lg p-4 flex gap-3 items-start">
-                <FaInfoCircle className="text-red-400 mt-0.5 shrink-0" />
-                <p className="text-xs text-zinc-600">
-                  <span className="font-bold text-[#0A2540]">Substitutions are allowed</span> at any time by notifying the Secretariat.
-                </p>
               </div>
             </div>
           </div>
