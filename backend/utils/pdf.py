@@ -297,7 +297,7 @@ def generate_abstract_pdf(data):
     story.append(Spacer(1, 6))
     
     story.append(Paragraph(
-        "<i>For additional concerns, please contact us through: (insert RDE contact details)</i>",
+        "<i>For additional concerns, please contact us through: internationalsymposium@capsu.edu.ph</i>",
         ParagraphStyle(
             'ContactStyle',
             parent=styles['Normal'],

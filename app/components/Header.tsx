@@ -84,15 +84,14 @@ export default function Header() {
       }`}
     >
       <nav
-        className="mx-auto flex w-full max-w-7xl items-center justify-between"
+        className="mx-auto flex w-full max-w-350 items-center justify-center"
         style={{
           paddingInline: "clamp(1rem, 2vw, 2rem)",
           paddingBlock: "clamp(0.6rem, 0.7vw, 0.85rem)",
-          gap: "clamp(0.5rem, 1.5vw, 1.5rem)",
         }}
       >
         {/* ── Logo ── */}
-        <Link href="/" aria-label="Symposium home" className="group shrink-0">
+        <Link href="/" aria-label="Symposium home" className="group shrink-0 mr-8 lg:mr-5">
           <div
             className="relative rounded-full overflow-hidden bg-white ring-2 ring-[#D5A54D] ring-offset-2 ring-offset-white shadow-md transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg"
             style={{
@@ -144,7 +143,7 @@ export default function Header() {
 
           {/* ── Desktop Logout Button ── */}
           {showLogout && (
-            <div className="flex items-center gap-2 pl-2 border-l border-gray-200">
+            <div className="flex items-center gap-2 pl-4 ml-4 border-l border-gray-200">
               <button
                 type="button"
                 onClick={handleLogout}
@@ -161,7 +160,7 @@ export default function Header() {
         </div>
 
         {/* ── Mobile / tablet right controls ── */}
-        <div className="xl:hidden flex items-center gap-2">
+        <div className="xl:hidden flex items-center gap-2 ml-auto">
           {showLogout && (
             <button
               type="button"

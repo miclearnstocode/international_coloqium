@@ -6,7 +6,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import UnderDevelopment from "../components/UnderDevelopment";
 import { useState, useEffect, useRef } from "react";
-import { FaArrowRight, FaBuilding, FaStar, FaHandshake } from "react-icons/fa";
+import { FaArrowRight, FaBuilding, FaStar, FaHandshake, FaBookOpen } from "react-icons/fa";
 
 interface Institution {
   name: string;
@@ -105,6 +105,7 @@ function ScrollProgressBar() {
 export default function PartnerInstitutionsPage() {
   // Reveal hooks
   const heroReveal = useInView<HTMLDivElement>();
+  const journalReveal = useInView<HTMLDivElement>(); // New Hook for Journal
   const hostReveal = useInView<HTMLDivElement>();
   const coHostReveal = useInView<HTMLDivElement>();
   const partnerReveal = useInView<HTMLDivElement>();
@@ -330,6 +331,75 @@ export default function PartnerInstitutionsPage() {
           <p className="text-lg text-gray-600 max-w-2xl leading-relaxed reveal-up stagger-3">
             Advancing science through institutional partnership and international collaboration.
           </p>
+        </div>
+      </section>
+
+      {/* == JOURNAL PROVIDER == */}
+      <section 
+        ref={journalReveal.ref} 
+        className={`py-12 relative overflow-hidden ${journalReveal.inView ? "in-view" : ""}`}
+      >
+        <div ref={journalReveal.ref} className="max-w-5xl mx-auto px-6">
+          
+          {/* Custom Pill Header */}
+          <div className="relative flex justify-center mb-6 reveal-up z-10">
+            <div className="absolute top-1/2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#2e7d32] to-transparent -z-10"></div>
+            <div className="bg-[#2e7d32] text-white px-6 py-2 rounded-full flex items-center gap-2 font-bold tracking-wider text-sm shadow-md border-2 border-[#76B947]">
+              <FaBookOpen className="text-lg" />
+              JOURNAL PROVIDER
+            </div>
+          </div>
+
+          {/* Journal Card */}
+          <div className="premium-card relative bg-white rounded-2xl border-2 border-[#76B947]/30 p-6 md:p-8 flex flex-col md:flex-row items-center gap-8 shadow-xl reveal-scale overflow-hidden">
+            
+            {/* Decorative green swooshes */}
+            <div className="absolute top-0 left-0 w-32 h-32 bg-[#76B947]/10 rounded-br-full -z-10"></div>
+            <div className="absolute bottom-0 right-0 w-48 h-48 bg-[#F0C674]/10 rounded-tl-full -z-10"></div>
+
+            {/* Left Side: VSU Logo & Name */}
+            <div className="flex flex-col sm:flex-row items-center gap-5 md:border-r-2 md:border-gray-100 md:pr-8 w-full md:w-auto shrink-0">
+              <div className="logo-bubble relative w-28 h-28 shrink-0">
+                <Image
+                  src="/images/vsu-logo.png"
+                  alt="Visayas State University"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+              <div className="text-center sm:text-left">
+                <h3 className="text-2xl font-extrabold text-[#1a5c1a] leading-tight uppercase tracking-tight">
+                  Visayas State<br />University
+                </h3>
+                <p className="text-sm text-gray-500 mt-1 font-medium">
+                  Baybay City, Leyte, Philippines
+                </p>
+              </div>
+            </div>
+
+            {/* Right Side: Journal Details */}
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 w-full">
+              <div className="logo-bubble relative w-24 h-32 shrink-0 shadow-md rounded-md overflow-hidden border border-gray-100">
+                <Image
+                  src="/images/cover-page-atr.png"
+                  alt="Annals of Tropical Research Cover"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="text-center sm:text-left">
+                <h4 className="text-xl font-bold text-[#0A2540]">
+                  Annals of Tropical Research (ATR)
+                </h4>
+                <p className="text-[#1a5c1a] font-semibold text-sm mb-3">
+                  The Official Journal Partner of the Symposium
+                </p>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  A peer-reviewed, open-access journal of Visayas State University indexed in Scopus, CABI, EBSCO, FAO AGRIS, DOAJ, BOAI, and listed in the ERA journal list (Journal ID: 5237).
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

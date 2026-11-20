@@ -5,7 +5,15 @@ import Footer from "../components/Footer";
 import UnderDevelopment from "../components/UnderDevelopment";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
-import { FaRegCheckCircle, FaRegPaperPlane, FaFileAlt, FaUserTie, FaQuoteLeft } from "react-icons/fa";
+import { 
+  FaRegCheckCircle, 
+  FaRegPaperPlane, 
+  FaFileAlt, 
+  FaUserTie, 
+  FaQuoteLeft,
+  FaTimes,
+  FaUser
+} from "react-icons/fa";
 
 //  Reusable scroll-reveal hook 
 function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
@@ -96,6 +104,14 @@ function ScrollProgressBar() {
   );
 }
 
+interface Speaker {
+  name: string;
+  role: string;
+  org: string;
+  img: string;
+  bionote: string;
+}
+
 export default function ScientificTracks() {
   // Reveal hooks
   const heroReveal = useInView<HTMLDivElement>();
@@ -109,6 +125,7 @@ export default function ScientificTracks() {
   const speakersScroll = useScrollProgress<HTMLElement>();
 
   const [showDevModal, setShowDevModal] = useState(false);
+  const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null);
 
   const checkColors = {
     green: "#4CAF50",
@@ -213,11 +230,49 @@ export default function ScientificTracks() {
     },
   ];
 
-  // Placeholder speakers data (Stakeholders can fill these in later)
-  const plenarySpeakers = [
-    { name: "To Be Announced", role: "Keynote Speaker", org: "International Organization", img: "" },
-    { name: "To Be Announced", role: "Plenary Speaker", org: "Academic Institution", img: "" },
-    { name: "To Be Announced", role: "Plenary Speaker", org: "Research Agency", img: "" },
+  const plenarySpeakers: Speaker[] = [
+    {
+      name: "Fika Yuliza Purba",
+      role: "Plenary Speaker",
+      org: "Hasanuddin University",
+      img: "/plenaryspeaker/Dr Purba.png",
+      bionote: "Dr. Fika Yuliza Purba is an Assistant Professor and Head of the Veterinary Professional Study Program at Hasanuddin University (UNHAS). Supported by the prestigious LPDP scholarship, she earned her Doctorate in Animal Science from Hiroshima University, Japan, where she also served as a visiting Assistant Professor (2021-2023). Her research specializes in dairy science, mammary gland immunity, mastitis, and ruminant reproductive disorders. She has published over 30 peer-reviewed articles in leading international journals—including the Journal of Dairy Science, Veterinary Immunology and Immunopathology, Journal of Veterinary Medical Science, and Veterinary World—and earned multiple honors from the Japanese Society of Animal Science, including the Excellent Presentation Award (2021). She is an active member of the Indonesian Veterinary Medical Association (PDHI), and now leads the Animal Production and Health Research Group (APHREG) UNHAS."
+    },
+    {
+      name: "Joval N. Martinez",
+      role: "Plenary Speaker",
+      org: "University of St. La Salle",
+      img: "/plenaryspeaker/Dr Martinez.png",
+      bionote: "Dr. Joval N. Martinez is a registered microbiologist and Professor of Microbiology in the Department of Natural Sciences at the University of St. La Salle (USLS) in Bacolod City and the President and CEO of Co-Lab Life Sciences. He earned his Bachelor of Science in Biology from the University of the Philippines Visayas and his Doctor of Philosophy in Biology (Microbiology) from Tokyo Metropolitan University in Japan. Following his doctorate, he completed postdoctoral and visiting research fellowships at Hiroshima University, Japan. His research focuses on environmental microbiology, microbial ecology, metagenomics, and the biotechnological applications of phototrophic and extremophilic bacteria. As a scientific innovator and project leader, Dr. Martinez bridges academia and industry by developing microbial solutions for sustainable agriculture, functional foods, and healthcare in the Visayas."
+    },
+    {
+      name: "Kwan-Suk Kim",
+      role: "Plenary Speaker",
+      org: "Chungbuk National University",
+      img: "/plenaryspeaker/Dr Kim.png",
+      bionote: "Dr. Kwan-Suk Kim is a Full Professor of Animal Science at Chungbuk National University in Cheongju, South Korea, specializing in livestock genomics and animal breeding. He holds a B.S. from Kyungpook National University and an M.S. and Ph.D. from Iowa State University, followed by postdoctoral fellowships at Iowa State University and Michigan State University before joining Chungbuk National University. Dr. Kim’s research focuses on identifying DNA markers linked to growth, feed efficiency, meat quality, heat tolerance, and disease resistance in swine and beef cattle. Notably, he demonstrated how porcine MC4R gene polymorphisms influence feed intake and growth rates in pigs. He also collaborates on international agricultural initiatives transferring genomic technologies to developing countries and conserving indigenous livestock diversity across Asia and Africa."
+    },
+    {
+      name: "Yudai Inabu",
+      role: "Plenary Speaker",
+      org: "Hiroshima University",
+      img: "", // Intentionally left blank for placeholder
+      bionote: "Yudai Inabu, Ph.D. is a researcher and faculty member affiliated with the Graduate School of Integrated Sciences for Life at Hiroshima University (Department of Bioresource Science), with previous academic and research appointments at Kyushu University (Faculty of Agriculture) and the Japan Society for the Promotion of Science (JSPS). He completed his undergraduate and graduate studies in biosphere and bioresource sciences at Hiroshima University. His primary research focuses on animal science, specifically ruminant physiology, nutrition, and metabolic responses—such as studying glucagon-like peptide-1 (GLP-1) secretion and nutrient absorption in calves. He has authored numerous peer-reviewed publications and conference papers contributing to livestock health and dairy science."
+    },
+    {
+      name: "Ching Fui Fui",
+      role: "Plenary Speaker",
+      org: "Universiti Malaysia Sabah",
+      img: "/plenaryspeaker/DR FUI.png",
+      bionote: "Assoc. Prof. Dr. Ching Fui Fui is a Malaysian marine scientist and academic serving as the Dean of the Institut Marin Borneo (IMB) at Universiti Malaysia Sabah (UMS). She earned both her bachelor’s and master’s degrees in aquaculture from UMS before completing her PhD in aquaculture at Kindai University in Japan, specializing in fish breeding and larval quality. Before assuming her role as Dean, Dr. Ching served as the Director and Deputy Director of the institute while overseeing operations at the UMS fish hatchery. Her research focuses on broodstock selection, larval rearing, and sustainable fish feeds for high-value species such as hybrid groupers, Napoleon wrasse, snappers, and short-finned eels. An active contributor to marine science and seafood security, she has published dozens of peer-reviewed studies and received both the UMS Young Scientist Award (2016) and the Leadership Figure in Academic Category Award (2018)."
+    },
+    {
+      name: "Licia Colli",
+      role: "Plenary Speaker",
+      org: "Catholic University of Piacenza",
+      img: "/plenaryspeaker/Dr Colli.png",
+      bionote: "Associate Professor of Zootechnics and Genetics at the Catholic University of Piacenza, where she conducts research on genomic and epigenomic applications in livestock farming, biodiversity, and disease adaptation. A member of the ISAG-FAO Advisory Group and the BioDNA Center Executive Committee, she has extensive experience in modern and ancient DNA analysis. She serves as an editor for several international journals and contributed to the FAO Guidelines on the Genomic Characterization of Animal Genetic Resources. She has authored numerous publications, has over 5,900 citations, and an H-index of 41."
+    }
   ];
 
   return (
@@ -244,6 +299,10 @@ export default function ScientificTracks() {
         @keyframes scaleIn {
           from { opacity: 0; transform: scale(0.94); }
           to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
 
         .reveal-up { opacity: 0; transform: translateY(28px); }
@@ -498,45 +557,35 @@ export default function ScientificTracks() {
             </h2>
             <div className="w-16 h-1 gold-underline mx-auto mt-4 reveal-up stagger-2 rounded-full"></div>
             <p className="text-zinc-500 mt-4 max-w-2xl mx-auto reveal-up stagger-3">
-              Learn more about the distinguished experts and thought leaders who will be sharing their insights at the symposium.
+              Learn more about the distinguished experts and thought leaders who will be sharing their insights at the symposium. Click on a profile to read their bionote.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {plenarySpeakers.map((speaker, idx) => (
               <div
                 key={idx}
-                className="track-card scroll-lift bg-[#F8FBF5] rounded-xl border border-zinc-200 p-6 text-center reveal-up"
+                onClick={() => setSelectedSpeaker(speaker)}
+                className="track-card scroll-lift bg-[#F8FBF5] rounded-xl border border-zinc-200 p-6 text-center reveal-up cursor-pointer group"
                 style={{ ["--scroll-y" as any]: `${(1 - speakersScroll.progress) * (25 - idx * 4)}px` }}
               >
-                <div className="relative w-32 h-32 mx-auto mb-6 rounded-full overflow-hidden border-4 border-white shadow-lg bg-[#E2E8F0] flex items-center justify-center group">
+                <div className="relative w-32 h-32 mx-auto mb-6 rounded-full overflow-hidden border-4 border-white shadow-lg bg-[#E2E8F0] flex items-center justify-center transition-transform duration-500 group-hover:scale-105">
                   {speaker.img ? (
                     <Image src={speaker.img} alt={speaker.name} fill className="object-cover" />
                   ) : (
-                    <FaUserTie className="text-4xl text-zinc-400 group-hover:scale-110 transition-transform duration-500" />
+                    <FaUser className="text-5xl text-zinc-400 group-hover:scale-110 transition-transform duration-500" />
                   )}
                 </div>
-                <h3 className="font-bold text-[#0A2540] text-lg mb-1">{speaker.name}</h3>
+                <h3 className="font-bold text-[#0A2540] text-lg mb-1 group-hover:text-[#1b5e20] transition-colors">{speaker.name}</h3>
                 <p className="text-sm font-semibold text-[#1b5e20] mb-1">{speaker.role}</p>
                 <p className="text-xs text-zinc-500 mb-4">{speaker.org}</p>
                 
-                <div className="bg-white rounded-lg p-4 border border-zinc-100 flex items-start gap-3">
-                  <FaQuoteLeft className="text-[#D5A54D] mt-1 shrink-0 text-sm" />
-                  <p className="text-xs text-zinc-500 italic text-left">
-                    Bionote and full profile will be published soon.
-                  </p>
+                <div className="bg-white rounded-lg p-4 border border-zinc-100 flex items-center justify-center gap-2 text-sm text-[#0A2540] font-medium group-hover:bg-[#f0f7eb] transition-colors">
+                  <FaFileAlt className="text-[#D5A54D]" />
+                  View Bionote
                 </div>
               </div>
             ))}
-          </div>
-
-          <div className="mt-10 text-center reveal-up">
-            <button
-              onClick={() => setShowDevModal(true)}
-              className="premium-btn inline-flex items-center gap-2 bg-[#0A2540] hover:bg-[#0B2A4A] text-white px-6 py-3 rounded-lg font-bold text-sm transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-0.5"
-            >
-              View Full Speaker Profiles <FaFileAlt />
-            </button>
           </div>
         </div>
       </section>
@@ -571,7 +620,68 @@ export default function ScientificTracks() {
         </div>
       </section>
 
-      {/* Under Development Modal */}
+      {/* Custom Speaker Modal */}
+      {selectedSpeaker && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 md:p-8">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-[#0A2540]/70 backdrop-blur-sm transition-opacity"
+            style={{ animation: "fadeIn 0.3s ease-out" }}
+            onClick={() => setSelectedSpeaker(null)}
+          />
+          
+          {/* Modal Content */}
+          <div 
+            className="relative w-full max-w-4xl max-h-[90vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row"
+            style={{ animation: "scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1)" }}
+          >
+            {/* Close Button */}
+            <button 
+              onClick={() => setSelectedSpeaker(null)}
+              className="absolute top-4 right-4 z-10 w-10 h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-zinc-500 hover:text-red-500 hover:bg-white transition-all shadow-sm"
+            >
+              <FaTimes />
+            </button>
+
+            {/* Left Side: Image */}
+            <div className="w-full md:w-2/5 h-64 md:h-auto relative bg-[#E2E8F0] shrink-0">
+              {selectedSpeaker.img ? (
+                <Image 
+                  src={selectedSpeaker.img} 
+                  alt={selectedSpeaker.name} 
+                  fill 
+                  className="object-cover object-top"
+                />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center text-zinc-400">
+                  <FaUser className="text-6xl mb-4 opacity-50" />
+                  <span className="text-sm font-medium">Image Coming Soon</span>
+                </div>
+              )}
+              {/* Subtle gradient overlay for mobile */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent md:hidden pointer-events-none" />
+            </div>
+
+            {/* Right Side: Details & Bionote */}
+            <div className="w-full md:w-3/5 p-6 md:p-10 flex flex-col overflow-y-auto">
+              <div className="mb-6">
+                <h3 className="text-2xl md:text-3xl font-bold text-[#0A2540] mb-2">{selectedSpeaker.name}</h3>
+                <p className="text-[#1b5e20] font-semibold mb-1">{selectedSpeaker.role}</p>
+                <p className="text-sm text-zinc-500">{selectedSpeaker.org}</p>
+              </div>
+
+              <div className="relative">
+                <FaQuoteLeft className="absolute top-0 left-0 text-[#D5A54D] text-2xl opacity-20 -z-10" />
+                <p className="text-zinc-600 leading-relaxed text-sm md:text-base text-justify whitespace-pre-line relative z-10 pl-4 border-l-2 border-[#D5A54D]/30">
+                  {selectedSpeaker.bionote}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Under Development Modal (For Speaker Profiles Button) */}
       <UnderDevelopment
         open={showDevModal}
         onClose={() => setShowDevModal(false)}

@@ -524,7 +524,7 @@ export default function RegistrationPage() {
                 {/* Left Column: Fee & Eligibility */}
                 <div>
                   <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-widest mb-2">Registration Fee</h3>
-                  <p className="text-4xl font-extrabold text-[#0A2540] mb-6">P 4,500.00</p>
+                  <p className="text-4xl font-extrabold text-[#0A2540] mb-6">₱ 6,000.00</p>
 
                   <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">Who can register:</h3>
                   <ul className="space-y-3">

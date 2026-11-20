@@ -9,7 +9,8 @@ import {
   FaFileAlt, FaGlobe, FaLightbulb, FaLeaf, FaFish, FaFlask, FaUtensils, FaChartLine,
   FaCheckCircle, FaArrowRight, FaClipboardCheck, FaChevronDown,
   FaChevronUp, FaUserTie, FaUsersCog, FaUserFriends,
-  FaMoneyBillWave, FaTruck, FaPlane, FaMicroscope, FaUserCheck
+  FaMoneyBillWave, FaTruck, FaPlane, FaMicroscope, FaUserCheck,
+  FaBookOpen, FaPrint, FaLink, FaLaptop 
 } from "react-icons/fa";
 
 //  Reusable scroll-reveal hook 
@@ -455,7 +456,6 @@ export default function AboutPage() {
         ref={heroReveal.ref}
         className={`relative bg-white overflow-hidden border-b border-zinc-100 ${heroReveal.inView ? "in-view" : ""}`}
       >
-        {/* Decorative orbs — multi-hue */}
         <div
           aria-hidden
           className="absolute top-0 right-0 w-96 h-96 bg-linear-to-br from-[#76B947]/10 to-transparent rounded-full blur-3xl -translate-y-1/3 translate-x-1/4 float-slow pointer-events-none"
@@ -524,44 +524,204 @@ export default function AboutPage() {
               </div>
             </div>
 
-            {/* Right Side - Image with parallax */}
+            {/* Right Side - Theme, Partner Journal, and Date/Location Stack */}
             <div
-              className="relative scroll-lift reveal-right stagger-2"
+              className="relative flex flex-col gap-6 reveal-right stagger-2"
               style={{ ["--scroll-y" as any]: `${(1 - aboutScroll.progress) * 30}px` }}
             >
-              <div className="bg-linear-to-br from-[#76B947]/5 via-white to-[#4FC3F7]/5 rounded-2xl p-8 border border-gray-200">
-                <div className="relative h-64 rounded-xl overflow-hidden shadow-lg">
-                  {/* Theme card — navy → marine with green accent */}
-                  <div className="flex flex-col items-center justify-center h-full bg-linear-to-br from-[#0B2A4A] via-[#1D3D6D] to-[#153A61] text-white p-8 text-center rounded-xl relative overflow-hidden">
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-[#76B947] via-[#F0C674] to-[#D5A54D]" />
-                    <h3 className="text-xl font-bold">Symposium Theme</h3>
-                    <p className="text-sm opacity-80 mt-2">
-                      Converging Frontiers in Agri-Life and Bioresource Sciences:<br />
-                      Science, Innovation, and Collaboration for a Resilient and Sustainable Future
+              {/* 1. Symposium Theme Card */}
+              <div className="bg-[#0B2A4A] text-white rounded-xl shadow-lg relative p-6 text-center z-10">
+                
+                {/* Inner wrapper to keep the gradient line rounded but let the icon pop out */}
+                <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none">
+                  <div className="absolute top-0 left-0 right-0 h-1.5 bg-linear-to-r from-[#76B947] via-[#F0C674] to-[#D5A54D]" />
+                </div>
+
+                {/* The popping icon - moved to -top-6 -left-6 to sit exactly on the corner */}
+                <div className="absolute -top-6 -left-6 bg-[#4FC3F7] p-3.5 rounded-xl shadow-lg rotate-[-5deg] z-20">
+                  <FaLightbulb className="text-2xl text-white" />
+                </div>
+
+                <h3 className="text-xl font-bold mt-2 relative z-10">Symposium Theme</h3>
+                <p className="text-sm text-white/90 leading-relaxed mt-2 px-2 relative z-10">
+                  Converging Frontiers in Agri-Life and Bioresource Sciences:<br />
+                  Science, Innovation, and Collaboration for a Resilient and Sustainable Future
+                </p>
+              </div>
+
+              {/* 2. Partner Journal Card */}
+              <div className="bg-[#F8FBF5] rounded-xl border border-[#76B947]/30 shadow-sm relative pt-8 p-5">
+                {/* Green Tab */}
+                <div className="absolute -top-3.5 left-4 bg-[#0A5C0A] text-white text-xs font-bold px-4 py-1.5 rounded-full flex items-center gap-2 shadow-sm z-10">
+                  <FaBookOpen /> PARTNER JOURNAL
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-5">
+                  {/* Journal Cover */}
+                  <div className="w-28 shrink-0 mx-auto sm:mx-0 relative aspect-3/4 bg-[#0A5C0A] rounded shadow-md overflow-hidden flex flex-col justify-between text-center border border-green-800">
+                    <div className="bg-[#0A5C0A] p-1 text-[5px] text-white/70 border-b border-green-700/50 uppercase">
+                      ISSN 2704-3541 (Online)<br/>ISSN 0116-2935 (Print)
+                    </div>
+                    <div className="px-1 text-white flex flex-col justify-center items-center flex-1">
+                      <h4 className="text-[11px] font-bold leading-tight font-serif uppercase tracking-wider">Annals of<br/>Tropical<br/>Research</h4>
+                      <div className="w-8 h-0.5 bg-[#F0C674] mx-auto mt-2 mb-2"></div>
+                      <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
+                        <span className="text-[5px] font-bold">VSU</span>
+                      </div>
+                    </div>
+                    <div className="h-10 bg-linear-to-t from-[#76B947] to-transparent w-full relative">
+                       <div className="absolute bottom-1 w-full text-[4px] text-white/80 tracking-widest uppercase">VSU Press</div>
+                    </div>
+                  </div>
+
+                  {/* Journal Info */}
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-[#0A5C0A] mb-1">Annals of Tropical Research (ATR)</h3>
+                    <p className="text-[11px] text-gray-700 leading-relaxed text-justify">
+                      The <strong>Annals of Tropical Research (ATR)</strong> is a peer-reviewed, open-access scientific journal established in 1979 by Visayas State University, Philippines. The journal is dedicated to advancing interdisciplinary and translational research that addresses the unique environmental, agricultural, biological, animal health, and public health challenges affecting tropical regions and the communities that depend on them.
                     </p>
                   </div>
                 </div>
-                {/* Floating accents — green + sky blue */}
-                <div className="absolute -bottom-4 -right-4 bg-[#76B947] text-white p-4 rounded-xl shadow-lg">
-                  <FaUsers className="text-3xl" />
+
+                {/* Metadata Row */}
+                <div className="flex flex-wrap items-center gap-4 text-xs text-gray-600 mt-5 border-t border-[#76B947]/20 pt-4">
+                  <div className="flex items-center gap-1.5">
+                    <FaLaptop className="text-[#76B947]" /> <span className="font-semibold text-[#0A2540]">ISSN (Online):</span> 2704-3541
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <FaPrint className="text-[#76B947]" /> <span className="font-semibold text-[#0A2540]">ISSN (Print):</span> 0116-2935
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <FaLink className="text-[#76B947]" /> <a href="https://annalstropres.com" target="_blank" rel="noreferrer" className="text-[#0A5C0A] underline decoration-[#0A5C0A]/30 underline-offset-2 font-semibold hover:text-[#76B947]">annalstropres.com</a>
+                  </div>
                 </div>
-                <div className="absolute -top-4 -left-4 bg-[#4FC3F7] text-white p-4 rounded-xl shadow-lg">
-                  <FaLightbulb className="text-3xl" />
+
+                {/* Indexing Section */}
+                <div className="relative bg-[#F8FBF5] rounded-xl border border-[#76B947]/40 p-6 pt-9 mt-6">
+                  
+                  {/* Floating Title Badge */}
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-full flex justify-center z-10">
+                    <span className="bg-[#0A5C0A] text-white text-[11px] font-bold px-5 py-1.5 rounded-full shadow-sm whitespace-nowrap">
+                      Major International Indexing and Abstracting Databases
+                    </span>
+                  </div>
+
+                  {/* Top Row (4 logos) */}
+                  <div className="flex items-center justify-between border-b border-zinc-200 pb-6 mb-6 gap-2">
+                    
+                    {/* Scopus */}
+                    <div className="relative flex-1 h-20 flex items-center justify-center">
+                      <Image 
+                        src="/images/home/scopus.png" 
+                        alt="Scopus" 
+                        width={140} 
+                        height={70} 
+                        className="absolute max-w-none object-contain" 
+                      />
+                    </div>
+                    
+                    <div className="w-px h-10 bg-zinc-300 shrink-0"></div>
+                    
+                    {/* CABI */}
+                    <div className="relative flex-1 h-20 flex items-center justify-center">
+                      <Image 
+                        src="/images/home/cabi.png" 
+                        alt="CABI" 
+                        width={140} 
+                        height={70} 
+                        className="absolute max-w-none object-contain" 
+                      />
+                    </div>
+                    
+                    <div className="w-px h-10 bg-zinc-300 shrink-0"></div>
+                    
+                    {/* EBSCO */}
+                    <div className="relative flex-1 h-20 flex items-center justify-center">
+                      <Image 
+                        src="/images/home/ebsco.png" 
+                        alt="EBSCO" 
+                        width={140} 
+                        height={70} 
+                        className="absolute max-w-none object-contain" 
+                      />
+                    </div>
+                    
+                    <div className="w-px h-10 bg-zinc-300 shrink-0"></div>
+                    
+                    {/* FAO AGRIS */}
+                    <div className="relative flex-1 h-20 flex items-center justify-center">
+                      <Image 
+                        src="/images/home/fao.png" 
+                        alt="FAO AGRIS" 
+                        width={140} 
+                        height={70} 
+                        className="absolute max-w-none object-contain" 
+                      />
+                    </div>
+                  </div>
+
+                  {/* Bottom Row (3 logos) */}
+                  <div className="flex items-center justify-between gap-2 px-6">
+                    
+                    {/* DOAJ */}
+                    <div className="relative flex-1 h-20 flex items-center justify-center">
+                      <Image 
+                        src="/images/home/doaj.svg" 
+                        alt="DOAJ" 
+                        width={140} 
+                        height={70} 
+                        className="absolute max-w-none object-contain" 
+                      />
+                    </div>
+                    
+                    <div className="w-px h-10 bg-zinc-300 shrink-0"></div>
+                    
+                    {/* BOAI */}
+                    <div className="relative flex-1 h-20 flex items-center justify-center">
+                      <Image 
+                        src="/images/home/boai.png" 
+                        alt="BOAI" 
+                        width={140} 
+                        height={70} 
+                        className="absolute max-w-none object-contain" 
+                      />
+                    </div>
+                    
+                    <div className="w-px h-10 bg-zinc-300 shrink-0"></div>
+                    
+                    {/* ERA */}
+                    <div className="relative flex-1 h-20 flex items-center justify-center">
+                      <Image 
+                        src="/images/home/era.png" 
+                        alt="ERA" 
+                        width={140} 
+                        height={70} 
+                        // Added shrink-0, and explicitly forced the exact width/height using Tailwind
+                        className="shrink-0 object-contain max-w-none w-35 h-17.5" 
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
-              {/* Date and Location */}
-              <div className="mt-6 p-4 bg-[#F8FAFC] rounded-lg border border-zinc-200">
-                <div className="flex items-center gap-3 mb-2">
-                  <FaCalendarAlt className="text-[#76B947] text-lg" />
-                  <span className="font-semibold text-[#0A2540]">March 11–13, 2027</span>
+
+              {/* 3. Date and Location Card */}
+              <div className="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm relative">
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-3">
+                    <FaCalendarAlt className="text-[#76B947] text-lg shrink-0" />
+                    <span className="font-bold text-[#0A2540]">March 11–13, 2027</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <FaMapMarkerAlt className="text-[#76B947] text-lg shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold text-[#0A2540] block leading-tight">Manoc-Manoc, Boracay Island, Malay, Aklan, Philippines</span>
+                      <span className="text-sm text-[#D5A54D] font-medium mt-1 inline-block">The Beach Capital of the Philippines</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3 mb-1">
-                  <FaMapMarkerAlt className="text-[#76B947] text-lg" />
-                  <span className="font-semibold text-[#0A2540]">Manoc-Manoc, Boracay Island, Malay, Aklan, Philippines</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="w-5"></span>
-                  <span className="text-sm text-[#D5A54D] font-medium">The Beach Capital of the Philippines</span>
+                {/* Floating Icon - Bottom Right */}
+                <div className="absolute bottom-4 right-4 bg-[#76B947] text-white p-3 rounded-xl shadow-md">
+                  <FaUsers className="text-2xl" />
                 </div>
               </div>
             </div>
@@ -571,7 +731,6 @@ export default function AboutPage() {
 
       {/* == SYMPOSIUM AT A GLANCE == */}
       <section ref={glanceScroll.ref} className="py-16 bg-linear-to-b from-white via-[#F8FBF5] to-white relative overflow-hidden">
-        {/* Ambient palette glows */}
         <div aria-hidden className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-64 w-[70%] rounded-full bg-[#4FC3F7]/10 blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-[#76B947]/10 blur-3xl" />
         <div
@@ -612,7 +771,6 @@ export default function AboutPage() {
         ref={objectivesScroll.ref}
         className="py-16 bg-linear-to-br from-[#0B2A4A] via-[#1D3D6D] to-[#153A61] relative overflow-hidden"
       >
-        {/* Decorative glows — green + gold + sky */}
         <div
           aria-hidden
           className="absolute inset-0 opacity-40 pointer-events-none"
@@ -716,7 +874,6 @@ export default function AboutPage() {
                 className={`premium-card scroll-lift bg-white rounded-xl border border-zinc-100 p-6 text-center reveal-up stagger-${idx + 1}`}
                 style={{ ["--scroll-y" as any]: `${(1 - hostScroll.progress) * (25 - idx * 4)}px` }}
               >
-                {/* Logo */}
                 <div className="relative w-24 h-24 mx-auto mb-4">
                   <Image 
                     src={inst.logo}
