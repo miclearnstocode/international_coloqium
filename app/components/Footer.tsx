@@ -11,16 +11,21 @@ import {
 } from "react-icons/fa";
 import { fetchPublicEvents, pickFeaturedEvent } from "@/app/lib/events";
 
+// Updated fallback to match the exact 3-line format
 const FALLBACK_TITLE_LINES = [
-  "3RD INTERNATIONAL AGRI-",
-  "LIFE & BIORESOURCE",
-  "SCIENCES SYMPOSIUM",
+  "3RD INTERNATIONAL",
+  "AGRI-LIFE & BIORESOURCE SCIENCES",
+  "SYMPOSIUM",
 ];
-
 
 function splitFooterTitle(title: string): string[] {
   const clean = (title || "").replace(/\s+/g, " ").trim().toUpperCase();
   if (!clean) return FALLBACK_TITLE_LINES;
+
+  // If the title matches the symposium name, return the exact lines
+  if (clean.includes("AGRI-LIFE") || clean.includes("BIORESOURCE")) {
+    return FALLBACK_TITLE_LINES;
+  }
 
   const words = clean.split(" ");
   if (words.length <= 3) return [clean];
