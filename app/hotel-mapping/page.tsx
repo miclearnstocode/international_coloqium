@@ -422,16 +422,7 @@ export default function HotelMapping() {
         </div>
 
         <div
-          ref={heroReveal.ref}
-          className="max-w-350 mx-auto px-8 py-16 relative z-20"
-        >
-          <div className="flex items-center gap-2 text-sm text-zinc-500 mb-8 reveal-up">
-            <Link href="/" className="hover:text-[#76B947] transition-colors">
-              Home
-            </Link>
-            <span className="text-zinc-300">›</span>
-            <span className="text-[#0B2A4A] font-medium">Hotel &amp; Mapping</span>
-          </div>
+          ref={heroReveal.ref} className="max-w-350 mx-auto px-8 py-16 relative z-20">
 
           <div className="max-w-xl">
             <h1 className="text-5xl font-bold text-[#0B2A4A] mb-4 reveal-up stagger-1">

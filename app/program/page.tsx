@@ -360,14 +360,6 @@ function ProgramPageInner() {
           ref={heroReveal.ref}
           className="max-w-7xl mx-auto px-6 py-16 relative z-10"
         >
-          <div className="flex items-center gap-2 text-sm text-zinc-500 mb-6 reveal-up">
-            <Link href="/" className="hover:text-[#76B947] transition-colors">
-              {getField('hero.breadcrumb_home')}
-            </Link>
-            <span className="text-zinc-300">›</span>
-            <span className="text-[#0A2540] font-medium">{getField('hero.breadcrumb_current')}</span>
-          </div>
-
           <h1 className="text-5xl font-bold text-[#0A2540] mb-4 reveal-up stagger-1">
             {getField('hero.title')}
           </h1>

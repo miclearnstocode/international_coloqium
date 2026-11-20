@@ -872,7 +872,7 @@ function HomeInner() {
         </div>
 
         {/*  FLOATING CALL FOR ABSTRACTS CARD  */}
-        <div ref={heroCardRef} className={`hidden md:flex absolute top-10 right-10 lg:top-46.5 lg:-translate-y-1/2 lg:right-30 z-20 w-72 lg:w-88 bg-white/95 backdrop-blur-md rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white/60 p-5 lg:p-7 flex-col items-center text-center overflow-hidden transition-opacity duration-300 ${popupDone ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+        <div ref={heroCardRef} className={`hidden md:flex absolute top-10 right-10 lg:top-50 lg:-translate-y-1/2 lg:right-50 z-20 w-72 lg:w-88 bg-white/95 backdrop-blur-md rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white/60 p-5 lg:p-7 flex-col items-center text-center overflow-hidden transition-opacity duration-300 ${popupDone ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-linear-to-r from-[#F0C674] via-[#D5A54D] to-[#76B947]"></div>
           <button className="absolute top-3 right-4 lg:top-4 lg:right-5 text-gray-400 hover:text-gray-700 transition-colors">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

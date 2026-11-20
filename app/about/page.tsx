@@ -465,14 +465,6 @@ export default function AboutPage() {
           className="absolute bottom-0 left-0 w-72 h-72 bg-linear-to-tr from-[#4FC3F7]/10 to-transparent rounded-full blur-3xl -translate-x-1/4 translate-y-1/4 float-slower pointer-events-none"
         />
         <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
-          <div className="flex items-center gap-2 text-sm text-zinc-500 mb-6 reveal-up">
-            <Link href="/" className="hover:text-[#76B947] transition-colors">
-              Home
-            </Link>
-            <span className="text-zinc-300">›</span>
-            <span className="text-[#0A2540] font-medium">About</span>
-          </div>
-
           <h1 className="text-5xl font-bold text-[#0A2540] mb-4 reveal-up stagger-1">
             About the Symposium
           </h1>
