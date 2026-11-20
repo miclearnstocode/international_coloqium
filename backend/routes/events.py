@@ -8,6 +8,18 @@ from utils.decorators import super_admin_required
 events_bp = Blueprint('events', __name__)
 EVENT_TIMEZONE = timezone(timedelta(hours=8))
 
+def parse_date_safe(value):
+    """Helper to safely convert string or date object to a date object."""
+    if not value:
+        return None
+    if isinstance(value, date) and not isinstance(value, datetime):
+        return value
+    if isinstance(value, datetime):
+        return value.date()
+    try:
+        return date.fromisoformat(str(value).strip())
+    except (ValueError, TypeError):
+        return None
 
 @events_bp.route('/api/events/countdown', methods=['GET', 'OPTIONS'])
 def get_event_countdown():
@@ -28,8 +40,15 @@ def get_event_countdown():
         if not event:
             return jsonify({"detail": "No published event with a start date is configured"}), 404
 
-        start_date = date.fromisoformat(event.date.strip())
-        end_date = date.fromisoformat((event.end_date or event.date).strip())
+        start_date = parse_date_safe(event.date)
+        end_date = parse_date_safe(event.end_date) or start_date
+        
+        if not start_date:
+            return jsonify({"detail": "Event start date is invalid"}), 500
+            
+        if not end_date:
+            end_date = start_date
+
         if end_date < start_date:
             return jsonify({"detail": "Event end date cannot be before its start date"}), 500
 
@@ -39,13 +58,15 @@ def get_event_countdown():
         target_at = event_start_at if server_now < event_start_at else event_end_at
         remaining_seconds = max(0, int((target_at - server_now).total_seconds()))
 
-        response = jsonify({ "event_start_at": event_start_at.isoformat(),
-            "event_end_at": event_end_at.isoformat(), "target_at": target_at.isoformat(),
-            "server_now": server_now.isoformat(), "remaining_seconds": remaining_seconds, })
+        response = jsonify({ 
+            "event_start_at": event_start_at.isoformat(),
+            "event_end_at": event_end_at.isoformat(), 
+            "target_at": target_at.isoformat(),
+            "server_now": server_now.isoformat(), 
+            "remaining_seconds": remaining_seconds, 
+        })
         response.headers["Cache-Control"] = "no-store"
         return response, 200
-    except (TypeError, ValueError):
-        return jsonify({"detail": "Event start and end dates must use YYYY-MM-DD format"}), 500
     except Exception as e:
         traceback.print_exc()
         return jsonify({"detail": str(e)}), 500
@@ -58,7 +79,6 @@ def list_events():
     try:
         include_drafts = request.args.get('include_drafts') == '1'
         
-        # We now only check status, since is_active is gone
         q = Event.query
         if not include_drafts:
             q = q.filter_by(status='Published')
@@ -101,8 +121,8 @@ def create_event():
         new_event = Event(
             title=title,
             description=data.get('description') or '',
-            date=data.get('date') or '',
-            end_date=data.get('endDate') or '',
+            date=data.get('date') or None,
+            end_date=data.get('endDate') or None,
             submission_deadline=data.get('submissionDeadline') or None,
             is_submission_open=bool(data.get('isSubmissionOpen', True)),
             location=data.get('location') or '',
@@ -163,11 +183,11 @@ def update_event(event_id):
             changed = True
 
         if 'date' in data:
-            event.date = data['date'] or ''
+            event.date = data['date'] or None
             changed = True
 
         if 'endDate' in data:
-            event.end_date = data['endDate'] or ''
+            event.end_date = data['endDate'] or None
             changed = True
             
         if 'submissionDeadline' in data:
@@ -233,7 +253,6 @@ def delete_event(event_id):
         if not event:
             return jsonify({"detail": "Event not found"}), 404
 
-        # HARD DELETE (Since is_active is gone)
         db.session.delete(event)
         
         db.session.add(ContentAuditLog(
@@ -311,8 +330,8 @@ def bulk_save_events():
 
             ev.title = (item.get('title') or '').strip() or 'Untitled event'
             ev.description = item.get('description') or ''
-            ev.date = item.get('date') or ''
-            ev.end_date = item.get('endDate') or ''
+            ev.date = item.get('date') or None
+            ev.end_date = item.get('endDate') or None
             ev.submission_deadline = item.get('submissionDeadline') or None
             ev.is_submission_open = bool(item.get('isSubmissionOpen', True))
             ev.location = item.get('location') or ''
@@ -329,7 +348,6 @@ def bulk_save_events():
             incoming_ids.add(ev.id)
             saved.append(ev)
 
-        # Since we don't have is_active, we permanently delete ones removed in the UI
         existing = Event.query.all()
         for ev in existing:
             if ev.id not in incoming_ids:
