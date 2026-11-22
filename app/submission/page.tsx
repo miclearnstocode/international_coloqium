@@ -13,6 +13,7 @@ import {
   FaEdit, FaTrash
 } from "react-icons/fa";
 import { apiFetch } from "../lib/api";
+import AddAgencyForm from "../components/AddAgencyForm";
 
 const emptyFormData = {
   selected_track: "",
@@ -317,6 +318,7 @@ export default function AbstractSubmissionPage() {
   };
 
   const handleAddCustomAgency = () => {
+    setCustomAgency(agencySearch.trim()); // pre-fills the name in AddAgencyForm
     setShowCustomAgency(true);
     setAgencyDropdownOpen(false);
     setAgencySearch("");
@@ -358,10 +360,9 @@ export default function AbstractSubmissionPage() {
       abstract: submission.abstract || "",
       keywords: submission.keywords || ""
     });
-    const agencyExists = sucs.some((suc) => suc.name === submission.university_agency);
-    setShowCustomAgency(!agencyExists);
-    setCustomAgency(agencyExists ? "" : submission.university_agency || "");
-    setSelectedAgency(agencyExists ? submission.university_agency || "" : "");
+    setShowCustomAgency(false);
+    setCustomAgency("");
+    setSelectedAgency(submission.university_agency || "");
     setView("submit");
   };
 
@@ -399,6 +400,10 @@ export default function AbstractSubmissionPage() {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+    if (showCustomAgency) {
+      alert("Please fill in and save the new University/Agency first, or cancel adding it.");
+      return;
+    }
     setLoading(true);
 
     try {
@@ -420,10 +425,7 @@ export default function AbstractSubmissionPage() {
         }
       }
 
-      let finalAgency = formData.university_agency;
-      if (showCustomAgency && customAgency.trim()) {
-        finalAgency = customAgency.trim();
-      }
+      const finalAgency = formData.university_agency;
 
       const coAuthorsString = formData.co_authors.join(", ");
 
@@ -1129,20 +1131,18 @@ export default function AbstractSubmissionPage() {
                         <FaUniversity className="text-zinc-400 text-sm" />
                       </div>
                       <input type="text"
-                        value={showCustomAgency ? customAgency : (selectedAgency || agencySearch)}
+                        value={showCustomAgency ? "" : (selectedAgency || agencySearch)}
                         onChange={(e) => {
-                          if (showCustomAgency) {
-                            setCustomAgency(e.target.value);
-                          } else {
-                            setAgencySearch(e.target.value);
-                            setSelectedAgency("");
-                            setFormData({ ...formData, university_agency: "" });
-                            setAgencyDropdownOpen(true);
-                          }
+                          if (showCustomAgency) return;
+                          setAgencySearch(e.target.value);
+                          setSelectedAgency("");
+                          setFormData({ ...formData, university_agency: "" });
+                          setAgencyDropdownOpen(true);
                         }}
                         onFocus={() => { if (!showCustomAgency) setAgencyDropdownOpen(true); }}
-                        placeholder={showCustomAgency ? "Enter University/Agency name" : "Search University/Agency..."}
-                        required
+                        readOnly={showCustomAgency}
+                        placeholder={showCustomAgency ? "Fill in the new agency details below" : "Search University/Agency..."}
+                        required={!showCustomAgency}
                         className="w-full pl-10 pr-10 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#76B947] focus:ring-1 focus:ring-[#76B947] transition-all" />
                       <button type="button" onClick={() => setAgencyDropdownOpen(!agencyDropdownOpen)}
                         className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-[#0A2540]">
@@ -1189,27 +1189,23 @@ export default function AbstractSubmissionPage() {
                     )}
 
                     {showCustomAgency && (
-                      <div className="mt-2 p-3 bg-[#F2F9FF] border border-[#4FC3F7]/30 rounded-lg">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs font-semibold text-[#1D3D6D]">Adding new agency</span>
-                          <button type="button" onClick={() => {
+                      <div className="mt-2 p-4 bg-[#F2F9FF] border border-[#4FC3F7]/30 rounded-lg">
+                        <p className="text-xs font-semibold text-[#1D3D6D] mb-3">Adding new agency — this will be saved for future use.</p>
+                        <AddAgencyForm
+                          existing={sucs}
+                          initialName={customAgency}
+                          onAdded={(agency) => {
+                            setSucs((prev) => (prev.some((s) => s.id === agency.id) ? prev : [...prev, agency]));
+                            selectAgency(agency.name);
+                            setCustomAgency("");
+                          }}
+                          onCancel={() => {
                             setShowCustomAgency(false);
                             setCustomAgency("");
                             setSelectedAgency("");
                             setFormData({ ...formData, university_agency: "" });
-                          }} className="text-xs text-[#1D3D6D] hover:text-[#4FC3F7] transition-colors">
-                            Cancel
-                          </button>
-                        </div>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <FaUniversity className="text-zinc-400 text-sm" />
-                          </div>
-                          <input type="text" value={customAgency} onChange={(e) => setCustomAgency(e.target.value)}
-                            placeholder="Enter full University/Agency name"
-                            className="w-full pl-10 pr-4 py-2.5 text-sm border border-[#4FC3F7]/50 rounded-lg focus:outline-none focus:border-[#76B947] focus:ring-1 focus:ring-[#76B947] bg-white" />
-                        </div>
-                        <p className="text-xs text-[#1D3D6D]/70 mt-2">This agency will be saved for future use.</p>
+                          }}
+                        />
                       </div>
                     )}
                   </div>
