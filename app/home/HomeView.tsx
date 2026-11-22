@@ -651,19 +651,23 @@ function HomeInner() {
   const speakersReveal = useInView<HTMLDivElement>();
   const speakersScroll = useScrollProgress<HTMLElement>();
   const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null);
-  const [showJournalCover, setShowJournalCover] = useState(false);
+  const [previewLogo, setPreviewLogo] = useState<{ src: string; alt: string; caption?: string; wide?: boolean } | null>(null);
 
   useEffect(() => {
-    if (!showJournalCover) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setShowJournalCover(false); };
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    if (!previewLogo) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setPreviewLogo(null); };
     window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [showJournalCover]);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [previewLogo]);
+
+  // Hover (desktop), focus (keyboard) and tap (touch) all show the enlarged logo
+  const logoPreview = (logo: { src: string; alt: string; caption?: string; wide?: boolean }) => ({
+    onMouseEnter: () => setPreviewLogo(logo),
+    onMouseLeave: () => setPreviewLogo(null),
+    onFocus: () => setPreviewLogo(logo),
+    onBlur: () => setPreviewLogo(null),
+    onClick: () => setPreviewLogo(logo),
+  });
 
   useEffect(() => {
     if (!selectedSpeaker) return;
@@ -929,63 +933,94 @@ function HomeInner() {
           {/* Bottom group (Info bar, buttons, countdown) */}
           <div className="w-full flex flex-col justify-end mt-auto">
             {/* Info Bar */}
-            <div className="reveal-up stagger-1 bg-white/95 backdrop-blur-md w-[98%] max-w-350 mx-auto rounded-2xl shadow-[0_12px_40px_rgb(0,0,0,0.12)] border border-white/50 relative z-20 py-4 px-4 xl:px-6 flex flex-col xl:flex-row items-center justify-between gap-4 overflow-x-auto">
-              <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-4 xl:gap-6 w-full whitespace-nowrap">
+            <div className="reveal-up stagger-1 bg-white/95 backdrop-blur-md w-[98%] max-w-400 mx-auto rounded-2xl shadow-[0_12px_40px_rgb(0,0,0,0.12)] border border-white/50 relative z-20 py-5 px-6 xl:px-10 flex flex-col items-center justify-between gap-4 overflow-x-auto">
+              <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-4 xl:gap-7 w-full whitespace-nowrap">
                 
                 <div className="flex flex-col items-center gap-1.5">
                   <div className="flex items-center gap-1.5 text-[#1b5e20]">
-                    <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                    <span className="text-m font-bold text-[#0A2540] leading-tight text-center">Abstract Submission<br/>and Registration</span>
+                    <svg className="w-7 h-7 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    <span className="text-base font-bold text-[#0A2540] leading-tight text-center">Abstract Submission<br/>and Registration</span>
                   </div>
-                  <div className="bg-[#0A5C0A] text-white text-[12px] font-bold px-4 py-1 rounded-full tracking-wider shadow-sm">NOVEMBER 16, 2026</div>
+                  <div className="bg-[#0A5C0A] text-white text-[13px] font-bold px-4 py-1.5 rounded-full tracking-wider shadow-sm">NOVEMBER 16, 2026</div>
                 </div>
 
                 <div className="hidden md:block w-px h-10 bg-[#76B947]/30 shrink-0"></div>
 
                 <div className="flex flex-col items-center gap-1.5">
                   <div className="flex items-center gap-1.5 text-[#1b5e20]">
-                    <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                    <span className="text-m font-bold text-[#0A2540] leading-tight text-center">Abstract Submission<br/>Deadline</span>
+                    <svg className="w-7 h-7 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    <span className="text-base font-bold text-[#0A2540] leading-tight text-center">Abstract Submission<br/>Deadline</span>
                   </div>
-                  <div className="bg-[#0A5C0A] text-white text-[12px] font-bold px-4 py-1 rounded-full tracking-wider shadow-sm">JANUARY 20, 2027</div>
+                  <div className="bg-[#0A5C0A] text-white text-[13px] font-bold px-4 py-1.5 rounded-full tracking-wider shadow-sm">JANUARY 20, 2027</div>
                 </div>
 
                 <div className="hidden md:block w-px h-10 bg-[#76B947]/30 shrink-0"></div>
 
                 <div className="flex items-center gap-2 text-[#1b5e20]">
-                  <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                  <svg className="w-7 h-7 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                   <div className="flex flex-col">
-                    <span className="text-m font-bold tracking-widest uppercase leading-none mb-0.5">March</span>
-                    <span className="text-sm font-bold leading-none text-[#0A2540]">11–13, 2027</span>
+                    <span className="text-base font-bold tracking-widest uppercase leading-none mb-1">March</span>
+                    <span className="text-base font-bold leading-none text-[#0A2540]">11–13, 2027</span>
                   </div>
                 </div>
 
                 <div className="hidden md:block w-px h-10 bg-[#76B947]/30 shrink-0"></div>
 
                 <div className="flex items-center gap-2">
-                  <svg className="w-6 h-6 text-[#1b5e20] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                  <svg className="w-7 h-7 text-[#1b5e20] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                   <div className="text-left">
-                    <p className="text-m font-bold text-[#0A2540] leading-tight mb-0.5">Paradise Garden Resort<br/>Hotel & Convention Center</p>
-                    <p className="text-[12px] text-gray-500 leading-tight">Manoc-Manoc, Boracay Island,<br/>Malay, Aklan, Philippines</p>
+                    <p className="text-base font-bold text-[#0A2540] leading-tight mb-1">Paradise Garden Resort<br/>Hotel & Convention Center</p>
+                    <p className="text-[13px] text-gray-500 leading-tight">Manoc-Manoc, Boracay Island,<br/>Malay, Aklan, Philippines</p>
                   </div>
                 </div>
 
-                <div className="hidden xl:block w-px h-10 bg-[#76B947]/30 shrink-0"></div>
 
-                <div className="flex items-center gap-3">
-                  <p className="text-[14px] font-bold text-[#0A2540] uppercase tracking-wider">PARTNER JOURNAL:</p>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowJournalCover(true)}
-                      aria-label="Enlarge Annals of Tropical Research cover"
-                      title="Click to enlarge"
-                      className="relative w-12 h-15 rounded-md overflow-hidden border border-gray-200 bg-white shadow-sm shrink-0 cursor-zoom-in hover:scale-105 hover:shadow-md transition-transform duration-300"
-                    >
-                      <Image src="/images/cover-page-atr.png" alt="Annals of Tropical Research cover" fill className="object-cover" />
-                    </button>
-                    <p className="text-[14px] font-bold text-[#0A2540] leading-tight text-left">Annals of Tropical<br/>Research (ATR)</p>
+                <div className="hidden md:block w-px h-16 bg-[#76B947]/40 shrink-0"></div>
+
+                <div className="flex flex-col items-center gap-1.5">
+                  <p className="text-[13px] font-extrabold text-[#1b5e20] uppercase tracking-widest">Host:</p>
+                  <div
+                    role="button" tabIndex={0} aria-label="Enlarge Capiz State University logo"
+                    {...logoPreview({ src: "/images/capsu-logo.png", alt: "Capiz State University", caption: "Capiz State University" })}
+                    className="relative w-16 h-16 shrink-0 cursor-zoom-in hover:scale-110 transition-transform duration-300"
+                  ><Image src="/images/capsu-logo.png" alt="Capiz State University" fill className="object-contain" /></div>
+                </div>
+
+                <div className="hidden md:block w-px h-16 bg-[#76B947]/40 shrink-0"></div>
+
+                <div className="flex flex-col items-center gap-1.5">
+                  <p className="text-[13px] font-extrabold text-[#1b5e20] uppercase tracking-widest">Co-Hosts:</p>
+                  <div className="flex items-center gap-1.5">
+                    <div
+                      role="button" tabIndex={0} aria-label="Enlarge co-host logo 1"
+                      {...logoPreview({ src: "https://res.cloudinary.com/xbloqjom/image/upload/v1794368585/hiroshima-logo.webp", alt: "Co-host 1" })}
+                      className="relative w-16 h-16 rounded-full overflow-hidden border border-gray-200 bg-white cursor-zoom-in hover:scale-110 transition-transform duration-300"
+                    ><Image src="https://res.cloudinary.com/xbloqjom/image/upload/v1794368585/hiroshima-logo.webp" alt="Co-host 1" fill className="object-contain p-0.5" /></div>
+                    <div
+                      role="button" tabIndex={0} aria-label="Enlarge co-host logo 2"
+                      {...logoPreview({ src: "https://res.cloudinary.com/xbloqjom/image/upload/v1794368684/vsu-logo.png", alt: "Co-host 2" })}
+                      className="relative w-16 h-16 rounded-full overflow-hidden border border-gray-200 bg-white cursor-zoom-in hover:scale-110 transition-transform duration-300"
+                    ><Image src="https://res.cloudinary.com/xbloqjom/image/upload/v1794368684/vsu-logo.png" alt="Co-host 2" fill className="object-contain p-0.5" /></div>
+                    <div
+                      role="button" tabIndex={0} aria-label="Enlarge co-host logo 3"
+                      {...logoPreview({ src: "https://res.cloudinary.com/xbloqjom/image/upload/v1794368844/usc-logo.svg", alt: "Co-host 3" })}
+                      className="relative w-16 h-16 rounded-full overflow-hidden border border-gray-200 bg-white cursor-zoom-in hover:scale-110 transition-transform duration-300"
+                    ><Image src="https://res.cloudinary.com/xbloqjom/image/upload/v1794368844/usc-logo.svg" alt="Co-host 3" fill className="object-contain p-0.5" /></div>
                   </div>
+                </div>
+
+                <div className="hidden md:block w-px h-16 bg-[#76B947]/40 shrink-0"></div>
+
+                <div className="flex flex-col items-center gap-1.5">
+                  <p className="text-[13px] font-extrabold text-[#1b5e20] uppercase tracking-widest">With Special Issue In:</p>
+                  <button
+                    type="button"
+                    {...logoPreview({ src: "/images/atr.png", alt: "Annals of Tropical Research", caption: "Annals of Tropical Research (ATR)", wide: true })}
+                    aria-label="Enlarge Annals of Tropical Research logo"
+                    className="relative w-60 h-16 cursor-zoom-in hover:scale-105 transition-transform duration-300"
+                  >
+                    <Image src="/images/atr.png" alt="Annals of Tropical Research" fill className="object-contain" />
+                  </button>
                 </div>
 
               </div>
@@ -1152,29 +1187,22 @@ function HomeInner() {
         </div>
       )}
 
-      {/* Partner journal cover lightbox */}
-      {showJournalCover && (
-        <div className="fixed inset-0 z-200 flex items-center justify-center p-4 sm:p-8" role="dialog" aria-modal="true" aria-label="Annals of Tropical Research cover">
-          <div
-            className="absolute inset-0 bg-[#0A2540]/80 backdrop-blur-sm cursor-zoom-out"
-            style={{ animation: "fadeIn 0.3s ease-out" }}
-            onClick={() => setShowJournalCover(false)}
-          />
-          <div
-            className="relative flex flex-col items-center gap-4"
-            style={{ animation: "scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1)" }}
-          >
-            <button
-              onClick={() => setShowJournalCover(false)}
-              aria-label="Close"
-              className="absolute -top-3 -right-3 z-10 w-10 h-10 bg-white rounded-full flex items-center justify-center text-zinc-500 hover:text-red-500 transition-all shadow-lg"
-            >
-              <FaTimes />
-            </button>
-            <div className="relative w-[80vw] max-w-md h-[75vh] max-h-170 rounded-lg overflow-hidden bg-white shadow-2xl border-4 border-white">
-              <Image src="/images/cover-page-atr.png" alt="Annals of Tropical Research cover" fill sizes="(max-width: 768px) 80vw, 448px" className="object-contain" />
+      {/* Logo hover preview (pointer-events-none on desktop so it never blocks or flickers; tap to close on touch) */}
+      {previewLogo && (
+        <div
+          className="fixed inset-0 z-200 flex items-center justify-center p-4 md:pointer-events-none"
+          role="dialog"
+          aria-label={previewLogo.alt}
+          onClick={() => setPreviewLogo(null)}
+        >
+          <div className="absolute inset-0 bg-[#0A2540]/60 backdrop-blur-sm" style={{ animation: "fadeIn 0.2s ease-out" }} />
+          <div className="relative flex flex-col items-center gap-4" style={{ animation: "scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1)" }}>
+            <div className={`relative bg-white rounded-2xl shadow-2xl border-4 border-white ${previewLogo.wide ? "w-[90vw] max-w-2xl h-[35vh] max-h-80" : "w-[70vw] max-w-sm h-[70vw] max-h-96"}`}>
+              <Image src={previewLogo.src} alt={previewLogo.alt} fill sizes="(max-width: 768px) 90vw, 672px" className="object-contain p-5" />
             </div>
-            <p className="text-white font-bold text-lg text-center drop-shadow">Annals of Tropical Research (ATR)</p>
+            {previewLogo.caption && (
+              <p className="text-white font-bold text-lg text-center drop-shadow">{previewLogo.caption}</p>
+            )}
           </div>
         </div>
       )}

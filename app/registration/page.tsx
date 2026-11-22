@@ -493,11 +493,11 @@ export default function RegistrationPage() {
         </div>
       </section>
 
-      {/* == REGISTRATION FEES == */}
+      {/* == REGISTRATION FEES + PAYMENT ACCOUNT == */}
       <section ref={feesScroll.ref} className="py-16 relative overflow-hidden">
         <div aria-hidden className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-64 w-[70%] rounded-full bg-[#4FC3F7]/10 blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-[#76B947]/10 blur-3xl" />
-        
+
         <div
           ref={feesReveal.ref}
           className={`relative max-w-350 mx-auto px-8 grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch ${feesReveal.inView ? "in-view" : ""}`}
@@ -511,7 +511,6 @@ export default function RegistrationPage() {
 
             <div className="premium-card bg-white border border-t-0 border-zinc-200 rounded-b-xl p-8 flex-1 flex flex-col">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 items-start">
-                {/* Left Column: Fee & Eligibility */}
                 <div>
                   <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-widest mb-2">Registration Fee</h3>
                   <p className="text-4xl font-extrabold text-[#0A2540] mb-6">₱ 6,000.00</p>
@@ -529,7 +528,6 @@ export default function RegistrationPage() {
                   </ul>
                 </div>
 
-                {/* Right Column: Inclusions — aligned with "Who can register" heading */}
                 <div className="md:pt-23">
                   <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">What's Included:</h3>
                   <div className="bg-[#F8FBF5] rounded-xl border border-[#76B947]/20 p-4">
@@ -546,56 +544,49 @@ export default function RegistrationPage() {
               </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* == PAYMENT INFO == */}
-      <section
-        ref={paymentReveal.ref}
-        className={`py-16 bg-white border-t border-zinc-100 relative overflow-hidden ${paymentReveal.inView ? "in-view" : ""}`}
-      >
-        <div aria-hidden className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-64 w-[60%] rounded-full bg-[#76B947]/8 blur-3xl" />
-        <div className="relative max-w-350 mx-auto px-8">
-          <div className="max-w-4xl mx-auto reveal-up">
-            <div className="bg-linear-to-r from-[#0B2A4A] to-[#1D3D6D] text-white p-5 flex items-center gap-3 rounded-t-xl mb-0">
+          {/* Paying Registration Account Card (beside fees) */}
+          <div className="w-full reveal-up stagger-2 flex flex-col h-full">
+            <div className="bg-linear-to-r from-[#0B2A4A] to-[#1D3D6D] text-white p-5 flex items-center gap-3 rounded-t-xl shrink-0">
               <FaRegListAlt className="text-xl" />
               <h2 className="text-lg font-bold uppercase">Paying Registration Account</h2>
             </div>
 
-            <div className="premium-card bg-white border border-t-0 border-zinc-200 rounded-b-xl p-8">
-              <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-8 items-center">
-                <div className="space-y-6">
-                  <div className="grid grid-cols-[160px_1fr] gap-4 text-sm">
-                    <span className="font-bold text-[#0A2540] whitespace-nowrap">Account Name</span>
-                    <span className="text-zinc-600">To be announced</span>
+            <div className="premium-card bg-white border border-t-0 border-zinc-200 rounded-b-xl p-8 flex-1 flex flex-col">
+              {/* Account details */}
+              <div className="grid grid-cols-[130px_1fr] gap-x-4 gap-y-3 text-sm mb-6">
+                <span className="font-bold text-[#0A2540] whitespace-nowrap">Account Name</span>
+                <span className="text-zinc-600">To be announced</span>
 
-                    <span className="font-bold text-[#0A2540] whitespace-nowrap">Bank Name</span>
-                    <span className="text-zinc-600">To be announced</span>
+                <span className="font-bold text-[#0A2540] whitespace-nowrap">Bank Name</span>
+                <span className="text-zinc-600">To be announced</span>
 
-                    <span className="font-bold text-[#0A2540] whitespace-nowrap">Account Number</span>
-                    <span className="text-zinc-600">To be announced</span>
+                <span className="font-bold text-[#0A2540] whitespace-nowrap">Account Number</span>
+                <span className="text-zinc-600">To be announced</span>
 
-                    <span className="font-bold text-[#0A2540] whitespace-nowrap">Account Type</span>
-                    <span className="text-zinc-600">To be announced</span>
+                <span className="font-bold text-[#0A2540] whitespace-nowrap">Account Type</span>
+                <span className="text-zinc-600">To be announced</span>
 
-                    <span className="font-bold text-[#0A2540] whitespace-nowrap">SWIFT/BIC</span>
-                    <span className="text-zinc-600">To be announced</span>
-                  </div>
-                </div>
+                <span className="font-bold text-[#0A2540] whitespace-nowrap">SWIFT/BIC</span>
+                <span className="text-zinc-600">To be announced</span>
+              </div>
 
-                <div className="flex justify-center items-center h-full py-4 md:py-0">
-                  <FaUniversity className="text-[#1D3D6D] text-8xl drop-shadow-sm" />
-                </div>
+              {/* Building logo — restored, centered divider */}
+              <div className="flex items-center gap-4 my-2">
+                <div className="flex-1 h-px bg-linear-to-r from-transparent via-zinc-200 to-zinc-200" />
+                <FaUniversity className="text-[#1D3D6D] text-5xl drop-shadow-sm shrink-0" aria-hidden />
+                <div className="flex-1 h-px bg-linear-to-l from-transparent via-zinc-200 to-zinc-200" />
+              </div>
 
-                <div className="bg-[#F2F9FF] border border-[#4FC3F7]/30 rounded-lg p-6 h-full flex flex-col justify-center">
-                  <div className="flex items-start gap-3">
-                    <FaRegFileAlt className="text-[#1D3D6D] mt-1 text-xl shrink-0" />
-                    <div>
-                      <p className="font-bold text-[#0A2540] text-sm mb-2">Please upload your proof of payment</p>
-                      <div className="text-xs text-zinc-600 space-y-1">
-                        <p>Email: <span className="font-semibold text-[#0A2540]">internationalsymposium@capsu.edu.ph</span></p>
-                        <p>Subject: <span className="font-semibold text-[#0A2540]">IC2025 Payment – [Your Name]</span></p>
-                      </div>
+              {/* Upload note */}
+              <div className="bg-[#F2F9FF] border border-[#4FC3F7]/30 rounded-lg p-6 mt-auto">
+                <div className="flex items-start gap-3">
+                  <FaRegFileAlt className="text-[#1D3D6D] mt-1 text-xl shrink-0" />
+                  <div>
+                    <p className="font-bold text-[#0A2540] text-sm mb-2">Please upload your proof of payment</p>
+                    <div className="text-xs text-zinc-600 space-y-1">
+                      <p>Email: <span className="font-semibold text-[#0A2540] break-all">internationalsymposium@capsu.edu.ph</span></p>
+                      <p>Subject: <span className="font-semibold text-[#0A2540]">IC2025 Payment – [Your Name]</span></p>
                     </div>
                   </div>
                 </div>

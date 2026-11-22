@@ -1,4 +1,4 @@
-npm run dev -- -H 127.0.0.1 -p 3000 start this server
+npm run dev -- -H 127.0.0.1 -p 3000 start Frontend service
 
 NEXT_PUBLIC_API_URL=http://127.0.0.1:5200
 
