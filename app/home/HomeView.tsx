@@ -933,7 +933,7 @@ function HomeInner() {
           {/* Bottom group (Info bar, buttons, countdown) */}
           <div className="w-full flex flex-col justify-end mt-auto">
             {/* Info Bar */}
-            <div className="reveal-up stagger-1 bg-white/95 backdrop-blur-md w-[98%] max-w-400 mx-auto rounded-2xl shadow-[0_12px_40px_rgb(0,0,0,0.12)] border border-white/50 relative z-20 py-5 px-6 xl:px-10 flex flex-col items-center justify-between gap-4 overflow-x-auto">
+            <div className="reveal-up stagger-1 bg-white/95 backdrop-blur-md w-[98%] max-w-420 mx-auto rounded-2xl shadow-[0_12px_40px_rgb(0,0,0,0.12)] border border-white/50 relative z-20 py-5 px-6 xl:px-10 flex flex-col items-center justify-between gap-4 overflow-x-auto">
               <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-4 xl:gap-7 w-full whitespace-nowrap">
                 
                 <div className="flex flex-col items-center gap-1.5">
