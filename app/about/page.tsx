@@ -193,27 +193,21 @@ export default function AboutPage() {
   ];
 
   const objectives = [
-    "Provide researchers, faculty members, and students with opportunities to present and disseminate their research findings and innovations",
-    "Facilitate interdisciplinary discussions on emerging issues and developments in agriculture, life sciences, and bioresource sciences",
-    "Strengthen research collaboration and academic linkages among participating universities, research institutions, government agencies, and industry partners",
-    "Promote internationalization through greater participation and engagement of international researchers and institutions",
-    "Provide opportunities for young and emerging researchers to interact with established scientists and experts",
-    "Identify potential areas for collaborative research, academic exchange, and other joint initiatives",
-    "Contribute to the advancement of sustainable and science-based solutions to challenges affecting agriculture, food systems, natural resources, and society"
+    "Research Presentation & Dissemination",
+    "Interdisciplinary Dialogue",
+    "Cross-Sector Research Partnerships",
+    "International Research Participation",
+    "Emerging Researcher Networking",
+    "Joint Research & Academic Exchange",
+    "Sustainable, Science-Based Solutions",
   ];
 
   const whoShouldAttend = [
-    "International delegates and researchers",
-    "Scientists and research professionals",
-    "Representatives of universities and research institutions",
-    "Faculty members",
-    "Graduate and undergraduate students",
-    "Eligible high-school research presenters",
-    "Government agencies and research councils",
-    "Professional and scientific organizations",
-    "Non-government organizations",
-    "Industry and private-sector partners",
-    "Stakeholders in agriculture, life sciences, fisheries, natural resources, food, health, innovation, and bioresource sciences"
+    "International delegates, scientists, and research professionals",
+    "Faculty and representatives of universities and research institutions",
+    "Graduate and undergraduate students, and eligible high-school research presenters",
+    "Government agencies, research councils, and professional, scientific, and non-governmental organizations",
+    "Industry partners and stakeholders in agriculture, life sciences, fisheries, natural resources, food, health, innovation, and bioresource sciences",
   ];
 
   const committeeData = [
@@ -795,7 +789,7 @@ export default function AboutPage() {
             <h2 className="text-3xl font-bold text-white uppercase reveal-up">Symposium Objectives</h2>
             <div className="w-16 h-1 gold-underline mx-auto mt-4 rounded-full reveal-up stagger-1"></div>
             <p className="text-gray-300 mt-4 max-w-3xl mx-auto reveal-up stagger-2">
-              The symposium generally aims to provide an international platform for the presentation, dissemination, and exchange of research and innovations in agriculture, life sciences, and bioresource sciences.
+              An international forum for research and innovation in agriculture, life sciences, and bioresource sciences.
             </p>
           </div>
 
@@ -805,11 +799,11 @@ export default function AboutPage() {
                 key={idx}
                 className={`reveal-up stagger-${(idx % 6) + 1} bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:bg-white/20 hover:border-[#76B947]/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl`}
               >
-                <div className="flex items-start gap-4">
-                  <div className="text-[#76B947] text-xl mt-1">
+                <div className="flex items-center gap-3">
+                  <div className="shrink-0 text-[#76B947] text-xl">
                     <FaCheckCircle />
                   </div>
-                  <p className="text-white text-sm text-justify leading-relaxed">{item}</p>
+                  <p className="text-sm font-semibold leading-snug text-white">{item}</p>
                 </div>
               </div>
             ))}
@@ -830,11 +824,11 @@ export default function AboutPage() {
             <p className="text-gray-600 mt-4 reveal-up stagger-2">The symposium welcomes:</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
             {whoShouldAttend.map((item, idx) => (
               <div
                 key={idx}
-                className={`reveal-up stagger-${(idx % 6) + 1} premium-card flex items-center gap-3 bg-linear-to-b from-[#F7FBF3] to-white rounded-lg p-4 border border-zinc-100`}
+                className={`reveal-up stagger-${(idx % 6) + 1} premium-card flex items-center gap-3 bg-linear-to-b from-[#F7FBF3] to-white rounded-lg p-4 border border-zinc-100 lg:col-span-2 ${whoShouldAttend.length % 3 === 2 && idx === whoShouldAttend.length - 2 ? "lg:col-start-2" : ""}`}
               >
                 <FaCheckCircle className="text-[#76B947] text-sm shrink-0" />
                 <span className="text-sm text-gray-700">{item}</span>

@@ -3,12 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import {
-  FaFacebookF,
-  FaTwitter,
-  FaLinkedinIn,
-  FaInstagram,
-} from "react-icons/fa";
+import { FaFacebookF } from "react-icons/fa";
 import { fetchPublicEvents, pickFeaturedEvent } from "@/app/lib/events";
 
 // Updated fallback to match the exact 3-line format
@@ -100,28 +95,11 @@ export default function Footer() {
         <div className="flex items-center gap-4">
           <span className="text-sm font-semibold mr-2">Follow Us</span>
           <a
-            href="#"
+            href="https://www.facebook.com/capsurdemonitor"
+            aria-label="Follow us on Facebook"
             className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#D5A54D] transition-colors"
           >
-            <FaFacebookF />
-          </a>
-          <a
-            href="#"
-            className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#D5A54D] transition-colors"
-          >
-            <FaTwitter />
-          </a>
-          <a
-            href="#"
-            className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#D5A54D] transition-colors"
-          >
-            <FaLinkedinIn />
-          </a>
-          <a
-            href="#"
-            className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#D5A54D] transition-colors"
-          >
-            <FaInstagram />
+            <FaFacebookF aria-hidden="true" />
           </a>
         </div>
       </div>

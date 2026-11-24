@@ -32,7 +32,7 @@ class User(db.Model):
     full_name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
-    role = db.Column(db.Enum('user', 'staff', 'admin'), nullable=False, default='user')
+    role = db.Column(db.Enum('user', 'staff', 'admin', 'evaluator'), nullable=False, default='user')
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
     def to_dict(self):
@@ -91,6 +91,12 @@ class AbstractSubmission(db.Model):
             'status': self.status,
             'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None
         }
+
+
+class AbstractAcceptanceEmail(db.Model):
+    __tablename__ = 'abstract_acceptance_emails'
+    submission_id = db.Column(db.Integer, primary_key=True)
+    sent_at = db.Column(db.DateTime, nullable=True)
 
 
 class SUC(db.Model):

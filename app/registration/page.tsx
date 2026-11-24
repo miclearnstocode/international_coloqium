@@ -6,7 +6,7 @@ import UnderDevelopment from "../components/UnderDevelopment";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { 
-  FaRegListAlt, FaUsers, FaGlobeAsia, FaUserTie, FaUserGraduate, FaUserCircle,
+  FaBook, FaCertificate, FaUtensils,
   FaRegCalendarAlt, FaInfoCircle, FaDollarSign, FaRegUser, 
   FaRegPaperPlane, FaUniversity, FaRegFileAlt, FaChevronRight,
   FaRegCheckCircle, FaPaperPlane, FaLaptop, FaSearch, FaEnvelopeOpenText,
@@ -114,23 +114,15 @@ export default function RegistrationPage() {
   const feesScroll = useScrollProgress<HTMLElement>();
   const [showDevModal, setShowDevModal] = useState(false);
 
-  const fees = [
-    { icon: <FaGlobeAsia />, text: "International participants" },
-    { icon: <FaUsers />, text: "Local professionals/researchers" },
-    { icon: <FaUserTie />, text: "Faculty" },
-    { icon: <FaUserGraduate />, text: "Graduate students" },
-    { icon: <FaUserCircle />, text: "Undergraduate students" },
-  ];
-
   const inclusions = [
-    "Access to all sessions",
-    "Conference materials",
-    "Certificate",
-    "Meals during the event",
+    { icon: FaLaptop, label: "Access to all sessions" },
+    { icon: FaBook, label: "Conference materials" },
+    { icon: FaCertificate, label: "Certificate" },
+    { icon: FaUtensils, label: "Meals during the event" },
   ];
 
   const importantDates = [
-    { icon: <FaRegPaperPlane />, title: "Opening of Abstract Submission and Registration", date: "November 16, 2026" },
+    { icon: <FaRegPaperPlane />, title: "Opening of Abstract Submission and Registration", date: "November 25, 2026" },
     { icon: <FaRegFileAlt />, title: "Abstract Submission Deadline", date: "January 20, 2027" },
     { icon: <FaRegCheckCircle />, title: "Notification of Acceptance", date: "January 25, 2027" },
     { icon: <FaRegUser />, title: "Final Registration and Payment Deadline", date: "February 06, 2027" },
@@ -253,6 +245,7 @@ export default function RegistrationPage() {
           border-color: rgba(118, 185, 71, 0.35);
           box-shadow: 0 2px 4px rgba(11, 42, 74, 0.05), 0 12px 24px -10px rgba(11, 42, 74, 0.16), 0 32px 60px -20px rgba(11, 42, 74, 0.22), 0 0 0 1px rgba(118, 185, 71, 0.05);
         }
+        .premium-card.registration-info-card:hover { transform: none; }
         .premium-card:hover::before {
           background: linear-gradient(135deg, rgba(118,185,71,0.9) 0%, rgba(213,165,77,0.5) 50%, rgba(76,195,247,0.9) 100%);
         }
@@ -304,19 +297,6 @@ export default function RegistrationPage() {
           background-color: rgba(118, 185, 71, 0.08);
         }
 
-        .fee-item {
-          transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        .fee-item:hover {
-          transform: translateX(6px);
-        }
-        .fee-item svg {
-          transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s ease;
-        }
-        .fee-item:hover svg {
-          transform: scale(1.2) rotate(8deg);
-          color: #76B947;
-        }
 
         .scroll-lift {
           will-change: transform;
@@ -386,14 +366,14 @@ export default function RegistrationPage() {
         <div className="relative max-w-350 mx-auto px-8 grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
           
           {/* Important Dates */}
-          <div className="reveal-up stagger-1 flex flex-col h-full">
-            <div className="bg-linear-to-r from-[#0B2A4A] to-[#1D3D6D] text-white p-5 flex items-center gap-3 rounded-t-xl shrink-0 bg-clip-padding">
-              <FaRegCalendarAlt className="text-xl" />
-              <h2 className="text-lg font-bold uppercase">Important Dates</h2>
+          <div className="premium-card registration-info-card reveal-up stagger-1 flex min-w-0 flex-col gap-5 rounded-3xl border border-zinc-200 bg-white p-4 sm:p-6">
+            <div className="flex min-h-18 shrink-0 items-center justify-center gap-3 rounded-2xl bg-linear-to-r from-[#103454] to-[#061F39] px-4 py-5 text-center text-white lg:min-h-22 xl:min-h-18">
+              <FaRegCalendarAlt aria-hidden="true" className="shrink-0 text-xl" />
+              <h2 className="text-lg font-extrabold uppercase leading-tight tracking-wide sm:text-xl 2xl:text-2xl">Important Dates</h2>
             </div>
 
-            <div className="premium-card bg-white border border-t-0 border-zinc-200 rounded-b-xl p-6 relative flex-1">
-              <div className="absolute left-10.75 top-12 bottom-12 w-0.5 bg-zinc-200"></div>
+            <div className="relative flex-1 px-1 py-2">
+              <div className="absolute left-6 top-8 bottom-8 w-0.5 bg-zinc-200"></div>
 
               <div className="space-y-6 relative dates-timeline">
                 {importantDates.map((date, idx) => (
@@ -412,15 +392,15 @@ export default function RegistrationPage() {
           </div>
 
           {/* Submission & Registration Workflow */}
-          <div className="reveal-up stagger-2 flex flex-col h-full">
-            <div className="bg-linear-to-r from-[#0B2A4A] to-[#1D3D6D] text-white p-5 flex items-center gap-3 rounded-t-xl shrink-0 bg-clip-padding">
-              <FaBullseye className="text-xl" />
-              <h2 className="text-lg font-bold uppercase leading-tight">Submission & Registration Workflow</h2>
+          <div className="premium-card registration-info-card reveal-up stagger-2 flex min-w-0 flex-col gap-5 rounded-3xl border border-zinc-200 bg-white p-4 sm:p-6">
+            <div className="flex min-h-18 shrink-0 items-center justify-center gap-3 rounded-2xl bg-linear-to-r from-[#103454] to-[#061F39] px-4 py-5 text-center text-white lg:min-h-22 xl:min-h-18">
+              <FaBullseye aria-hidden="true" className="shrink-0 text-xl" />
+              <h2 className="text-lg font-extrabold uppercase leading-tight tracking-wide sm:text-xl 2xl:text-2xl">Submission & Registration Workflow</h2>
             </div>
 
-            <div className="premium-card bg-white border border-t-0 border-zinc-200 rounded-b-xl relative flex-1 overflow-hidden">
+            <div className="relative min-h-96 flex-1 overflow-hidden lg:min-h-0">
               
-              <div className="absolute inset-0 p-6 flex flex-col">
+              <div className="absolute inset-0 flex flex-col px-4">
                 <style dangerouslySetInnerHTML={{__html: `
                   .workflow-scroll::-webkit-scrollbar { width: 6px; }
                   .workflow-scroll::-webkit-scrollbar-track { background: #f4f4f5; border-radius: 8px; }
@@ -503,56 +483,67 @@ export default function RegistrationPage() {
           className={`relative max-w-350 mx-auto px-8 grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch ${feesReveal.inView ? "in-view" : ""}`}
         >
           {/* Registration Fees Card */}
-          <div className="w-full reveal-up stagger-1 flex flex-col h-full">
-            <div className="bg-linear-to-r from-[#0B2A4A] to-[#1D3D6D] text-white p-5 flex items-center gap-3 rounded-t-xl shrink-0">
-              <FaRegListAlt className="text-xl" />
-              <h2 className="text-lg font-bold uppercase tracking-wide">Registration Fees</h2>
+          <div className="premium-card reveal-up stagger-1 flex h-full min-w-0 flex-col gap-5 rounded-3xl border border-zinc-200 bg-white p-4 sm:p-6">
+            <div className="flex items-center justify-center gap-3 rounded-2xl bg-linear-to-r from-[#103454] to-[#061F39] px-4 py-5 text-center text-white">
+              <FaClipboardList aria-hidden="true" className="shrink-0 text-xl" />
+              <h2 className="text-lg font-extrabold uppercase tracking-wide sm:text-2xl">Registration Fees</h2>
             </div>
 
-            <div className="premium-card bg-white border border-t-0 border-zinc-200 rounded-b-xl p-8 flex-1 flex flex-col">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 items-start">
-                <div>
-                  <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-widest mb-2">Registration Fee</h3>
-                  <p className="text-4xl font-extrabold text-[#0A2540] mb-6">₱ 6,000.00</p>
-
-                  <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">Who can register:</h3>
-                  <ul className="space-y-3">
-                    {fees.map((fee, idx) => (
-                      <li key={idx} className={`fee-item flex items-center gap-3 text-zinc-700 reveal-up stagger-${(idx % 6) + 1}`}>
-                        <div className="w-7 h-7 rounded-full bg-[#F2F9FF] flex items-center justify-center text-[#1D3D6D] shrink-0 text-xs">
-                          {fee.icon}
-                        </div>
-                        <span className="text-xs font-medium">{fee.text}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="md:pt-23">
-                  <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">What's Included:</h3>
-                  <div className="bg-[#F8FBF5] rounded-xl border border-[#76B947]/20 p-4">
-                    <ul className="space-y-3">
-                      {inclusions.map((item, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-xs text-zinc-700">
-                          <FaCheckCircle className="text-[#76B947] mt-0.5 shrink-0 text-sm" />
-                          <span className="font-medium">{item}</span>
-                        </li>
-                      ))}
-                    </ul>
+            <div className="flex flex-1 flex-col">
+              <div className="mb-6 rounded-2xl bg-[#F1F7EC] p-4 sm:p-5">
+                <dl className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2">
+                  <div className="rounded-xl bg-linear-to-r from-[#082139] to-[#082B50] p-5 text-white min-[480px]:col-span-2 sm:p-6">
+                    <dt className="text-lg font-bold sm:text-xl">Early Bird Registration</dt>
+                    <dd className="mt-2 text-4xl font-extrabold tracking-tight tabular-nums sm:text-5xl">₱6,000.00</dd>
+                    <dd className="mt-3 flex items-center gap-2 text-sm font-semibold text-[#D8E8C9] sm:text-base">
+                      <FaRegCalendarAlt aria-hidden="true" className="shrink-0" />
+                      <span>Until <time dateTime="2027-01-20">January 20, 2027</time></span>
+                    </dd>
                   </div>
-                </div>
+                  <div className="flex flex-col rounded-xl border border-[#AFD78A] bg-white p-3 text-center">
+                    <dt className="font-bold text-zinc-900">Undergraduate Students</dt>
+                    <dd className="mt-auto pt-3 text-2xl font-extrabold tracking-tight text-[#142F4B] tabular-nums">₱5,500.00</dd>
+                  </div>
+                  <div className="flex flex-col rounded-xl border border-[#AFD78A] bg-white p-3 text-center">
+                    <dt className="font-bold text-zinc-900">Walk-in Registration</dt>
+                    <dd className="mt-auto pt-3 text-2xl font-extrabold tracking-tight text-[#142F4B] tabular-nums">₱6,500.00</dd>
+                  </div>
+                </dl>
+              </div>
+
+              <section className="relative mt-2 rounded-2xl border border-[#8BCC49] bg-[#F3F9ED] px-3 pb-4 pt-6">
+                <h3 className="absolute -top-4 left-3 flex items-center gap-2 rounded-xl bg-[#32770B] px-3 py-2 text-sm font-extrabold uppercase text-white sm:px-4">
+                  <FaCheckCircle aria-hidden="true" className="shrink-0" />
+                  What's Included
+                </h3>
+                <ul className="grid grid-cols-2 gap-y-4 min-[520px]:grid-cols-4">
+                  {inclusions.map(({ icon: Icon, label }, index) => (
+                    <li key={label} className={`flex min-w-0 flex-col items-center gap-2 px-2 text-center text-xs font-semibold leading-tight text-zinc-900 ${index % 2 === 1 ? "border-l border-[#A9D675]" : index > 0 ? "min-[520px]:border-l min-[520px]:border-[#A9D675]" : ""}`}>
+                      <Icon aria-hidden="true" className="text-2xl text-[#28650C]" />
+                      {label}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+
+              <div className="mt-5 rounded-2xl bg-[#EEF7E9] px-4 py-5 text-center">
+                <h3 className="text-sm font-extrabold uppercase tracking-wide text-[#28650C]">Early Bird Registration Deadline</h3>
+                <p className="mt-1 flex items-center justify-center gap-3 text-2xl font-extrabold text-[#082746] before:h-px before:flex-1 before:bg-[#76B947] after:h-px after:flex-1 after:bg-[#76B947] sm:text-3xl">
+                  <time dateTime="2027-01-20">January 20, 2027</time>
+                </p>
+                <p className="mt-2 text-sm italic text-zinc-700">Walk-in registration is subject to slot availability.</p>
               </div>
             </div>
           </div>
 
           {/* Paying Registration Account Card (beside fees) */}
-          <div className="w-full reveal-up stagger-2 flex flex-col h-full">
-            <div className="bg-linear-to-r from-[#0B2A4A] to-[#1D3D6D] text-white p-5 flex items-center gap-3 rounded-t-xl shrink-0">
-              <FaRegListAlt className="text-xl" />
-              <h2 className="text-lg font-bold uppercase">Paying Registration Account</h2>
+          <div className="premium-card reveal-up stagger-2 flex h-full min-w-0 flex-col gap-5 rounded-3xl border border-zinc-200 bg-white p-4 sm:p-6">
+            <div className="flex items-center justify-center gap-3 rounded-2xl bg-linear-to-r from-[#103454] to-[#061F39] px-4 py-5 text-center text-white">
+              <FaClipboardList aria-hidden="true" className="shrink-0 text-xl" />
+              <h2 className="text-lg font-extrabold uppercase tracking-wide sm:text-2xl">Paying Registration Account</h2>
             </div>
 
-            <div className="premium-card bg-white border border-t-0 border-zinc-200 rounded-b-xl p-8 flex-1 flex flex-col">
+            <div className="flex flex-1 flex-col">
               {/* Account details */}
               <div className="grid grid-cols-[130px_1fr] gap-x-4 gap-y-3 text-sm mb-6">
                 <span className="font-bold text-[#0A2540] whitespace-nowrap">Account Name</span>
@@ -630,7 +621,7 @@ export default function RegistrationPage() {
         title="Registration Form Coming Soon"
         description="The online registration portal is currently under development and will open soon."
         notes={[
-          "Online registration will open on November 16, 2026.",
+          "Online registration will open on November 25, 2026.",
           "Early bird payment deadline: January 10, 2027.",
           "Final registration and payment deadline: February 06, 2027.",
         ]}

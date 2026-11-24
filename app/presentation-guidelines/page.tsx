@@ -515,7 +515,7 @@ export default function PresentationGuidelinesPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               {[
-                { icon: <FaRuler />, label: "Poster Size", value: "36\" × 48\" (Portrait)" },
+                { icon: <FaRuler />, label: "Poster Size", value: "80cm × 180cm (Portrait)" },
                 { icon: <FaFileAlt />, label: "Font", value: "Arial, Multiple Sizes" },
                 { icon: <FaPalette />, label: "Design", value: "High Contrast Colors" },
                 { icon: <FaClock />, label: "Setup", value: "1 Hour Before Session" },

@@ -1,0 +1,63 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { apiFetch } from "@/app/lib/api";
+
+export interface Submission {
+  id: number;
+  research_title: string;
+  author: string;
+  co_author: string | null;
+  university_agency: string;
+  selected_track: string;
+  specific_track: string;
+  presentation_type: string | null;
+  abstract_drive_view_url: string | null;
+  abstract_drive_download_url: string | null;
+  keywords: string;
+  status: string;
+  acceptance_email?: "pending" | "sent";
+}
+
+export function useEvaluatorSubmissions() {
+  const router = useRouter();
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loaded, setLoaded] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const controller = new AbortController();
+    async function load() {
+      try {
+        const response = await apiFetch("/api/evaluator/submissions", { signal: controller.signal });
+        if (response.status === 401 || response.status === 422) {
+          router.replace("/login");
+          return;
+        }
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || "Could not load submissions.");
+        setSubmissions(data.submissions);
+        setLoaded(true);
+      } catch (err) {
+        if (!controller.signal.aborted) {
+          setError(err instanceof Error ? err.message : "Could not load submissions.");
+        }
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    }
+    void load();
+    return () => controller.abort();
+  }, [router, attempt]);
+
+  function retry() {
+    setLoading(true);
+    setError("");
+    setAttempt((current) => current + 1);
+  }
+
+  return { submissions, setSubmissions, loading, loaded, error, setError, retry };
+}

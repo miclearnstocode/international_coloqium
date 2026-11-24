@@ -1,7 +1,7 @@
 npm run dev -- -H 127.0.0.1 -p 3000 start Frontend service
 
 NEXT_PUBLIC_API_URL=http://127.0.0.1:5200
-
+Evaluator1234
 npm run build
 
 virtual env creation

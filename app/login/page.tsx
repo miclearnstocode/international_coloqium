@@ -44,7 +44,10 @@ export default function LoginPage() {
           if (res.ok) {
             const user = await res.json();
             // User is already logged in — auto-redirect so they don't have to login every time
-            if (user.role === "staff") {
+            if (user.role === "evaluator") {
+              router.replace("/evaluator");
+              return;
+            } else if (user.role === "staff") {
               router.replace("/staff/dashboard");
               return;
             } else if (user.role === "admin") {
@@ -103,7 +106,9 @@ export default function LoginPage() {
         }
 
         // Redirect based on role
-        if (data.user.role === "staff") {
+        if (data.user.role === "evaluator") {
+          router.push("/evaluator");
+        } else if (data.user.role === "staff") {
           router.push("/staff/dashboard");
         } else if (data.user.role === "admin") {
           router.push("/admin");

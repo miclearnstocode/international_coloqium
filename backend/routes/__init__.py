@@ -5,6 +5,7 @@ from .content import content_bp
 from .events import events_bp
 from .pages import pages_bp
 from .users import users_bp
+from .evaluation import evaluation_bp
 
 ALL_BLUEPRINTS = [
     auth_bp,
@@ -14,4 +15,5 @@ ALL_BLUEPRINTS = [
     events_bp,
     pages_bp,
     users_bp,
+    evaluation_bp,
 ]

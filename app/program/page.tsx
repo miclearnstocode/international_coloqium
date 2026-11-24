@@ -587,7 +587,7 @@ function ProgramPageInner() {
               <div className="w-20 h-28 bg-[#F2F9FF] mb-2 relative overflow-hidden rounded">
                 <Image src={getField('download.cover_image') || "/program-cover.png"} alt="Program Cover" fill className="object-cover" />
               </div>
-              <p className="text-[8px] font-bold text-gray-700 mt-1 leading-tight">INTERNATIONAL<br/>SCIENCE<br/>SYMPOSIUM<br/>2027</p>
+              <p className="text-[8px] font-bold text-gray-700 mt-1 leading-tight">3rd INTERNATIONAL<br/>AGRI-LIFE & BIORESOURCE<br/>SCIENCES SYMPOSIUM<br/>2027</p>
             </div>
           </div>
 

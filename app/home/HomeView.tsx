@@ -268,14 +268,6 @@ function AbstractPopup({
     autoCloseRef.current = null;
   };
 
-  const instantClose = () => {
-    if (closingRef.current) return;
-    closingRef.current = true;
-    clearAuto();
-    setOpen(false);
-    onDone();
-  };
-
   closeRef.current = () => {
     if (closingRef.current) return;
     closingRef.current = true;
@@ -389,8 +381,7 @@ function AbstractPopup({
             aria-modal="true"
             aria-label="Call for abstract"
             onClick={(e) => e.stopPropagation()}
-            className="popup-card relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-[0_30px_80px_rgba(0,0,0,0.35)] border border-white/60 px-8 pt-10 pb-8 flex flex-col items-center text-center"
-          >
+            className="popup-card relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-[0_30px_80px_rgba(0,0,0,0.35)] border border-white/60 px-8 pt-10 pb-8 flex flex-col items-center text-center">
             <div className="absolute top-0 left-0 right-0 h-2 bg-linear-to-r from-[#F0C674] via-[#D5A54D] to-[#76B947]" />
 
             <button
@@ -435,17 +426,9 @@ function AbstractPopup({
             </p>
             <div className="w-3/5 h-0.5 bg-[#F0C674] mb-4" />
 
-            <p className="text-gray-600 text-sm leading-relaxed mb-6">
+            <p className="text-gray-600 text-sm leading-relaxed">
               Submit your research and share your scientific contributions with experts, educators, and industry leaders from the Philippines and around the world.
             </p>
-
-            <Link
-              href="/abstract-submission"
-              onClick={() => instantClose()}
-              className="flex items-center justify-center gap-2 w-full py-3 rounded-full bg-[#0A5C0A] hover:bg-[#084a08] text-white text-sm font-bold shadow-md hover:-translate-y-0.5 transition-all duration-300"
-            >
-              Submit Abstract →
-            </Link>
           </div>
         </div>
       )}
@@ -918,9 +901,6 @@ function HomeInner() {
           <p className="text-[#0B2A4A] font-bold text-sm lg:text-base leading-tight mb-2">3rd International Agri-Life &<br/>Bioresource Sciences Symposium</p>
           <div className="w-3/5 h-0.5 bg-[#F0C674] mb-4"></div>
           <p className="text-gray-600 text-[11px] lg:text-xs leading-relaxed mb-5 px-1">Submit your research and share your scientific contributions with experts, educators, and industry leaders from the Philippines and around the world.</p>
-          <Link href="/abstract-submission" className="flex items-center justify-center gap-2 w-full py-2.5 lg:py-3 rounded-full bg-[#0A5C0A] hover:bg-[#084a08] text-white text-xs lg:text-sm font-bold shadow-md hover:-translate-y-0.5 transition-all duration-300">
-            Submit Abstract →
-          </Link>
         </div>
 
         <div
@@ -939,9 +919,9 @@ function HomeInner() {
                 <div className="flex flex-col items-center gap-1.5">
                   <div className="flex items-center gap-1.5 text-[#1b5e20]">
                     <svg className="w-7 h-7 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                    <span className="text-base font-bold text-[#0A2540] leading-tight text-center">Abstract Submission<br/>and Registration</span>
+                    <span className="text-base font-bold text-[#0A2540] leading-tight text-center">Registration Early<br/>Bird Deadline</span>
                   </div>
-                  <div className="bg-[#0A5C0A] text-white text-[13px] font-bold px-4 py-1.5 rounded-full tracking-wider shadow-sm">NOVEMBER 16, 2026</div>
+                  <div className="bg-[#0A5C0A] text-white text-[13px] font-bold px-4 py-1.5 rounded-full tracking-wider shadow-sm">JANUARY 20, 2027</div>
                 </div>
 
                 <div className="hidden md:block w-px h-10 bg-[#76B947]/30 shrink-0"></div>
@@ -1120,7 +1100,13 @@ function HomeInner() {
               >
                 <div className="relative w-32 h-32 mx-auto mb-6 rounded-full overflow-hidden border-4 border-white shadow-lg bg-[#E2E8F0] flex items-center justify-center transition-transform duration-500 group-hover:scale-105">
                   {speaker.img ? (
-                    <Image src={speaker.img} alt={speaker.name} fill className="object-cover" />
+                    <Image
+                      src={speaker.img}
+                      alt={speaker.name}
+                      fill
+                      className="object-cover"
+                      style={speaker.name === "Joval N. Martinez" ? { objectPosition: "center 0%" } : undefined}
+                    />
                   ) : (
                     <FaUser className="text-5xl text-zinc-400 group-hover:scale-110 transition-transform duration-500" />
                   )}

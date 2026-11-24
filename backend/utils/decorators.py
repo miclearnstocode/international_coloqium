@@ -32,3 +32,13 @@ def staff_required(fn):
             return jsonify({"detail": "Staff access required"}), 403
         return fn(*args, **kwargs)
     return wrapper
+
+def evaluator_required(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        verify_jwt_in_request()
+        user = User.query.get(int(get_jwt_identity()))
+        if not user or user.role != 'evaluator':
+            return jsonify({'detail': 'Evaluator access required.'}), 403
+        return fn(*args, **kwargs)
+    return wrapper

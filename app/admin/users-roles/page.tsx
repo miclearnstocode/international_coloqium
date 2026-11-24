@@ -1,16 +1,18 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, type FormEvent } from "react";
 import {FaHome, FaChevronRight, FaSearch, FaUser, FaUserShield, FaUserTie, FaTrash, FaEdit, FaSave, FaTimes, } from "react-icons/fa";
 import { Sidebar } from "@/app/admin/admin-components/Sidebar";
 import { AdminHeader } from "@/app/admin/admin-components/AdminHeader";
 import { apiFetch } from "../../lib/api";
 
+type Role = "user" | "staff" | "admin" | "evaluator";
+
 interface UserRow {
   id: number;
   full_name: string;
   email: string;
-  role: "user" | "staff" | "admin";
+  role: Role;
   created_at: string | null;
   is_self: boolean;
 }
@@ -19,20 +21,26 @@ interface Stats {
   total: number;
   admin: number;
   staff: number;
+  evaluator: number;
   user: number;
 }
 
 export default function UsersAndRolesPage() {
   const [users, setUsers] = useState<UserRow[]>([]);
-  const [stats, setStats] = useState<Stats>({ total: 0, admin: 0, staff: 0, user: 0 });
+  const [stats, setStats] = useState<Stats>({ total: 0, admin: 0, staff: 0, evaluator: 0, user: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [roleFilter, setRoleFilter] = useState<"all" | "admin" | "staff" | "user">("all");
+  const [roleFilter, setRoleFilter] = useState<"all" | Role>("all");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
-  const [editRole, setEditRole] = useState<"user" | "staff" | "admin">("user");
+  const [editRole, setEditRole] = useState<Role>("user");
   const [savingId, setSavingId] = useState<number | null>(null);
+
+  const [showEvaluatorForm, setShowEvaluatorForm] = useState(false);
+  const [creatingEvaluator, setCreatingEvaluator] = useState(false);
+  const [createError, setCreateError] = useState("");
+  const [createMessage, setCreateMessage] = useState("");
 
   const token = () =>
     typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
@@ -51,7 +59,7 @@ export default function UsersAndRolesPage() {
       }
       const data = await res.json();
       setUsers(data.users || []);
-      setStats(data.stats || { total: 0, admin: 0, staff: 0, user: 0 });
+      setStats(data.stats || { total: 0, admin: 0, staff: 0, evaluator: 0, user: 0 });
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -62,6 +70,29 @@ export default function UsersAndRolesPage() {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  const createEvaluator = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const fields = new FormData(event.currentTarget);
+    setCreatingEvaluator(true);
+    setCreateError("");
+    setCreateMessage("");
+    try {
+      const res = await apiFetch("/api/admin/users/evaluators", {
+        method: "POST",
+        body: JSON.stringify(Object.fromEntries(fields)),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.detail || "Could not create evaluator account.");
+      setShowEvaluatorForm(false);
+      setCreateMessage("Evaluator account created. They can now sign in.");
+      await fetchUsers();
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : "Could not create evaluator account.");
+    } finally {
+      setCreatingEvaluator(false);
+    }
+  };
 
   // ===== Filtered list =====
   const filtered = useMemo(() => {
@@ -140,6 +171,7 @@ export default function UsersAndRolesPage() {
     const map = {
       admin: { cls: "bg-purple-100 text-purple-700", Icon: FaUserShield, label: "Admin" },
       staff: { cls: "bg-blue-100 text-blue-700", Icon: FaUserTie, label: "Staff" },
+      evaluator: { cls: "bg-green-100 text-green-800", Icon: FaUserTie, label: "Evaluator" },
       user:  { cls: "bg-gray-100 text-gray-700", Icon: FaUser, label: "User" },
     } as const;
     const { cls, Icon, label } = map[role];
@@ -172,11 +204,45 @@ export default function UsersAndRolesPage() {
             </div>
           </div>
 
+          <button
+            type="button"
+            onClick={() => { setShowEvaluatorForm(!showEvaluatorForm); setCreateError(""); setCreateMessage(""); }}
+            disabled={creatingEvaluator}
+            aria-expanded={showEvaluatorForm}
+            className="mb-4 rounded-lg bg-[#0B2A4A] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+          >
+            {showEvaluatorForm ? "Cancel" : "Create evaluator"}
+          </button>
+          {createMessage && <p role="status" className="mb-4 text-sm text-green-800">{createMessage}</p>}
+          {showEvaluatorForm && (
+            <form onSubmit={createEvaluator} className="mb-6 rounded-xl border border-zinc-200 bg-white p-5">
+              <div className="grid gap-4 md:grid-cols-3">
+                <label className="grid gap-1 text-sm font-medium">
+                  Full name
+                  <input name="full_name" required maxLength={100} autoComplete="off" className="rounded border border-zinc-300 px-3 py-2" />
+                </label>
+                <label className="grid gap-1 text-sm font-medium">
+                  Email
+                  <input name="email" type="email" required maxLength={100} autoComplete="off" className="rounded border border-zinc-300 px-3 py-2" />
+                </label>
+                <label className="grid gap-1 text-sm font-medium">
+                  Password
+                  <input name="password" type="password" required minLength={8} maxLength={72} autoComplete="new-password" className="rounded border border-zinc-300 px-3 py-2" />
+                </label>
+              </div>
+              {createError && <p role="alert" className="mt-3 text-sm text-red-700">{createError}</p>}
+              <button disabled={creatingEvaluator} className="mt-4 rounded-lg bg-[#28650C] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
+                {creatingEvaluator ? "Creating account…" : "Create account"}
+              </button>
+            </form>
+          )}
+
           {/* Stats row */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
             <StatCard label="Total Users" value={stats.total} color="bg-gray-100 text-gray-700" />
             <StatCard label="Admins" value={stats.admin} color="bg-purple-100 text-purple-700" />
             <StatCard label="Staff" value={stats.staff} color="bg-blue-100 text-blue-700" />
+            <StatCard label="Evaluators" value={stats.evaluator} color="bg-green-100 text-green-800" />
             <StatCard label="Regular Users" value={stats.user} color="bg-gray-100 text-gray-700" />
           </div>
 
@@ -186,6 +252,7 @@ export default function UsersAndRolesPage() {
               <RoleTab label="All" active={roleFilter === "all"} onClick={() => setRoleFilter("all")} />
               <RoleTab label="Admins" active={roleFilter === "admin"} onClick={() => setRoleFilter("admin")} />
               <RoleTab label="Staff" active={roleFilter === "staff"} onClick={() => setRoleFilter("staff")} />
+              <RoleTab label="Evaluator" active={roleFilter === "evaluator"} onClick={() => setRoleFilter("evaluator")} />
               <RoleTab label="Users" active={roleFilter === "user"} onClick={() => setRoleFilter("user")} />
             </div>
             <div className="relative">
@@ -256,12 +323,13 @@ export default function UsersAndRolesPage() {
                             {isEditing ? (
                               <select
                                 value={editRole}
-                                onChange={(e) => setEditRole(e.target.value as any)}
+                                onChange={(e) => setEditRole(e.target.value as Role)}
                                 disabled={user.is_self}
                                 className="px-2 py-1 border border-gray-300 rounded text-sm bg-white disabled:bg-gray-100"
                               >
                                 <option value="user">User</option>
                                 <option value="staff">Staff</option>
+                                <option value="evaluator">Evaluator</option>
                                 <option value="admin">Admin</option>
                               </select>
                             ) : (

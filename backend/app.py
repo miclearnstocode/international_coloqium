@@ -18,6 +18,14 @@ MAIL_FROM = os.getenv('MAIL_FROM', MAIL_USERNAME)
 MAIL_FROM_NAME = os.getenv('MAIL_FROM_NAME', 'Symposium Portal')
 
 app = Flask(__name__)
+app.config.update(
+    MAIL_SERVER=MAIL_SERVER,
+    MAIL_PORT=MAIL_PORT,
+    MAIL_USERNAME=MAIL_USERNAME,
+    MAIL_PASSWORD=MAIL_PASSWORD,
+    MAIL_FROM=MAIL_FROM,
+    MAIL_FROM_NAME=MAIL_FROM_NAME,
+)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['JWT_SECRET_KEY'] =  os.getenv('JWT_SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'mysql+pymysql://root:@127.0.0.1:3306/researchdb')
