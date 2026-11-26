@@ -2,7 +2,8 @@ from datetime import datetime, timezone
 import smtplib
 
 from flask import Blueprint, current_app, jsonify, request
-from models import AbstractAcceptanceEmail, AbstractPaymentProof, AbstractRejectionEmail, AbstractSubmission, db
+from flask_jwt_extended import get_jwt_identity
+from models import AbstractAcceptanceEmail, AbstractEvaluatorDecision, AbstractPaymentProof, AbstractRejectionEmail, AbstractSubmission, User, db
 from utils.acceptance_email import send_acceptance_email, send_rejection_email
 from utils.decorators import evaluator_required, super_admin_required
 
@@ -58,11 +59,17 @@ def decision_query():
 @evaluation_bp.get('/api/admin/abstract-decisions')
 @super_admin_required
 def list_decisions():
-    rows = decision_query().add_entity(AbstractPaymentProof).outerjoin(
+    rows = decision_query().add_entity(AbstractPaymentProof).add_entity(AbstractEvaluatorDecision).add_columns(User.full_name).outerjoin(
         AbstractPaymentProof, AbstractPaymentProof.submission_id == AbstractSubmission.id,
+    ).outerjoin(
+        AbstractEvaluatorDecision,
+        (AbstractEvaluatorDecision.submission_id == AbstractSubmission.id)
+        & (AbstractEvaluatorDecision.status == AbstractSubmission.status),
+    ).outerjoin(
+        User, User.id == AbstractEvaluatorDecision.evaluator_id,
     ).filter(AbstractSubmission.status.in_(('pending', 'accepted', 'rejected'))).all()
     decisions = []
-    for submission, acceptance, rejection, proof in rows:
+    for submission, acceptance, rejection, proof, evaluation, evaluator_name in rows:
         notification = {'accepted': acceptance, 'rejected': rejection}.get(submission.status)
         sent_at = notification.sent_at if notification else None
         decisions.append({
@@ -71,6 +78,7 @@ def list_decisions():
             'author': submission.author,
             'email_address': submission.email_address,
             'status': submission.status,
+            'evaluator_name': (evaluator_name or evaluation.evaluator_name) if evaluation else None,
             'rejection_reason': rejection.reason if rejection and submission.status == 'rejected' else None,
             'email_status': 'sent' if sent_at else 'pending' if notification else 'untracked',
             'email_sent_at': sent_at.replace(tzinfo=timezone.utc).isoformat() if sent_at else None,
@@ -90,11 +98,22 @@ def accept_submission(submission_id):
     return accept_and_notify(submission_id)
 
 
+def record_evaluator_decision(submission_id, status):
+    evaluator = db.session.get(User, int(get_jwt_identity()))
+    db.session.merge(AbstractEvaluatorDecision(
+        submission_id=submission_id,
+        evaluator_id=evaluator.id,
+        evaluator_name=evaluator.full_name,
+        status=status,
+    ))
+
+
 def accept_and_notify(submission_id):
     updated = AbstractSubmission.query.filter_by(id=submission_id, status='pending').update(
         {'status': 'accepted'}
     )
     if updated:
+        record_evaluator_decision(submission_id, 'accepted')
         notification = db.session.get(AbstractAcceptanceEmail, submission_id)
         if notification is None:
             db.session.add(AbstractAcceptanceEmail(submission_id=submission_id))
@@ -158,6 +177,7 @@ def decide_submission(submission_id):
             {'status': 'rejected'}
         )
         if updated:
+            record_evaluator_decision(submission_id, 'rejected')
             notification = db.session.get(AbstractRejectionEmail, submission_id)
             if notification is None:
                 db.session.add(AbstractRejectionEmail(submission_id=submission_id, reason=reason.strip()))

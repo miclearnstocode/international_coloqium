@@ -12,8 +12,6 @@ export const partnerInstitutionsPage: PageDefinition = {
     {
       section: 'Page Hero',
       fields: [
-        { key: 'hero.breadcrumb_home', label: 'Breadcrumb Home Text', type: 'text', value: 'Home' },
-        { key: 'hero.breadcrumb_current', label: 'Breadcrumb Current Text', type: 'text', value: 'Partners' },
         { key: 'hero.title', label: 'Hero Title', type: 'text', value: 'Partners & Collaborating Institutions' },
         {
           key: 'hero.subtitle',

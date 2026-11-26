@@ -1,22 +1,50 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Link from "next/link";
+import Image from "next/image";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { FaBuilding, FaCar, FaChevronRight, FaInfoCircle, FaMapMarkerAlt } from "react-icons/fa";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import UnderDevelopment from "../components/UnderDevelopment";
-import Link from "next/link";
-import Image from "next/image";
-import { useState, useEffect, useRef } from "react";
-import { FaMapMarkerAlt, FaBuilding, FaUsers, FaBed, FaUniversity, FaPlus, FaMinus, FaChevronRight, FaInfoCircle, FaCar, FaPlane, FaWalking, FaDownload, } from "react-icons/fa";
+import LoadingIndicator from "../components/LoadingIndicator";
+import { hotelMappingPage } from "../admin/content-structures/hotelMapping";
+import { apiFetch } from "../lib/api";
+import { venueIcons } from "./venueIcons";
+import HotelActionCard, { hotelActionUrl } from "./HotelActionCard";
 
 const VenueMap = dynamic(() => import("./VenueMap"), {
   ssr: false,
-  loading: () => (
-    <div className="w-full h-full bg-[#F2F9FF] flex items-center justify-center text-zinc-400 text-sm">
-      Loading map…
-    </div>
-  ),
+  loading: () => <div className="grid h-full place-items-center"><LoadingIndicator label="Loading map…" /></div>,
 });
+
+type HotelContent = {
+  content?: Record<string, Record<string, string | null>>;
+  items?: Record<string, Record<string, unknown>[]>;
+};
+
+const sectionLabels = new Map(hotelMappingPage.structure.flatMap((section) =>
+  section.fields.map(({ key }) => [key, section.section] as const)
+));
+
+const itemText = (value: unknown) => typeof value === "string" ? value.trim() : "";
+
+function contentList(content: HotelContent | null, key: string) {
+  const items = content?.items?.[key];
+  return Array.isArray(items)
+    ? items.filter((item) => item && typeof item === "object" && !Array.isArray(item))
+    : [];
+}
+
+function coordinates(value: unknown): [number, number] | undefined {
+  const parts = typeof value === "string" ? value.split(",") : Array.isArray(value) ? value : [];
+  if (parts.length !== 2 || parts.some((part) => typeof part !== "number" && (typeof part !== "string" || !part.trim()))) return;
+  const [lat, lng] = parts.map(Number);
+  if (Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180) {
+    return [lat, lng];
+  }
+}
 
 //  Reusable scroll-reveal hook 
 function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
@@ -115,69 +143,61 @@ export default function HotelMapping() {
 
   const heroScroll = useScrollProgress<HTMLElement>();
   const mapScroll = useScrollProgress<HTMLElement>();
-  const [showMapModal, setShowMapModal] = useState(false);
-  const [showContactModal, setShowContactModal] = useState(false);
+  const [saved, setSaved] = useState<HotelContent | null>(null);
+  const [error, setError] = useState("");
+  const [attempt, setAttempt] = useState(0);
+  const [selectedVenue, setSelectedVenue] = useState<number | null>(null);
+  const [unavailableAction, setUnavailableAction] = useState<"download" | "contact" | null>(null);
 
-  const PRIMARY_VENUE = {
-    name: "Paradise Garden Resort Hotel & Convention Center",
-    shortName: "Paradise Garden Resort",
-    address: "Manoc-Manoc, Boracay Island, Malay, Aklan, Philippines",
-    coords: [11.9674, 121.9246] as [number, number],
-  };
+  useEffect(() => {
+    const controller = new AbortController();
+    async function loadContent() {
+      try {
+        const response = await apiFetch("/api/content/hotel-mapping", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        if (!response.ok) throw new Error();
+        const content: HotelContent = await response.json();
+        if (!controller.signal.aborted) setSaved(content);
+      } catch {
+        if (!controller.signal.aborted) setError("Hotel and venue information could not be loaded.");
+      }
+    }
+    void loadContent();
+    return () => controller.abort();
+  }, [attempt]);
 
-  // Individual on-site venues. All markers are clustered around the resort.
-  const venues = [
-    {
-      id: 1,
-      name: "Paradise Garden Resort — Main Convention Center",
-      desc: "Plenary sessions, keynotes, and opening ceremonies",
-      loc: "Paradise Garden Resort, Boracay Island",
-      icon: <FaBuilding className="text-white" />,
-      color: "bg-[#1D3D6D]",
-      glow: "rgba(29, 61, 109, 0.4)",
-      pos: [11.9674, 121.9246] as [number, number],
-    },
-    {
-      id: 2,
-      name: "Convention Hall A — Track 1 & 2",
-      desc: "Parallel technical sessions (Agriculture & Life Sciences)",
-      loc: "Paradise Garden Resort, Boracay Island",
-      icon: <FaUsers className="text-white" />,
-      color: "bg-[#4CAF50]",
-      glow: "rgba(76, 175, 80, 0.4)",
-      pos: [11.9679, 121.9250] as [number, number],
-    },
-    {
-      id: 3,
-      name: "Convention Hall B — Track 3 & 4",
-      desc: "Parallel technical sessions (Bioresources & One Health)",
-      loc: "Paradise Garden Resort, Boracay Island",
-      icon: <FaBuilding className="text-white" />,
-      color: "bg-[#F57C00]",
-      glow: "rgba(245, 124, 0, 0.4)",
-      pos: [11.9671, 121.9253] as [number, number],
-    },
-    {
-      id: 4,
-      name: "Poster & Exhibit Pavilion",
-      desc: "Poster presentations, exhibits, and networking area",
-      loc: "Paradise Garden Resort, Boracay Island",
-      icon: <FaUniversity className="text-white" />,
-      color: "bg-[#8E24AA]",
-      glow: "rgba(142, 36, 170, 0.4)",
-      pos: [11.9668, 121.9243] as [number, number],
-    },
-    {
-      id: 5,
-      name: "Resort Accommodation Wing",
-      desc: "Official room block for invited guests and delegates",
-      loc: "Paradise Garden Resort, Boracay Island",
-      icon: <FaBed className="text-white" />,
-      color: "bg-[#E53935]",
-      glow: "rgba(229, 57, 53, 0.4)",
-      pos: [11.9676, 121.9240] as [number, number],
-    },
-  ];
+  function field(key: string) {
+    const [section, name] = key.split(".");
+    const legacySection = sectionLabels.get(key);
+    return itemText(saved?.content?.[section]?.[name]
+      ?? (legacySection ? saved?.content?.[legacySection]?.[name] : undefined));
+  }
+
+  const center = coordinates([field("map.center_lat"), field("map.center_lng")]);
+  const zoomValue = field("map.zoom");
+  const zoom = zoomValue ? Number(zoomValue) : NaN;
+  const hasMap = Boolean(center && Number.isInteger(zoom) && zoom >= 0 && zoom <= 19);
+  const mapUrl = hotelActionUrl(field("download.file_url"));
+  const hasDownload = field("download.title") || field("download.description") || field("download.button_text") || mapUrl;
+  const contactUrl = hotelActionUrl(field("bottom_cta.button_link"));
+  const venues = useMemo(() => contentList(saved, "venues_items").map((item, index) => ({
+    id: index,
+    name: itemText(item.name),
+    description: itemText(item.desc),
+    location: itemText(item.loc),
+    markerLabel: itemText(item.num).match(/^\d{1,3}$/)?.[0],
+    pos: coordinates(item.pos),
+    color: itemText(item.color).match(/^(?:bg-\[)?(#[0-9a-f]{6})(?:\])?$/i)?.[1],
+    Icon: venueIcons.get(itemText(item.icon))?.Icon ?? FaMapMarkerAlt,
+  })).filter(({ name }) => name), [saved]);
+  const markers = useMemo(() => venues.flatMap(({ id, name, pos, color, markerLabel }) =>
+    pos ? [{ id, name, pos, color, markerLabel }] : []
+  ), [venues]);
+  const travel = contentList(saved, "travel_items").filter((item) => itemText(item.title) || itemText(item.description));
+  const hasNote = field("note.title") || field("note.text");
+  const hasContact = field("bottom_cta.title") || field("bottom_cta.description") || field("bottom_cta.button_text") || contactUrl;
 
   return (
     <div className="min-h-screen bg-linear-to-b from-white via-[#F8FBF5] to-white font-sans text-[#0B2A4A] flex flex-col overflow-x-hidden">
@@ -426,24 +446,29 @@ export default function HotelMapping() {
 
           <div className="max-w-xl">
             <h1 className="text-5xl font-bold text-[#0B2A4A] mb-4 reveal-up stagger-1">
-              Hotel &amp; Mapping
+              {field("hero.title") || "Hotel & Mapping"}
             </h1>
             <div className="w-16 h-1 gold-underline mb-6 reveal-up stagger-2 rounded-full"></div>
-            <p className="text-lg text-zinc-600 leading-relaxed reveal-up stagger-3">
-              The 3rd International Agri-Life &amp; Bioresource Science Symposium
-              will be held at the{" "}
-              <span className="font-semibold text-[#0B2A4A]">
-                {PRIMARY_VENUE.name}
-              </span>{" "}
-              in {PRIMARY_VENUE.address}. Find your way to all event venues
-              using the map and travel information below.
-            </p>
+            {field("hero.description") && (
+              <p className="text-lg leading-relaxed text-zinc-600 reveal-up stagger-3">{field("hero.description")}</p>
+            )}
           </div>
         </div>
       </section>
 
+      {!saved && (
+        <div className="mx-auto w-full max-w-350 px-8 py-12 text-sm text-zinc-600">
+          {error ? (
+            <div role="alert" className="flex flex-wrap items-center gap-3">
+              <p>{error}</p>
+              <button type="button" className="font-semibold underline" onClick={() => { setError(""); setAttempt((value) => value + 1); }}>Try again</button>
+            </div>
+          ) : <LoadingIndicator label="Loading venue information…" />}
+        </div>
+      )}
+
       {/* == MAP & VENUE LIST == */}
-      <section ref={mapScroll.ref} className="py-16 relative overflow-hidden">
+      <section ref={mapScroll.ref} className={`py-16 relative overflow-hidden ${saved ? "" : "hidden"}`}>
         {/* Ambient palette glows */}
         <div aria-hidden className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-64 w-[70%] rounded-full bg-[#4FC3F7]/10 blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-[#76B947]/10 blur-3xl" />
@@ -461,53 +486,41 @@ export default function HotelMapping() {
                   </div>
                   <div>
                     <h2 className="text-xl font-bold text-[#0B2A4A] uppercase">
-                      Event Venue &amp; Map
+                      {field("map.title") || "Venue map"}
                     </h2>
                     <p className="text-sm text-zinc-500">
-                      Paradise Garden Resort Hotel &amp; Convention Center, Boracay Island.
+                      {field("map.description")}
                     </p>
                   </div>
                 </div>
 
                 <div className="h-125 rounded-xl overflow-hidden shadow-inner border border-zinc-200 relative z-0">
-                  <VenueMap
-                    venues={venues.map((v) => ({
-                      id: v.id,
-                      name: v.name,
-                      pos: v.pos,
-                    }))}
-                    center={PRIMARY_VENUE.coords}
-                    zoom={17}
-                  />
+                  {hasMap && center ? (
+                    <VenueMap
+                      key={`${center.join(",")}-${zoom}`}
+                      venues={markers}
+                      center={center}
+                      zoom={zoom}
+                      selectedVenue={selectedVenue}
+                      onSelect={setSelectedVenue}
+                    />
+                  ) : (
+                    <p className="grid h-full place-items-center bg-[#F2F9FF] p-6 text-center text-sm text-zinc-500">
+                      The venue map has not been published.
+                    </p>
+                  )}
+                </div>
+              </div>
 
-                  <div className="absolute top-4 left-4 z-1000 flex flex-col shadow-md rounded-md overflow-hidden">
-                    <button className="bg-white p-2 hover:bg-[#F8FBF5]">
-                      <FaPlus size={12} />
-                    </button>
-                    <div className="h-px bg-zinc-200"></div>
-                    <button className="bg-white p-2 hover:bg-[#F8FBF5]">
-                      <FaMinus size={12} />
-                    </button>
+              {hasNote && (
+                <div className="premium-card reveal-up stagger-1 bg-[#F2F9FF] border border-[#4FC3F7]/30 rounded-xl p-6 flex gap-4 items-start">
+                  <FaInfoCircle aria-hidden="true" className="text-[#1D3D6D] text-xl mt-1 shrink-0" />
+                  <div>
+                    {field("note.title") && <p className="font-bold text-[#0B2A4A] mb-1">{field("note.title")}</p>}
+                    {field("note.text") && <p className="text-sm text-zinc-600 whitespace-pre-line">{field("note.text")}</p>}
                   </div>
                 </div>
-              </div>
-
-              {/* Important Note */}
-              <div className="premium-card reveal-up stagger-1 bg-[#F2F9FF] border border-[#4FC3F7]/30 rounded-xl p-6 flex gap-4 items-start">
-                <FaInfoCircle className="text-[#1D3D6D] text-xl mt-1 shrink-0" />
-                <div>
-                  <p className="font-bold text-[#0B2A4A] mb-1">Important Note</p>
-                  <p className="text-sm text-zinc-600">
-                    All event venues are located inside the{" "}
-                    <span className="font-semibold text-[#0B2A4A]">
-                      {PRIMARY_VENUE.shortName}
-                    </span>{" "}
-                    compound and are within walking distance of each other.
-                    Shuttle services and boats from Caticlan Jetty Port will be
-                    coordinated during the event.
-                  </p>
-                </div>
-              </div>
+              )}
             </div>
 
             {/* Right: Venue List */}
@@ -519,32 +532,33 @@ export default function HotelMapping() {
                   </div>
                   <div>
                     <h2 className="text-xl font-bold text-[#0B2A4A] uppercase">
-                      Venue List
+                      {field("venues.title") || "Venue List"}
                     </h2>
                     <p className="text-sm text-zinc-500">
-                      Click a venue to view details and highlight the location on the map.
+                      {field("venues.description")}
                     </p>
                   </div>
                 </div>
 
                 <div className="space-y-6">
+                  {venues.length === 0 && <p className="text-sm text-zinc-500">No venues have been published.</p>}
                   {venues.map((venue, idx) => (
-                    <div
-                      key={venue.id}
-                      className={`venue-list-item flex gap-4 items-start reveal-up stagger-${(idx % 6) + 1}`}
-                      style={{ ["--glow" as any]: venue.glow }}
-                    >
-                      <div
-                        className={`venue-list-num w-8 h-8 rounded-full ${venue.color} flex items-center justify-center text-sm font-bold text-white shrink-0 mt-1`}
+                    <div key={venue.id} className={`venue-list-item flex items-start gap-4 reveal-up stagger-${(idx % 6) + 1}`}>
+                      <span
+                        className="venue-list-num mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#1D3D6D] text-sm font-bold text-white"
+                        style={venue.color ? { backgroundColor: venue.color } : undefined}
                       >
-                        {venue.id}
-                      </div>
-                      <div>
-                        <p className="font-bold text-[#0B2A4A] text-sm mb-1">{venue.name}</p>
-                        <p className="text-xs text-zinc-500 mb-2">{venue.desc}</p>
-                        <p className="text-xs text-zinc-600 flex items-center gap-1.5">
-                          <FaMapMarkerAlt className="text-[#76B947]" /> {venue.loc}
-                        </p>
+                        {venue.markerLabel ?? <venue.Icon aria-hidden="true" />}
+                      </span>
+                      <div className="min-w-0">
+                        {hasMap && venue.pos ? (
+                          <button type="button" aria-pressed={selectedVenue === venue.id} onClick={() => setSelectedVenue(venue.id)}
+                            className="mb-1 text-left text-sm font-bold text-[#0B2A4A] hover:underline focus-visible:outline-2">
+                            {venue.name}
+                          </button>
+                        ) : <p className="mb-1 text-sm font-bold text-[#0B2A4A]">{venue.name}</p>}
+                        {venue.description && <p className="mb-2 text-xs text-zinc-500">{venue.description}</p>}
+                        {venue.location && <p className="flex items-center gap-1.5 text-xs text-zinc-600"><FaMapMarkerAlt aria-hidden="true" className="text-[#76B947]" /> {venue.location}</p>}
                       </div>
                     </div>
                   ))}
@@ -556,7 +570,7 @@ export default function HotelMapping() {
       </section>
 
       {/* == VENUE DETAILS & TRAVEL INFORMATION == */}
-      <section ref={detailsReveal.ref} className={`bg-white py-16 border-t border-zinc-100 relative overflow-hidden ${detailsReveal.inView ? "in-view" : ""}`}>
+      <section ref={detailsReveal.ref} className={`bg-white py-16 border-t border-zinc-100 relative overflow-hidden ${saved && (venues.length || travel.length || hasDownload) ? "" : "hidden"} ${detailsReveal.inView ? "in-view" : ""}`}>
         <div aria-hidden className="pointer-events-none absolute top-0 left-0 h-56 w-56 rounded-full bg-[#F0C674]/10 blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-56 w-56 rounded-full bg-[#4FC3F7]/10 blur-3xl" />
         <div className="relative max-w-350 mx-auto px-8 grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -567,7 +581,7 @@ export default function HotelMapping() {
                 <FaBuilding className="text-[#1D3D6D] text-2xl" />
               </div>
               <h2 className="text-2xl font-bold text-[#0B2A4A] uppercase">
-                Venue Details
+                {field("venues.details_title") || "Venue Details"}
               </h2>
             </div>
 
@@ -579,15 +593,16 @@ export default function HotelMapping() {
                 >
                   <div className="flex items-center gap-4">
                     <div
-                      className={`venue-num w-10 h-10 rounded-full ${venue.color} flex items-center justify-center text-base font-bold text-white shrink-0`}
+                      className="venue-num flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#1D3D6D] text-base font-bold text-white"
+                      style={venue.color ? { backgroundColor: venue.color } : undefined}
                     >
-                      {venue.id}
+                      {venue.markerLabel ?? <venue.Icon aria-hidden="true" />}
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-[#1D3D6D] text-lg">{venue.icon}</span>
+                      <span className="text-[#1D3D6D] text-lg"><venue.Icon aria-hidden="true" /></span>
                       <div>
                         <p className="font-bold text-[#0B2A4A] text-sm">{venue.name}</p>
-                        <p className="text-xs text-zinc-500">{venue.desc}</p>
+                        <p className="text-xs text-zinc-500">{venue.description}</p>
                       </div>
                     </div>
                   </div>
@@ -604,114 +619,70 @@ export default function HotelMapping() {
                 <FaCar className="text-[#1D3D6D] text-2xl" />
               </div>
               <h2 className="text-2xl font-bold text-[#0B2A4A] uppercase">
-                Travel Information
+                {field("travel.title") || "Travel Information"}
               </h2>
             </div>
 
             <div className="space-y-6">
-              {[
-                { icon: <FaPlane />, title: "Via Caticlan (Boracay) Airport (MPH)", desc: "Fly into Godofredo P. Ramos Airport (Caticlan). Take a 5-minute tricycle ride to Caticlan Jetty Port, then a 10–15 minute boat ride to Cagban or Tambisaan Port in Boracay. From the port, it’s a short 10–15 minute ride to Paradise Garden Resort." },
-                { icon: <FaPlane />, title: "Via Kalibo International Airport (KLO)", desc: "From Kalibo Airport, take a 1.5 – 2 hour van or bus ride to Caticlan Jetty Port, then a short boat ride to Boracay Island. Total travel time is roughly 2.5 – 3 hours." },
-                { icon: <FaCar />, title: "From Iloilo City", desc: "Approximately 4 – 5 hours by land to Caticlan Jetty Port (via Roxas-Iloilo Road and Aklan West Road), followed by a boat transfer to Boracay Island." },
-                { icon: <FaWalking />, title: "On the Island", desc: "Paradise Garden Resort is located in Station 3, Manoc-Manoc. E-trikes and shuttle services are available within the island. Follow symposium signage for event venues." },
-              ].map((item, idx) => (
-                <div key={idx} className={`travel-item flex gap-4 reveal-up stagger-${(idx % 6) + 1}`}>
-                  <div className="travel-icon w-10 h-10 rounded-full bg-[#F2F9FF] text-[#1D3D6D] flex items-center justify-center text-lg shrink-0">
-                    {item.icon}
+              {travel.map((item, index) => {
+                const Icon = venueIcons.get(itemText(item.icon))?.Icon;
+                return (
+                  <div key={index} className={`travel-item flex gap-4 reveal-up stagger-${(index % 6) + 1}`}>
+                    {Icon && (
+                      <span className="travel-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F2F9FF] text-lg text-[#1D3D6D]">
+                        <Icon aria-hidden="true" />
+                      </span>
+                    )}
+                    <div>
+                      {itemText(item.title) && <p className="mb-1 text-sm font-bold text-[#0B2A4A]">{itemText(item.title)}</p>}
+                      {itemText(item.description) && <p className="text-sm text-zinc-500">{itemText(item.description)}</p>}
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-bold text-[#0B2A4A] text-sm mb-1">{item.title}</p>
-                    <p className="text-sm text-zinc-500">{item.desc}</p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
-            {/* Download Box */}
-            <div className="premium-card reveal-up stagger-4 mt-10 bg-[#F2F9FF] border border-[#4FC3F7]/30 rounded-xl p-6">
-              <div className="flex gap-4">
-                <FaDownload className="text-[#1D3D6D] text-xl mt-1 shrink-0" />
-                <div className="flex-1">
-                  <p className="font-bold text-[#0B2A4A] text-sm mb-1">
-                    Download Venue Map
-                  </p>
-                  <p className="text-sm text-zinc-500 mb-4">
-                    Get the Paradise Garden Resort venue map in PDF format for offline use.
-                  </p>
-                  
-                  {/* 🔁 Updated to trigger modal */}
-                  <button 
-                    onClick={() => setShowMapModal(true)}
-                    className="premium-btn bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white px-6 py-2.5 rounded-md text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl flex items-center gap-2"
-                  >
-                    Download PDF <FaDownload />
-                  </button>
-
-                </div>
+            {hasDownload && (
+              <div className="reveal-up stagger-4 mt-10">
+                <HotelActionCard
+                  variant="download"
+                  title={field("download.title")}
+                  description={field("download.description")}
+                  buttonText={field("download.button_text")}
+                  link={field("download.file_url")}
+                  onUnavailable={() => setUnavailableAction("download")}
+                />
               </div>
-            </div>
+            )}
           </div>
         </div>
       </section>
 
       {/* == BOTTOM CTA == */}
-      <section ref={ctaReveal.ref} className={`bg-linear-to-b from-[#F8FBF5] to-white py-8 relative overflow-hidden ${ctaReveal.inView ? "in-view" : ""}`}>
+      <section ref={ctaReveal.ref} className={`bg-linear-to-b from-[#F8FBF5] to-white py-8 relative overflow-hidden ${saved && hasContact ? "" : "hidden"} ${ctaReveal.inView ? "in-view" : ""}`}>
         <div aria-hidden className="pointer-events-none absolute top-0 left-0 h-40 w-40 rounded-full bg-[#F0C674]/10 blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-40 w-40 rounded-full bg-[#4FC3F7]/10 blur-3xl" />
-        <div className="relative max-w-350 mx-auto px-8">
-          <div className="premium-card reveal-up bg-white rounded-xl border border-zinc-200 p-8 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-4">
-              <div className="premium-icon w-16 h-16 bg-[#F2F9FF] rounded-full flex items-center justify-center ring-1 ring-[#4FC3F7]/30">
-                <FaMapMarkerAlt className="text-[#1D3D6D] text-3xl" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-[#0B2A4A] mb-1">Need Assistance?</h3>
-                <p className="text-zinc-500">
-                  Our secretariat is ready to help you with directions and other inquiries.
-                </p>
-              </div>
-            </div>
-            
-            {/* 🔁 Updated to trigger modal */}
-            <button 
-              onClick={() => setShowContactModal(true)}
-              className="premium-btn bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white px-8 py-4 rounded-lg font-bold transition-all duration-300 flex items-center gap-2 shrink-0 hover:-translate-y-0.5 hover:shadow-xl"
-            >
-              Contact Secretariat <FaChevronRight />
-            </button>
-
-          </div>
+        <div className="relative max-w-350 mx-auto px-8 reveal-up">
+          <HotelActionCard
+            variant="contact"
+            title={field("bottom_cta.title")}
+            description={field("bottom_cta.description")}
+            buttonText={field("bottom_cta.button_text")}
+            link={field("bottom_cta.button_link")}
+            onUnavailable={() => setUnavailableAction("contact")}
+          />
         </div>
       </section>
 
-      {/* Modal for Map Download */}
       <UnderDevelopment
-        open={showMapModal}
-        onClose={() => setShowMapModal(false)}
-        title="Venue Map PDF Coming Soon"
-        description="The official venue map is currently being finalized. You will be able to download the complete PDF guide shortly."
-        notes={[
-          "The map will include detailed walking paths between halls.",
-          "Floor plans for the convention center will be included.",
-          "Signage will also be posted on-site for easy navigation."
-        ]}
-        contactEmail="internationalsymposium@capsu.edu.ph"
+        open={unavailableAction !== null}
+        onClose={() => setUnavailableAction(null)}
+        title={unavailableAction === "download" ? "Venue map download" : "Contact Secretariat"}
+        description={unavailableAction === "download"
+          ? "The venue map is not available to download yet."
+          : "The contact link is not available yet."}
+        notes={[]}
       />
-
-      {/* Modal for Contact Secretariat */}
-      <UnderDevelopment
-        open={showContactModal}
-        onClose={() => setShowContactModal(false)}
-        title="Secretariat Portal Coming Soon"
-        description="We are currently setting up a dedicated support portal to assist you better with travel and venue inquiries."
-        notes={[
-          "You will soon be able to submit inquiries via a web form.",
-          "Live chat support will be available closer to the event date.",
-          "For immediate concerns, please reach out via the email below."
-        ]}
-        contactEmail="internationalsymposium@capsu.edu.ph"
-      />
-
       <Footer />
     </div>
   );

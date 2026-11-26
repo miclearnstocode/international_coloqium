@@ -8,7 +8,7 @@ import os, re, tempfile, traceback
 from sqlalchemy.exc import IntegrityError, OperationalError
 from werkzeug.utils import secure_filename
 from google_drive import extract_file_id, set_drive_file_trashed, upload_file_to_drive, trash_file_from_drive
-from models import db, AbstractPaymentProof, AbstractSubmission, AbstractSubmissionRequest, SUC
+from models import db, AbstractEvaluatorDecision, AbstractPaymentProof, AbstractSubmission, AbstractSubmissionRequest, SUC
 from utils.pdf import generate_abstract_pdf
 from utils.decorators import staff_required
 
@@ -496,11 +496,15 @@ def update_submission_status(submission_id):
         if new_status not in ['pending', 'accepted', 'rejected']:
             return jsonify({"detail": "Invalid status"}), 400
         
-        submission = AbstractSubmission.query.get(submission_id)
+        submission = db.session.get(AbstractSubmission, submission_id, with_for_update=True)
         if not submission:
             return jsonify({"detail": "Submission not found"}), 404
         
-        submission.status = new_status
+        if submission.status != new_status:
+            attribution = db.session.get(AbstractEvaluatorDecision, submission_id)
+            if attribution:
+                db.session.delete(attribution)
+            submission.status = new_status
         db.session.commit()
         return jsonify({"message": "Status updated successfully", "status": submission.status}), 200
     except Exception as e:

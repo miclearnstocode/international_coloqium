@@ -38,6 +38,7 @@ export default function AdminPages() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isLoadingContent, setIsLoadingContent] = useState(false);
+  const [loadedHotelContent, setLoadedHotelContent] = useState(false);
 
   // ── Load draft from DB ──
   useEffect(() => {
@@ -45,6 +46,7 @@ export default function AdminPages() {
 
     const loadDraftFromDB = async () => {
       setIsLoadingContent(true);
+      if (selectedPage.slug === "hotel-mapping") setLoadedHotelContent(false);
       setHasUnsavedChanges(false);
       setSaveError(null);
 
@@ -53,7 +55,7 @@ export default function AdminPages() {
       );
 
       try {
-        const res = await apiFetch(`/api/content/${selectedPage.slug}`);
+        const res = await apiFetch(`/api/content/${selectedPage.slug}`, { cache: "no-store" });
         if (!res.ok) throw new Error("Failed to fetch page content");
 
         const data: {
@@ -76,7 +78,7 @@ export default function AdminPages() {
           let list = section.list;
           if (section.list) {
             const dbItems = data.items?.[section.list.key];
-            if (Array.isArray(dbItems) && dbItems.length > 0) {
+            if (Array.isArray(dbItems)) {
               list = { ...section.list, items: dbItems };
             }
           }
@@ -85,6 +87,7 @@ export default function AdminPages() {
         });
 
         if (!cancelled) {
+          if (selectedPage.slug === "hotel-mapping") setLoadedHotelContent(true);
           setDraftContent(merged);
           setPristineDraft(JSON.parse(JSON.stringify(merged)));
         }
@@ -93,6 +96,9 @@ export default function AdminPages() {
         if (!cancelled) {
           setDraftContent(baseStructure);
           setPristineDraft(JSON.parse(JSON.stringify(baseStructure)));
+          if (selectedPage.slug === "hotel-mapping") {
+            setSaveError("Could not load saved Hotel & Mapping content. Reload the page before editing.");
+          }
         }
       } finally {
         if (!cancelled) setIsLoadingContent(false);
@@ -185,9 +191,12 @@ export default function AdminPages() {
       const next = [...prev];
       const section = { ...next[sIdx] };
       if (section.list) {
-        const template = section.list.items[0] || {};
-        const newItem: any = {};
-        Object.keys(template).forEach((k) => {
+        const basePage = PAGES.find((page) => page.slug === selectedPage.slug);
+        const baseList = basePage?.structure.find((item) => item.list?.key === section.list?.key)?.list;
+        const template = section.list.items[0] ?? baseList?.items[0] ?? {};
+        const newItem: Record<string, unknown> = {};
+        const fields = section.list.itemFields ?? Object.keys(template);
+        fields.forEach((k) => {
           newItem[k] = Array.isArray(template[k]) ? [] : "";
         });
         section.list = {
@@ -217,6 +226,11 @@ export default function AdminPages() {
           : null;
       if (!token) throw new Error("Not authenticated. Please log in again.");
 
+      const isHotelMapping = selectedPage.slug === "hotel-mapping";
+      if (isHotelMapping && !loadedHotelContent) {
+        throw new Error("Reload saved Hotel & Mapping content before saving.");
+      }
+
       const updates = draftContent.flatMap((section) =>
         section.fields.map((f) => ({
           section_key: getSectionKey(section, f.key),
@@ -226,7 +240,9 @@ export default function AdminPages() {
         }))
       );
 
-      if (updates.length > 0) {
+      const lists = draftContent.flatMap(({ list }) => list ? [list] : []);
+      const items = isHotelMapping ? Object.fromEntries(lists.map((list) => [list.key, list.items])) : undefined;
+      if (updates.length > 0 || isHotelMapping) {
         const res = await apiFetch(`/api/admin/content/${selectedPage.slug}`,
           {
             method: "PUT",
@@ -234,7 +250,7 @@ export default function AdminPages() {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ updates }),
+            body: JSON.stringify({ updates, items }),
           }
         );
         if (!res.ok) {
@@ -243,22 +259,21 @@ export default function AdminPages() {
         }
       }
 
-      for (const section of draftContent) {
-        if (!section.list) continue;
-        const res = await apiFetch(`/api/admin/content/${selectedPage.slug}/items/${section.list.key}`,
+      for (const list of isHotelMapping ? [] : lists) {
+        const res = await apiFetch(`/api/admin/content/${selectedPage.slug}/items/${list.key}`,
           {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ items: section.list.items }),
+            body: JSON.stringify({ items: list.items }),
           }
         );
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
           throw new Error(
-            err.detail || `Failed to save list "${section.list.key}"`
+            err.detail || `Failed to save list "${list.key}"`
           );
         }
       }
@@ -282,7 +297,7 @@ export default function AdminPages() {
     } finally {
       setIsSaving(false);
     }
-  }, [draftContent, selectedPage]);
+  }, [draftContent, selectedPage, loadedHotelContent]);
 
   // ── Save handler with confirmation ──
   const handleSave = useCallback(async () => {

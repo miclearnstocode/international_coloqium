@@ -10,6 +10,7 @@ export interface ListDefinition {
     key: string;
     label: string;
     items: Record<string, any>[];
+    itemFields?: string[];
 }
 
 export interface SectionDefinition {

@@ -126,6 +126,14 @@ class AbstractPaymentProof(db.Model):
         }
 
 
+class AbstractEvaluatorDecision(db.Model):
+    __tablename__ = 'abstract_evaluator_decisions'
+    submission_id = db.Column(db.Integer, primary_key=True)
+    evaluator_id = db.Column(db.Integer, nullable=False)
+    evaluator_name = db.Column(db.String(100), nullable=False)
+    status = db.Column(db.Enum('accepted', 'rejected'), nullable=False)
+
+
 class AbstractAcceptanceEmail(db.Model):
     __tablename__ = 'abstract_acceptance_emails'
     submission_id = db.Column(db.Integer, primary_key=True)

@@ -1,0 +1,33 @@
+import {
+  FaBed, FaBuilding, FaBusAlt, FaCar, FaChalkboardTeacher, FaClinicMedical, FaCoffee,
+  FaConciergeBell, FaDoorOpen, FaGlobe, FaHotel, FaMapPin, FaParking, FaPlane,
+  FaShip, FaShuttleVan, FaTheaterMasks, FaTicketAlt, FaUniversity, FaUsers,
+  FaUtensils, FaWalking, FaWheelchair, FaWifi,
+} from "react-icons/fa";
+
+export const venueIcons = new Map([
+  ["building", { label: "Building", Icon: FaBuilding }],
+  ["users", { label: "Group", Icon: FaUsers }],
+  ["university", { label: "University", Icon: FaUniversity }],
+  ["bed", { label: "Accommodation", Icon: FaBed }],
+  ["plane", { label: "Airport", Icon: FaPlane }],
+  ["car", { label: "Transport", Icon: FaCar }],
+  ["walking", { label: "Walk", Icon: FaWalking }],
+  ["globe", { label: "Location", Icon: FaGlobe }],
+  ["hotel", { label: "Hotel", Icon: FaHotel }],
+  ["pin", { label: "Map pin", Icon: FaMapPin }],
+  ["entrance", { label: "Entrance", Icon: FaDoorOpen }],
+  ["reception", { label: "Reception", Icon: FaConciergeBell }],
+  ["conference", { label: "Meeting room", Icon: FaChalkboardTeacher }],
+  ["stage", { label: "Stage or performance", Icon: FaTheaterMasks }],
+  ["free", { label: "Free admission", Icon: FaTicketAlt }],
+  ["dining", { label: "Dining", Icon: FaUtensils }],
+  ["coffee", { label: "Café", Icon: FaCoffee }],
+  ["parking", { label: "Parking", Icon: FaParking }],
+  ["bus", { label: "Bus", Icon: FaBusAlt }],
+  ["shuttle", { label: "Shuttle", Icon: FaShuttleVan }],
+  ["ferry", { label: "Ferry", Icon: FaShip }],
+  ["accessible", { label: "Wheelchair access", Icon: FaWheelchair }],
+  ["first-aid", { label: "First aid", Icon: FaClinicMedical }],
+  ["wifi", { label: "Wi-Fi", Icon: FaWifi }],
+]);

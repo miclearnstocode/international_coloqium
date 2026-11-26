@@ -7,6 +7,47 @@ from utils.decorators import super_admin_required
 content_bp = Blueprint('content', __name__)
 
 
+HOTEL_MAPPING = 'hotel-mapping'
+HOTEL_LISTS = {'venues_items', 'travel_items'}
+
+
+def validate_venues(items):
+    for index, venue in enumerate(items, start=1):
+        name = venue.get('name')
+        if not isinstance(name, str) or not name.strip():
+            return f'Enter a name for venue {index}.'
+
+        position = venue.get('pos')
+        if position is None or (isinstance(position, str) and not position.strip()):
+            continue
+
+        try:
+            parts = position.split(',') if isinstance(position, str) else position
+            if not isinstance(parts, list) or len(parts) != 2 or any(isinstance(part, bool) for part in parts):
+                raise ValueError
+            lat, lng = map(float, parts)
+            if not (-90 <= lat <= 90 and -180 <= lng <= 180):
+                raise ValueError
+        except (TypeError, ValueError, OverflowError):
+            return f'Enter valid latitude and longitude for venue {index}, or leave its coordinates blank.'
+    return None
+
+
+def replace_page_items(page_slug, section_key, items):
+    PageContentItem.query.filter_by(page_slug=page_slug, section_key=section_key).delete()
+    for index, item in enumerate(items):
+        db.session.add(PageContentItem(
+            page_slug=page_slug, section_key=section_key, item_order=index,
+            item_data=item, is_active=True,
+        ))
+    if not items and page_slug == HOTEL_MAPPING and section_key in HOTEL_LISTS:
+        # An empty saved list must be distinguishable from an unconfigured list.
+        db.session.add(PageContentItem(
+            page_slug=page_slug, section_key=section_key, item_order=0,
+            item_data=None, is_active=False,
+        ))
+
+
 @content_bp.route('/api/content/<page_slug>', methods=['GET', 'OPTIONS'])
 def get_page_content(page_slug):
     """Public endpoint: fetch all content for a page."""
@@ -14,9 +55,10 @@ def get_page_content(page_slug):
         return jsonify({})
     try:
         blocks = PageContent.query.filter_by(page_slug=page_slug).all()
-        items = PageContentItem.query.filter_by(
-            page_slug=page_slug, is_active=True
-        ).order_by(PageContentItem.item_order).all()
+        query = PageContentItem.query.filter_by(page_slug=page_slug)
+        if page_slug != HOTEL_MAPPING:
+            query = query.filter_by(is_active=True)
+        items = query.order_by(PageContentItem.item_order, PageContentItem.id).all()
 
         # Build nested dict: { section_key: { field_key: value } }
         content = {}
@@ -25,13 +67,15 @@ def get_page_content(page_slug):
 
         # Group items: { section_key: [ {...}, {...} ] }
         list_items = {}
-        for it in items:
-            list_items.setdefault(it.section_key, []).append(it.item_data)
+        for item in items:
+            if item.is_active:
+                list_items.setdefault(item.section_key, []).append(item.item_data)
+            elif item.section_key in HOTEL_LISTS and item.item_data is None:
+                list_items.setdefault(item.section_key, [])
 
-        return jsonify({
-            "content": content,
-            "items": list_items
-        }), 200
+        response = jsonify({"content": content, "items": list_items})
+        response.headers['Cache-Control'] = 'no-store'
+        return response, 200
     except Exception as e:
         traceback.print_exc()
         return jsonify({"detail": str(e)}), 500
@@ -47,6 +91,20 @@ def update_page_content(page_slug):
         user_id = get_jwt_identity()
         data = request.get_json()
         updates = data.get('updates', [])  # [{section_key, field_key, field_value, field_type}]
+
+        lists = data.get('items', {})
+        if page_slug == HOTEL_MAPPING and (
+            not isinstance(lists, dict) or any(
+                key not in HOTEL_LISTS or not isinstance(entries, list)
+                or any(not isinstance(item, dict) for item in entries)
+                for key, entries in lists.items()
+            )
+        ):
+            return jsonify({"detail": "Invalid Hotel & Mapping list contents."}), 400
+        if page_slug == HOTEL_MAPPING and 'venues_items' in lists:
+            error = validate_venues(lists['venues_items'])
+            if error:
+                return jsonify({"detail": error}), 400
 
         for upd in updates:
             section_key = upd.get('section_key')
@@ -91,6 +149,10 @@ def update_page_content(page_slug):
             )
             db.session.add(log)
 
+        if page_slug == HOTEL_MAPPING:
+            for section_key, entries in lists.items():
+                replace_page_items(page_slug, section_key, entries)
+
         db.session.commit()
         return jsonify({"message": "Content updated successfully"}), 200
 
@@ -110,22 +172,13 @@ def update_page_items(page_slug, section_key):
         data = request.get_json()
         items = data.get('items', [])  # list of dicts
 
-        # Delete existing items for this section
-        PageContentItem.query.filter_by(
-            page_slug=page_slug, section_key=section_key
-        ).delete()
-
-        # Insert new items
-        for idx, item in enumerate(items):
-            new_item = PageContentItem(
-                page_slug=page_slug,
-                section_key=section_key,
-                item_order=idx,
-                item_data=item,
-                is_active=True
-            )
-            db.session.add(new_item)
-
+        if not isinstance(items, list) or any(not isinstance(item, dict) for item in items):
+            return jsonify({"detail": "List items must be objects."}), 400
+        if page_slug == HOTEL_MAPPING and section_key == 'venues_items':
+            error = validate_venues(items)
+            if error:
+                return jsonify({"detail": error}), 400
+        replace_page_items(page_slug, section_key, items)
         db.session.commit()
         return jsonify({"message": "Items updated successfully"}), 200
 

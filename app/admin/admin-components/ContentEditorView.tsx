@@ -1,5 +1,7 @@
 "use client";
 
+import VenueListEditor from "./VenueListEditor";
+import HotelActionCard, { hotelActionUrl } from "@/app/hotel-mapping/HotelActionCard";
 import { useEffect, useState, useRef } from "react";
 import { 
   FaEdit, FaUndo, FaSave, FaTrash, FaSpinner, FaCheck, 
@@ -9,13 +11,39 @@ import {
   FaMarker, FaRegCircle, FaMugHot, FaBookOpen, FaLeaf, FaReact, 
   FaMortarPestle, FaPastafarianism, FaViadeoSquare, FaFileAlt, 
   FaBell, FaCalendarCheck, FaClock, FaPenFancy, FaRocket, FaPrint, FaEnvelope,
-  FaSearch, FaChevronDown, FaPlus,
+  FaSearch, FaChevronDown, FaPlus, FaWalking,
   FaBus, FaMapMarkedAlt, FaChurch, FaLandmark, FaWater, FaUmbrellaBeach,
   FaCamera, FaSuitcase, FaMapSigns, FaUniversity, FaConciergeBell, FaBuilding, 
   FaPlaneArrival, FaShip, FaAward, FaTrophy, FaHandshake, FaUserTie, 
   FaClipboardCheck, FaRegSmileBeam, FaRegHandshake, FaRegStar, FaUsersCog, FaSignOutAlt
 } from "react-icons/fa";
 import { PageDefinition, SectionDefinition } from "@/app/admin/content-structures";
+
+function HotelActionPreview({ section }: { section: SectionDefinition }) {
+  const download = section.section === "Download Box";
+  const prefix = download ? "download" : "bottom_cta";
+  const text = (key: string) => section.fields.find((field) => field.key === `${prefix}.${key}`)?.value?.trim() ?? "";
+  const link = text(download ? "file_url" : "button_link");
+  const title = text("title");
+  const description = text("description");
+  const buttonText = text("button_text");
+
+  return (
+    <section className="space-y-3 border-t border-gray-100 pt-4" aria-label={`${section.section} preview`}>
+      <h5 className="text-sm font-bold text-[#0B2A4A]">Card preview</h5>
+      {(title || description || buttonText || link) ? (
+        <HotelActionCard variant={download ? "download" : "contact"} title={title} description={description} buttonText={buttonText} link={link} preview />
+      ) : (
+        <p className="rounded-xl border border-dashed border-slate-300 p-4 text-sm text-slate-600">Fill in the fields to preview this card.</p>
+      )}
+      {!hotelActionUrl(link) && (
+        <p className="text-xs text-slate-600">
+          {link ? "Enter a valid HTTP(S) link or a site path starting with /." : "Without a link, the button opens an Under Development message."}
+        </p>
+      )}
+    </section>
+  );
+}
 
 // --- ICON MAP FOR THE DROPDOWN ---
 const ICON_OPTIONS = [
@@ -50,6 +78,7 @@ const ICON_OPTIONS = [
   
   // --- TRAVEL & TOUR ICONS ---
   { value: "bus", label: "Bus / Transport", icon: <FaBus /> },
+  { value: "walking", label: "Walk / Walking", icon: <FaWalking /> },
   { value: "map-marked", label: "Map / Tour Route", icon: <FaMapMarkedAlt /> },
   { value: "church", label: "Church / Cathedral", icon: <FaChurch /> },
   { value: "landmark", label: "Landmark / Plaza", icon: <FaLandmark /> },
@@ -418,7 +447,18 @@ export const ContentEditorView = ({
                       </div>
                     ))}
 
-                    {section.list && (
+                    {selectedPage.slug === "hotel-mapping" && ["Download Box", "Bottom CTA"].includes(section.section) && (
+                      <HotelActionPreview section={section} />
+                    )}
+
+                    {selectedPage.slug === "hotel-mapping" && section.list?.key === "venues_items" ? (
+                      <VenueListEditor
+                        items={section.list.items}
+                        onAdd={() => onAddListItem(sIdx)}
+                        onChange={(index, item) => onListItemChange(sIdx, index, item)}
+                        onRemove={(index) => onDeleteListItem(sIdx, index)}
+                      />
+                    ) : section.list && (
                       <div className="mt-6 pt-4 border-t border-gray-100">
                         <div className="flex items-center gap-2 mb-4">
                           <span className="text-base font-bold text-blue-600">

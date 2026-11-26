@@ -12,8 +12,6 @@ export const contactPage: PageDefinition = {
     {
       section: 'Page Hero',
       fields: [
-        { key: 'hero.breadcrumb_home', label: 'Breadcrumb Home Text', type: 'text', value: 'Home' },
-        { key: 'hero.breadcrumb_current', label: 'Breadcrumb Current Text', type: 'text', value: 'Contact Us' },
         { key: 'hero.title', label: 'Hero Title', type: 'text', value: 'Contact Us' },
         {
           key: 'hero.subtitle',

@@ -1,91 +1,56 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import { useEffect, useState } from "react";
+import { divIcon } from "leaflet";
+import { useEffect } from "react";
+import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
 interface Venue {
   id: number;
   name: string;
   pos: [number, number];
-  color?: string;   // optional: accept a hex color
+  markerLabel?: string;
+  color?: string;
 }
 
-export default function VenueMap({
-  venues,
-  center = [11.9674, 121.9246], // Paradise Garden Resort, Boracay
-  zoom = 17,
-}: {
-  venues: Venue[];
-  center?: [number, number];
-  zoom?: number;
-}) {
-  const [icons, setIcons] = useState<Record<number, any>>({});
-
+function SelectedVenue({ venue }: { venue?: Venue }) {
+  const map = useMap();
   useEffect(() => {
-    const L = require("leaflet");
+    if (venue) map.panTo(venue.pos);
+  }, [map, venue]);
+  return null;
+}
 
-    delete (L.Icon.Default.prototype as any)._getIconUrl;
-    L.Icon.Default.mergeOptions({
-      iconRetinaUrl: "/leaflet/marker-icon-2x.png",
-      iconUrl: "/leaflet/marker-icon.png",
-      shadowUrl: "/leaflet/marker-shadow.png",
-    });
-
-    // Unified palette markers
-    const defaultColors: Record<number, string> = {
-      1: "#1D3D6D", // navy — main convention center
-      2: "#4CAF50", // green — hall A
-      3: "#F57C00", // orange — hall B
-      4: "#8E24AA", // purple — pavilion
-      5: "#E53935", // red — accommodation
-    };
-
-    const built: Record<number, any> = {};
-    venues.forEach((v) => {
-      const hex = v.color || defaultColors[v.id] || "#1D3D6D";
-      built[v.id] = L.divIcon({
-        className: "custom-pin",
-        html: `<div style="background-color: ${hex}; width: 26px; height: 26px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.25); position: relative;"><span style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; transform: rotate(45deg); color: white; font-weight: 700; font-size: 11px;">${v.id}</span></div>`,
-        iconSize: [26, 26],
-        iconAnchor: [13, 26],
-        popupAnchor: [0, -26],
-      });
-    });
-    setIcons(built);
-  }, [venues]);
-
-  if (Object.keys(icons).length === 0) {
-    return (
-      <div className="w-full h-full bg-[#F2F9FF] flex items-center justify-center text-zinc-400 text-sm">
-        Loading map…
-      </div>
-    );
-  }
-
+export default function VenueMap({ venues, center, zoom, selectedVenue, onSelect }: {
+  venues: Venue[];
+  center: [number, number];
+  zoom: number;
+  selectedVenue: number | null;
+  onSelect: (id: number) => void;
+}) {
   return (
-    <MapContainer
-      {...({ center } as any)}
-      zoom={zoom}
-      style={{ height: "100%", width: "100%" }}
-      scrollWheelZoom={false}
-    >
+    <MapContainer center={center} zoom={zoom} className="h-full w-full" scrollWheelZoom={false}>
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        {...({
-          attribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        } as any)}
+        attribution={'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}
       />
-      {venues.map((venue) => (
-        <Marker
-          key={venue.id}
-          position={venue.pos}
-          {...({ icon: icons[venue.id] } as any)}
-        >
-          <Popup>{venue.name}</Popup>
-        </Marker>
-      ))}
+      {venues.map((venue) => {
+        const color = venue.color && /^#[0-9a-f]{6}$/i.test(venue.color) ? venue.color : "#1D3D6D";
+        const label = venue.markerLabel && /^\d{1,3}$/.test(venue.markerLabel) ? venue.markerLabel : "";
+        const icon = divIcon({
+          className: "",
+          html: `<span style="display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:${color};border:2px solid white;color:white;font-size:11px;font-weight:700;box-shadow:0 0 0 ${selectedVenue === venue.id ? 4 : 1}px #0B2A4A55">${label}</span>`,
+          iconSize: [30, 30],
+          iconAnchor: [15, 15],
+          popupAnchor: [0, -15],
+        });
+        return (
+          <Marker key={venue.id} position={venue.pos} icon={icon} title={venue.name} eventHandlers={{ click: () => onSelect(venue.id) }}>
+            <Popup>{venue.name}</Popup>
+          </Marker>
+        );
+      })}
+      <SelectedVenue venue={venues.find((venue) => venue.id === selectedVenue)} />
     </MapContainer>
   );
 }

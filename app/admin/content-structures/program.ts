@@ -12,8 +12,6 @@ export const programPage: PageDefinition = {
     {
       section: 'Page Hero',
       fields: [
-        { key: 'hero.breadcrumb_home', label: 'Breadcrumb Home Text', type: 'text', placeholder: 'Home' },
-        { key: 'hero.breadcrumb_current', label: 'Breadcrumb Current Text', type: 'text', placeholder: 'Program' },
         { key: 'hero.title', label: 'Hero Title', type: 'text', placeholder: 'Symposium Program' },
         {
           key: 'hero.description',

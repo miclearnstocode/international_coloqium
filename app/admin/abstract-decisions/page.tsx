@@ -12,6 +12,7 @@ interface Decision {
   author: string;
   email_address: string;
   status: "pending" | "accepted" | "rejected";
+  evaluator_name?: string | null;
   rejection_reason: string | null;
   email_status: "sent" | "pending" | "untracked";
   email_sent_at: string | null;
@@ -104,7 +105,7 @@ export default function AbstractDecisionsPage() {
               <table className="w-full min-w-180 text-left text-sm">
                 <thead className="bg-[#0B2A4A] text-white">
                   <tr>
-                    {["Abstract", "Decision", "Notification email", "Rejection reason", "Payment proof"].map((label) => (
+                    {["Abstract", "Decision", "Evaluator", "Notification email", "Rejection reason", "Payment proof"].map((label) => (
                       <th key={label} scope="col" className="px-5 py-4 font-semibold">{label}</th>
                     ))}
                   </tr>
@@ -127,6 +128,9 @@ export default function AbstractDecisionsPage() {
                           <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${decisionStyles[latestStatus]}`}>
                             {decisionLabel}
                           </span>
+                        </td>
+                        <td className="wrap-break-word px-5 py-4 text-slate-700">
+                          {row.evaluator_name ?? (row.status === "pending" ? "—" : "Not recorded")}
                         </td>
                         <td className="px-5 py-4">
                           <p className="font-semibold">{row.status === "pending" ? "No decision email yet" : emailLabels[row.email_status]}</p>
