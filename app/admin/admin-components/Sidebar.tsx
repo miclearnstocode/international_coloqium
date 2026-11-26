@@ -70,6 +70,7 @@ export const Sidebar = () => (
       <NavItem icon={<FaFileAlt />} label="Pages" href="/admin" />
       <NavItem icon={<FaCalendarAlt />} label="News & Events" href="/admin/news-events" />
       <NavItem icon={<FaUsers />} label="Users & Roles" href="/admin/users-roles" />
+      <NavItem icon={<FaFileAlt />} label="Abstract Decisions" href="/admin/abstract-decisions" />
     </nav>
 
     {/* Bottom info card */}

@@ -93,9 +93,49 @@ class AbstractSubmission(db.Model):
         }
 
 
+class AbstractSubmissionRequest(db.Model):
+    __tablename__ = 'abstract_submission_requests'
+    sender_id = db.Column(db.Integer, primary_key=True)
+    idempotency_key = db.Column(db.String(36), primary_key=True)
+    payload_hash = db.Column(db.String(64), nullable=False)
+    response = db.Column(db.JSON, nullable=True)
+
+
+class AbstractPaymentProof(db.Model):
+    __tablename__ = 'abstract_payment_proofs'
+    submission_id = db.Column(db.Integer, primary_key=True)
+    stored_name = db.Column(db.String(32), nullable=True)
+    drive_file_id = db.Column(db.String(255), nullable=True)
+    original_name = db.Column(db.String(255), nullable=False)
+    uploaded_at = db.Column(db.DateTime, server_default=db.func.now(), nullable=False)
+
+    payment_status = db.Column(
+        db.Enum('pending', 'accepted', 'rejected'), nullable=False, server_default='pending'
+    )
+    review_reason = db.Column(db.Text, nullable=True)
+    reviewer_id = db.Column(db.Integer, nullable=True)
+    review_email_sent_at = db.Column(db.DateTime, nullable=True)
+
+    def review_data(self):
+        if self.payment_status == 'pending':
+            return None
+        return {
+            'status': self.payment_status,
+            'reason': self.review_reason or '',
+            'email_status': 'sent' if self.review_email_sent_at else 'pending',
+        }
+
+
 class AbstractAcceptanceEmail(db.Model):
     __tablename__ = 'abstract_acceptance_emails'
     submission_id = db.Column(db.Integer, primary_key=True)
+    sent_at = db.Column(db.DateTime, nullable=True)
+
+
+class AbstractRejectionEmail(db.Model):
+    __tablename__ = 'abstract_rejection_emails'
+    submission_id = db.Column(db.Integer, primary_key=True)
+    reason = db.Column(db.Text, nullable=False)
     sent_at = db.Column(db.DateTime, nullable=True)
 
 

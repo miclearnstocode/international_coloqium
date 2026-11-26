@@ -28,9 +28,8 @@ export default function Header({ showNavigation = true }: { showNavigation?: boo
 
   // Show logout in authenticated work areas.
   const isSubmissionPage = pathname === "/submission" || pathname.startsWith("/submission/");
-  const isStaffDashboard = pathname === "/staff/dashboard" || pathname.startsWith("/staff/dashboard/");
   const isEvaluatorPage = pathname === "/evaluator" || pathname.startsWith("/evaluator/");
-  const showLogout = isLoggedIn && (isSubmissionPage || isStaffDashboard || isEvaluatorPage);
+  const showLogout = isLoggedIn && (isSubmissionPage || isEvaluatorPage);
   const HeaderContent = showNavigation ? "nav" : "div";
 
 
@@ -86,7 +85,7 @@ export default function Header({ showNavigation = true }: { showNavigation?: boo
       }`}
     >
       <HeaderContent
-        className={`mx-auto flex w-full items-center ${showNavigation ? "max-w-350 justify-center" : "max-w-6xl flex-wrap justify-between gap-y-2 px-5 sm:px-8"}`}
+        className={`mx-auto flex w-full items-center ${showNavigation ? "max-w-350 justify-center" : "max-w-7xl flex-wrap justify-between gap-y-2 px-4 sm:px-6"}`}
         style={{
           paddingInline: showNavigation ? "clamp(1rem, 2vw, 2rem)" : undefined,
           paddingBlock: "clamp(0.6rem, 0.7vw, 0.85rem)",
@@ -147,7 +146,10 @@ export default function Header({ showNavigation = true }: { showNavigation?: boo
 
               {/* ── Desktop Logout Button ── */}
               {showLogout && (
-                <div className="flex items-center gap-2 pl-4 ml-4 border-l border-gray-200">
+                <div className={`flex items-center border-l border-gray-200 ${isEvaluatorPage ? "ml-2 flex-col gap-1 pl-2" : "ml-4 gap-2 pl-4"}`}>
+                  {isEvaluatorPage && userName && (
+                    <span className="max-w-20 truncate text-xs font-semibold text-[#0B2A4A]" title={userName}>{userName}</span>
+                  )}
                   <button
                     type="button"
                     onClick={handleLogout}
@@ -164,7 +166,10 @@ export default function Header({ showNavigation = true }: { showNavigation?: boo
             </div>
 
             {/* ── Mobile / tablet right controls ── */}
-            <div className="xl:hidden flex items-center gap-2 ml-auto">
+            <div className="xl:hidden flex min-w-0 items-center gap-2 ml-auto">
+              {isEvaluatorPage && showLogout && userName && (
+                <span className="max-w-24 truncate text-xs font-semibold text-[#0B2A4A] sm:max-w-40" title={userName}>{userName}</span>
+              )}
               {showLogout && (
                 <button
                   type="button"
@@ -204,37 +209,18 @@ export default function Header({ showNavigation = true }: { showNavigation?: boo
               </button>
             </div>
           </>
-        ) : isEvaluatorPage ? (
-          <>
-            <nav aria-label="Evaluator navigation" className="order-last flex w-full items-center justify-center gap-2 sm:order-none sm:w-auto">
-              <Link
-                href="/evaluator"
-                aria-current={pathname === "/evaluator" ? "page" : undefined}
-                className="rounded-lg px-3 py-2 text-sm font-semibold text-[#0B2A4A] hover:bg-[#0B2A4A]/5 aria-[current=page]:bg-[#0B2A4A] aria-[current=page]:text-white"
-              >
-                Overview
-              </Link>
-              <Link
-                href="/evaluator/submissions"
-                aria-current={pathname === "/evaluator/submissions" ? "page" : undefined}
-                className="rounded-lg px-3 py-2 text-sm font-semibold text-[#0B2A4A] hover:bg-[#0B2A4A]/5 aria-[current=page]:bg-[#0B2A4A] aria-[current=page]:text-white"
-              >
-                Submissions
-              </Link>
-            </nav>
-            {showLogout && (
-              <div className="flex min-w-0 flex-1 items-center justify-end gap-3 text-[#0B2A4A] sm:flex-none">
-                <span className="truncate text-sm font-semibold" title={userName ?? undefined}>{userName}</span>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="shrink-0 rounded-lg border border-[#0B2A4A]/20 px-3 py-2 text-sm font-semibold hover:bg-[#0B2A4A]/5"
-                >
-                  Sign out
-                </button>
-              </div>
-            )}
-          </>
+        ) : isEvaluatorPage ? (showLogout && (
+          <div className="flex min-w-0 flex-1 items-center justify-end gap-3 text-[#0B2A4A] sm:flex-none">
+            <span className="truncate text-sm font-semibold" title={userName ?? undefined}>{userName}</span>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="shrink-0 rounded-lg border border-[#0B2A4A]/20 px-3 py-2 text-sm font-semibold hover:bg-[#0B2A4A]/5"
+            >
+              Sign out
+            </button>
+          </div>
+        )
         ) : showLogout && (
           <button
             type="button"

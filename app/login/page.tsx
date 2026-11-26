@@ -14,6 +14,13 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [error, setError] = useState("");
+  const [retryAfter, setRetryAfter] = useState(0);
+
+  useEffect(() => {
+    if (!retryAfter) return;
+    const timer = window.setTimeout(() => setRetryAfter(0), retryAfter * 1000);
+    return () => window.clearTimeout(timer);
+  }, [retryAfter]);
 
   // Form state
   const [email, setEmail] = useState("");
@@ -47,9 +54,6 @@ export default function LoginPage() {
             if (user.role === "evaluator") {
               router.replace("/evaluator");
               return;
-            } else if (user.role === "staff") {
-              router.replace("/staff/dashboard");
-              return;
             } else if (user.role === "admin") {
               router.replace("/admin");
               return;
@@ -76,6 +80,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading || retryAfter) return;
     setLoading(true);
     setError("");
 
@@ -88,7 +93,12 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password, remember_me: rememberMe }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 429) {
+        const seconds = Number(data.retry_after);
+        setRetryAfter(Number.isFinite(seconds) && seconds > 0 ? Math.min(60, seconds) : 60);
+        return;
+      }
 
       if (res.ok) {
         // Store the token and user data
@@ -108,8 +118,6 @@ export default function LoginPage() {
         // Redirect based on role
         if (data.user.role === "evaluator") {
           router.push("/evaluator");
-        } else if (data.user.role === "staff") {
-          router.push("/staff/dashboard");
         } else if (data.user.role === "admin") {
           router.push("/admin");
         } else {
@@ -156,9 +164,9 @@ export default function LoginPage() {
             <p className="text-sm text-zinc-500 mt-2">Login to manage your abstract submissions</p>
           </div>
 
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-              {error}
+          {(error || retryAfter > 0) && (
+            <div role="alert" className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+              {retryAfter > 0 ? `Too many sign-in attempts. Try again in ${retryAfter} seconds.` : error}
             </div>
           )}
 
@@ -219,7 +227,7 @@ export default function LoginPage() {
 
             <button 
               type="submit" 
-              disabled={loading}
+              disabled={loading || retryAfter > 0}
               className="w-full bg-[#0A2540] text-white py-3 rounded-lg font-bold hover:bg-[#143b66] transition-colors flex items-center justify-center gap-2 disabled:bg-zinc-300 disabled:cursor-not-allowed cursor-pointer"
             >
               {loading ? (

@@ -13,7 +13,10 @@ import {
   FaEdit, FaTrash
 } from "react-icons/fa";
 import { apiFetch } from "../lib/api";
+import PaymentProofAction, { PaymentProofPreview } from "./PaymentProofAction";
 import AddAgencyForm from "../components/AddAgencyForm";
+
+const ABSTRACT_WORD_GUIDELINE = 300;
 
 const emptyFormData = {
   selected_track: "",
@@ -34,6 +37,7 @@ const emptyFormData = {
 type AbstractSubmissionRecord = {
   id: number;
   status: string;
+  payment_proof_filename?: string | null;
   research_title: string;
   selected_track?: string;
   specific_track?: string;
@@ -77,6 +81,8 @@ export default function AbstractSubmissionPage() {
   const [showSubmissionModal, setShowSubmissionModal] = useState(false);
   const [pdfViewerUrl, setPdfViewerUrl] = useState("");
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const submissionInFlight = useRef(false);
+  const submissionAttempt = useRef<{ body: string; key: string } | null>(null);
 
   // Search state for university/agency
   const [agencySearch, setAgencySearch] = useState("");
@@ -378,7 +384,7 @@ export default function AbstractSubmissionPage() {
   };
 
   const deleteSubmission = async (submission: AbstractSubmissionRecord) => {
-    if (!window.confirm(`Delete "${submission.research_title}"? This cannot be undone.`)) return;
+    if (!window.confirm(`Delete "${submission.research_title}" and move its abstract file to Google Drive Trash?`)) return;
 
     setDeletingSubmissionId(submission.id);
     try {
@@ -400,10 +406,12 @@ export default function AbstractSubmissionPage() {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+    if (submissionInFlight.current || showSuccessModal) return;
     if (showCustomAgency) {
       alert("Please fill in and save the new University/Agency first, or cancel adding it.");
       return;
     }
+    submissionInFlight.current = true;
     setLoading(true);
 
     try {
@@ -438,12 +446,34 @@ export default function AbstractSubmissionPage() {
       };
 
       const isEditing = editingSubmissionId !== null;
+      const body = JSON.stringify(submissionData);
+      let storageKey: string | undefined;
+      let idempotencyKey: string | undefined;
+      if (!isEditing) {
+        if (submissionAttempt.current?.body === body) {
+          idempotencyKey = submissionAttempt.current.key;
+        }
+        try {
+          const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(body));
+          const fingerprint = Array.from(new Uint8Array(hash), (byte) => byte.toString(16).padStart(2, "0")).join("");
+          storageKey = `abstract-submission:${userId ?? "current"}:${fingerprint}`;
+          idempotencyKey ??= sessionStorage.getItem(storageKey) ?? undefined;
+        } catch {
+          // The current form can still reuse its key when browser storage is unavailable.
+        }
+        idempotencyKey ??= crypto.randomUUID();
+        submissionAttempt.current = { body, key: idempotencyKey };
+        if (storageKey) {
+          try { sessionStorage.setItem(storageKey, idempotencyKey); } catch { /* Keep the in-memory key. */ }
+        }
+      }
+
       const res = await apiFetch(
         isEditing ? `/api/abstracts/${editingSubmissionId}` : "/api/abstracts/submit",
         {
           method: isEditing ? "PUT" : "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(submissionData)
+          headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined,
+          body,
         }
       );
 
@@ -463,6 +493,10 @@ export default function AbstractSubmissionPage() {
           alert(data.warning || data.message || "Submission updated successfully.");
           return;
         }
+        if (storageKey) {
+          try { sessionStorage.removeItem(storageKey); } catch { /* The original key can safely be reused. */ }
+        }
+        submissionAttempt.current = null;
         setSubmittedData(data);
         setShowSuccessModal(true);
         setLoading(false);
@@ -473,14 +507,17 @@ export default function AbstractSubmissionPage() {
           fetchMySubmissions();
         }, 2000);
       } else {
-        const errorData = await res.json();
+        const errorData = await res.json().catch(() => ({}));
         setLoading(false);
         alert(errorData.detail || "Submission failed.");
       }
     } catch (error) {
       setLoading(false);
       console.error("Error submitting abstract", error);
-      alert("Failed to connect to the server.");
+      alert("Failed to connect to the server. You can retry with the same abstract details.");
+    } finally {
+      submissionInFlight.current = false;
+      setLoading(false);
     }
   };
 
@@ -509,6 +546,9 @@ export default function AbstractSubmissionPage() {
     accepted: mySubmissions.filter(s => s.status === 'accepted').length,
     rejected: mySubmissions.filter(s => s.status === 'rejected').length
   };
+
+  const abstractWordCount = formData.abstract.match(/\S+/g)?.length ?? 0;
+  const wordsOverGuideline = Math.max(0, abstractWordCount - ABSTRACT_WORD_GUIDELINE);
 
   // Google Drive PDF Viewer Component
   const GoogleDriveViewer = ({ url }: { url: string }) => {
@@ -629,8 +669,8 @@ export default function AbstractSubmissionPage() {
             </div>
 
             {/* Modal Body */}
-            <div className="flex-1 overflow-hidden bg-white">
-              <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-6 h-full p-6">
+            <div className="min-h-0 flex-1 overflow-y-auto bg-white lg:overflow-hidden">
+              <div className="grid grid-cols-1 gap-6 p-4 sm:p-6 lg:h-full lg:grid-cols-[1fr_1.2fr] lg:grid-rows-[minmax(0,1fr)]">
 
                 {/* Left Column - Scrollable Details (Card Layout) */}
                 <div className="overflow-y-auto pr-2 space-y-4 custom-scrollbar">
@@ -768,24 +808,39 @@ export default function AbstractSubmissionPage() {
 
                 </div>
 
-                {/* Right Column - PDF Viewer */}
-                <div className="bg-[#F2F9FF] rounded-xl p-5 flex flex-col h-full border border-[#4FC3F7]/30 shadow-sm">
-                  <div className="flex items-center justify-between mb-4 shrink-0 border-b border-[#4FC3F7]/20 pb-3">
-                    <h4 className="text-sm font-bold text-[#1D3D6D] flex items-center gap-2 tracking-wide uppercase">
-                      <FaFileAlt /> Abstract PDF Viewer
-                    </h4>
+                {/* Right Column - Submission Attachments */}
+                <div className="flex min-w-0 flex-col gap-4 lg:min-h-0 lg:overflow-y-auto lg:pr-2">
+                  <div className="flex min-h-[55dvh] shrink-0 flex-col rounded-xl border border-[#4FC3F7]/30 bg-[#F2F9FF] p-5 shadow-sm lg:grow">
+                    <div className="flex items-center justify-between mb-4 shrink-0 border-b border-[#4FC3F7]/20 pb-3">
+                      <h4 className="text-sm font-bold text-[#1D3D6D] flex items-center gap-2 tracking-wide uppercase">
+                        <FaFileAlt /> Abstract PDF Viewer
+                      </h4>
+                    </div>
+                    <div className="flex-1 min-h-0 bg-white rounded-lg overflow-hidden shadow-inner border border-zinc-200">
+                      {pdfViewerUrl ? (
+                        <GoogleDriveViewer url={pdfViewerUrl} />
+                      ) : (
+                        <div className="flex flex-col items-center justify-center h-full text-center p-6">
+                          <FaFilePdf className="text-5xl text-zinc-300 mb-4" />
+                          <p className="text-zinc-500 font-medium text-lg">No PDF file available for this submission.</p>
+                          <p className="text-sm text-zinc-400 mt-2">The document may have been removed or failed to upload.</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex-1 min-h-0 bg-white rounded-lg overflow-hidden shadow-inner border border-zinc-200">
-                    {pdfViewerUrl ? (
-                      <GoogleDriveViewer url={pdfViewerUrl} />
-                    ) : (
-                      <div className="flex flex-col items-center justify-center h-full text-center p-6">
-                        <FaFilePdf className="text-5xl text-zinc-300 mb-4" />
-                        <p className="text-zinc-500 font-medium text-lg">No PDF file available for this submission.</p>
-                        <p className="text-sm text-zinc-400 mt-2">The document may have been removed or failed to upload.</p>
-                      </div>
-                    )}
-                  </div>
+                  {viewingSubmission.payment_proof_filename && (
+                    <section className="rounded-xl border border-[#DCE6DB] bg-[#F7FAF5] p-5">
+                      <h4 className="mb-1 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-[#28650C]">
+                        <FaFileAlt aria-hidden="true" /> Proof of payment
+                      </h4>
+                      <p className="mb-3 wrap-break-word text-xs text-slate-600">{viewingSubmission.payment_proof_filename}</p>
+                      <PaymentProofPreview
+                        key={viewingSubmission.id}
+                        submissionId={viewingSubmission.id}
+                        filename={viewingSubmission.payment_proof_filename}
+                      />
+                    </section>
+                  )}
                 </div>
               </div>
             </div>
@@ -1244,11 +1299,15 @@ export default function AbstractSubmissionPage() {
 
               {/* Abstract */}
               <div>
-                <label className="block text-sm font-semibold text-[#0A2540] mb-2">Abstract (not more than 300 words) *</label>
-                <textarea name="abstract" value={formData.abstract} onChange={handleChange} required rows={8}
+                <label htmlFor="submission-abstract" className="mb-2 block text-sm font-semibold text-[#0A2540]">Abstract *</label>
+                <textarea id="submission-abstract" name="abstract" value={formData.abstract} onChange={handleChange} required rows={8}
+                  aria-describedby="abstract-word-count"
                   placeholder="Enter your abstract here..."
                   className="w-full px-4 py-3 border border-zinc-200 rounded-lg focus:outline-none focus:border-[#76B947] focus:ring-1 focus:ring-[#76B947] transition-all"></textarea>
-                <p className="text-xs text-zinc-400 mt-1">{formData.abstract.split(/\s+/).filter(Boolean).length} words</p>
+                <p id="abstract-word-count" className={`mt-1 text-xs tabular-nums ${wordsOverGuideline ? "font-semibold text-amber-800" : "text-zinc-600"}`}>
+                  {abstractWordCount} / {ABSTRACT_WORD_GUIDELINE} words
+                  {wordsOverGuideline > 0 && ` · ${wordsOverGuideline} over the guideline`}
+                </p>
               </div>
 
               {/* Keywords */}
@@ -1288,7 +1347,7 @@ export default function AbstractSubmissionPage() {
               </div>
 
               {/* Submit Button */}
-              <button type="submit" disabled={loading}
+              <button type="submit" disabled={loading || showSuccessModal}
                 className="w-full bg-linear-to-r from-[#0A5C0A] to-[#0d6b0d] text-white py-4 rounded-lg font-bold hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 disabled:bg-zinc-300 disabled:cursor-not-allowed">
                 {loading
                   ? <><FaSpinner className="animate-spin" /> {editingSubmissionId !== null ? "Updating Abstract..." : "Generating PDF & Submitting..."}</>
@@ -1351,9 +1410,23 @@ export default function AbstractSubmissionPage() {
                     </thead>
                     <tbody>
                       {mySubmissions.map((submission) => (
-                        <tr key={submission.id} className="border-b border-zinc-100 hover:bg-[#F8FBF5] transition-colors">
+                        <tr
+                          key={submission.id}
+                          onClick={(event) => {
+                            if (event.target instanceof Element && event.target.closest("button, input, a")) return;
+                            viewSubmission(submission);
+                          }}
+                          className="cursor-pointer border-b border-zinc-100 transition-colors hover:bg-[#F8FBF5] focus-within:bg-[#F8FBF5]"
+                        >
                           <td className="py-3 px-4">
-                            <p className="text-sm font-medium text-[#0A2540] line-clamp-1">{submission.research_title}</p>
+                            <button
+                              type="button"
+                              aria-haspopup="dialog"
+                              onClick={() => viewSubmission(submission)}
+                              className="line-clamp-1 rounded-sm text-left text-sm font-medium text-[#0A2540] hover:underline focus-visible:outline-2"
+                            >
+                              {submission.research_title}
+                            </button>
                           </td>
                           <td className="py-3 px-4">
                             <span className="inline-flex items-center gap-1 text-xs text-zinc-500">
@@ -1371,10 +1444,15 @@ export default function AbstractSubmissionPage() {
                           </td>
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-1">
-                              <button onClick={() => viewSubmission(submission)}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-[#1b5e20] hover:text-[#76B947] transition-colors">
-                                <FaEye className="text-xs" /> View
-                              </button>
+                              {submission.status?.toLowerCase() === "accepted" && (
+                                <PaymentProofAction
+                                  submissionId={submission.id}
+                                  filename={submission.payment_proof_filename}
+                                  onUploaded={(filename) => setMySubmissions((items) => items.map((item) =>
+                                    item.id === submission.id ? { ...item, payment_proof_filename: filename } : item
+                                  ))}
+                                />
+                              )}
                               {submission.status?.toLowerCase() === "pending" && (
                                 <>
                                   <button onClick={() => editSubmission(submission)}

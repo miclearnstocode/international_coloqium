@@ -2,7 +2,7 @@ import os
 import re
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-from googleapiclient.http import MediaFileUpload
+from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload, MediaIoBaseUpload
 from googleapiclient.errors import HttpError
 from dotenv import load_dotenv
 
@@ -119,16 +119,69 @@ def extract_file_id(drive_url_or_id):
             return match.group(1).split('?')[0].split('&')[0]
     return None
 
-def trash_file_from_drive(drive_url_or_id):
-    """Move an existing file in Google Drive to the trash."""
+def set_drive_file_trashed(drive_url_or_id, trashed):
     file_id = extract_file_id(drive_url_or_id)
     if not file_id:
-        raise ValueError("Could not find a Google Drive file ID to move to trash")
+        raise ValueError('Could not find the linked Google Drive file ID.')
+
+    files = get_drive_service().files()
+    file = files.get(fileId=file_id, fields='id,trashed', supportsAllDrives=True).execute()
+    if file.get('trashed') is trashed:
+        return False
+
+    updated = files.update(
+        fileId=file_id,
+        body={'trashed': trashed},
+        fields='id,trashed',
+        supportsAllDrives=True,
+    ).execute()
+    if updated.get('trashed') is not trashed:
+        raise RuntimeError('Google Drive did not confirm the file trash status.')
+    return True
+
+
+def trash_file_from_drive(drive_url_or_id):
+    """Move a Drive file to Trash and report whether this call changed it."""
+    return set_drive_file_trashed(drive_url_or_id, True)
+
+
+def upload_payment_proof_to_drive(file_path, filename, mime_type, abstract_url):
+    abstract_id = extract_file_id(abstract_url)
+    if not abstract_id:
+        raise ValueError('The abstract has no Google Drive file.')
 
     service = get_drive_service()
-    service.files().update(
-        fileId=file_id,
-        body={'trashed': True},
-        supportsAllDrives=True
-    ).execute()
-    return True
+    files = service.files()
+    abstract = files.get(fileId=abstract_id, fields='parents,trashed', supportsAllDrives=True).execute()
+    if abstract.get('trashed') or not abstract.get('parents'):
+        raise ValueError('The abstract has no accessible Google Drive folder.')
+
+    folder = abstract['parents'][0]
+    page_token = None
+    while True:
+        permissions = service.permissions().list(
+            fileId=folder, fields='nextPageToken,permissions(type)',
+            pageToken=page_token, supportsAllDrives=True,
+        ).execute()
+        if any(permission['type'] in ('anyone', 'domain') for permission in permissions.get('permissions', [])):
+            raise ValueError('The abstract folder is shared publicly or across the domain.')
+        page_token = permissions.get('nextPageToken')
+        if not page_token:
+            break
+
+    with open(file_path, 'rb') as stream:
+        media = MediaIoBaseUpload(stream, mimetype=mime_type, chunksize=8 * 1024 * 1024, resumable=True)
+        result = files.create(
+            body={'name': filename, 'parents': [folder]},
+            media_body=media, fields='id', supportsAllDrives=True,
+        ).execute()
+    return result['id']
+
+
+def download_drive_file(file_id, output):
+    request = get_drive_service().files().get_media(fileId=file_id, supportsAllDrives=True)
+    download = MediaIoBaseDownload(output, request, chunksize=8 * 1024 * 1024)
+    done = False
+    while not done:
+        _, done = download.next_chunk(num_retries=2)
+    output.seek(0)

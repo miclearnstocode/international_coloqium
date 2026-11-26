@@ -8,7 +8,7 @@ import { useState, useEffect, useRef } from "react";
 import { 
   FaBook, FaCertificate, FaUtensils,
   FaRegCalendarAlt, FaInfoCircle, FaDollarSign, FaRegUser, 
-  FaRegPaperPlane, FaUniversity, FaRegFileAlt, FaChevronRight,
+  FaRegPaperPlane, FaRegFileAlt, FaChevronRight,
   FaRegCheckCircle, FaPaperPlane, FaLaptop, FaSearch, FaEnvelopeOpenText,
   FaEnvelope, FaUserCheck, FaTimesCircle, FaCreditCard, FaCheckDouble,
   FaUsersCog, FaClipboardList, FaBullseye, FaCheckCircle, FaBookOpen,
@@ -544,42 +544,37 @@ export default function RegistrationPage() {
             </div>
 
             <div className="flex flex-1 flex-col">
-              {/* Account details */}
-              <div className="grid grid-cols-[130px_1fr] gap-x-4 gap-y-3 text-sm mb-6">
-                <span className="font-bold text-[#0A2540] whitespace-nowrap">Account Name</span>
-                <span className="text-zinc-600">To be announced</span>
-
-                <span className="font-bold text-[#0A2540] whitespace-nowrap">Bank Name</span>
-                <span className="text-zinc-600">To be announced</span>
-
-                <span className="font-bold text-[#0A2540] whitespace-nowrap">Account Number</span>
-                <span className="text-zinc-600">To be announced</span>
-
-                <span className="font-bold text-[#0A2540] whitespace-nowrap">Account Type</span>
-                <span className="text-zinc-600">To be announced</span>
-
-                <span className="font-bold text-[#0A2540] whitespace-nowrap">SWIFT/BIC</span>
-                <span className="text-zinc-600">To be announced</span>
-              </div>
-
-              {/* Building logo — restored, centered divider */}
-              <div className="flex items-center gap-4 my-2">
-                <div className="flex-1 h-px bg-linear-to-r from-transparent via-zinc-200 to-zinc-200" />
-                <FaUniversity className="text-[#1D3D6D] text-5xl drop-shadow-sm shrink-0" aria-hidden />
-                <div className="flex-1 h-px bg-linear-to-l from-transparent via-zinc-200 to-zinc-200" />
-              </div>
+              <figure className="mb-4 flex flex-col items-center gap-3 text-center">
+                <a
+                  href="/images/gcash.jpg"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Open the full-size GCash payment QR code in a new tab"
+                  className="block w-full max-w-52 overflow-hidden rounded-2xl border border-[#DCE6DB] shadow-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0B2A4A]"
+                >
+                  <Image
+                    src="/images/gcash.jpg"
+                    alt="GCash payment QR code for John King Layos"
+                    width={1066}
+                    height={2048}
+                    unoptimized
+                    className="h-auto w-full"
+                  />
+                </a>
+                <figcaption>
+                  <p className="text-lg font-extrabold text-[#0A2540]">John King Layos</p>
+                  <p className="text-sm text-zinc-600">Chair, Organizing Committee</p>
+                  <p className="mt-1 text-sm font-bold text-[#0A2540]">
+                    3RD INTERNATIONAL AGRI-LIFE &amp; BIORESOURCE SCIENCES SYMPOSIUM
+                  </p>
+                </figcaption>
+              </figure>
 
               {/* Upload note */}
-              <div className="bg-[#F2F9FF] border border-[#4FC3F7]/30 rounded-lg p-6 mt-auto">
+              <div className="bg-[#F2F9FF] border border-[#4FC3F7]/30 rounded-lg p-4 mt-auto">
                 <div className="flex items-start gap-3">
                   <FaRegFileAlt className="text-[#1D3D6D] mt-1 text-xl shrink-0" />
-                  <div>
-                    <p className="font-bold text-[#0A2540] text-sm mb-2">Please upload your proof of payment</p>
-                    <div className="text-xs text-zinc-600 space-y-1">
-                      <p>Email: <span className="font-semibold text-[#0A2540] break-all">internationalsymposium@capsu.edu.ph</span></p>
-                      <p>Subject: <span className="font-semibold text-[#0A2540]">IC2025 Payment – [Your Name]</span></p>
-                    </div>
-                  </div>
+                  <p className="text-sm font-bold text-[#0A2540]">Upload your proof of payment in the system once your abstract has been accepted.</p>
                 </div>
               </div>
             </div>

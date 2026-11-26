@@ -1,4 +1,14 @@
 npm run dev -- -H 127.0.0.1 -p 3000 start Frontend service
+xztlwzvtsadoqwag
+MAIL_SERVER=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your-account@your-university.edu.ph
+MAIL_PASSWORD=your_google_app_password_without_spaces
+MAIL_FROM=your-account@your-university.edu.ph
+MAIL_FROM_NAME="Symposium Secretariat"
+
+app passwords
+https://support.google.com/accounts/answer/185833
 
 NEXT_PUBLIC_API_URL=http://127.0.0.1:5200
 Evaluator1234

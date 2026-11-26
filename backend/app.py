@@ -3,8 +3,9 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
-from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, jwt_required, get_jwt_identity, verify_jwt_in_request
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 from datetime import timedelta
+from werkzeug.middleware.proxy_fix import ProxyFix
 import os, traceback
 from routes import ALL_BLUEPRINTS
 from models import (db, User, SUC,)
@@ -30,7 +31,14 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['JWT_SECRET_KEY'] =  os.getenv('JWT_SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'mysql+pymysql://root:@127.0.0.1:3306/researchdb')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['MAX_CONTENT_LENGTH'] = 64 * 1024 * 1024 
+app.config['LOGIN_RATE_LIMIT_PATH'] = os.getenv('LOGIN_RATE_LIMIT_PATH')
+trusted_proxy_hops = int(os.getenv('TRUSTED_PROXY_HOPS', '0'))
+if trusted_proxy_hops > 0:
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=trusted_proxy_hops)
+app.config['MAX_CONTENT_LENGTH'] = 64 * 1024 * 1024
+app.config['PAYMENT_PROOF_DIR'] = os.path.abspath(os.getenv(
+    'PAYMENT_PROOF_DIR', os.path.join(app.instance_path, 'payment-proofs')
+)) 
 
 db.init_app(app)     
 bcrypt = Bcrypt(app)
@@ -40,7 +48,7 @@ jwt = JWTManager(app)
 CORS(app, 
      origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5000", "http://127.0.0.1:5000", "https://symposium.capsu.edu.ph"],
      supports_credentials=True,
-     allow_headers=["Content-Type", "Authorization", "Accept", "X-Requested-With"],
+     allow_headers=["Content-Type", "Authorization", "Accept", "X-Requested-With", "Idempotency-Key"],
      expose_headers=["Content-Type", "Authorization"],
      methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"], max_age=3600)
 
@@ -76,7 +84,7 @@ def handle_options():
 @app.after_request
 def after_request(response):
     response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, Idempotency-Key')
     response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
     return response
 
@@ -138,35 +146,6 @@ def register():
     except Exception as e:
         db.session.rollback()
         return jsonify({"detail": str(e)}), 500
-
-@app.route('/api/login', methods=['POST', 'GET', 'OPTIONS'])
-def login():
-    if request.method == 'OPTIONS':
-        return jsonify({})
-    try:
-        data = request.get_json()
-        if not data.get('email') or not data.get('password'):
-            return jsonify({"detail": "Email and password are required"}), 400
-        
-        user = User.query.filter_by(email=data['email']).first()
-        if not user or not bcrypt.check_password_hash(user.password_hash, data['password']):
-            return jsonify({"detail": "Invalid email or password"}), 401
-        
-        remember_me = bool(data.get('remember_me', False))
-        access_expiry = timedelta(days=30) if remember_me else timedelta(days=7)
-        refresh_expiry = timedelta(days=60) if remember_me else timedelta(days=14)
-
-        access_token = create_access_token(identity=str(user.id), expires_delta=access_expiry)
-        refresh_token = create_refresh_token(identity=str(user.id), expires_delta=refresh_expiry)
-        
-        return jsonify({ "message": "Login successful", "access_token": access_token,
-            "refresh_token": refresh_token,
-            "user": {"id": user.id, "full_name": user.full_name, "email": user.email, "role": user.role}
-        }), 200
-        
-    except Exception as e:
-        return jsonify({"detail": str(e)}), 500
-
 
 @app.route('/api/refresh', methods=['POST', 'OPTIONS'])
 @jwt_required(refresh=True)
