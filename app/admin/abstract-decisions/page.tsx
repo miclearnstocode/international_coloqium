@@ -11,12 +11,20 @@ interface Decision {
   research_title: string;
   author: string;
   email_address: string;
-  status: "accepted" | "rejected";
+  status: "pending" | "accepted" | "rejected";
   rejection_reason: string | null;
   email_status: "sent" | "pending" | "untracked";
   email_sent_at: string | null;
   payment_proof: { filename: string; review: PaymentReview | null } | null;
 }
+
+const decisionStyles = {
+  pending: "bg-amber-100 text-amber-900",
+  accepted: "bg-green-100 text-green-800",
+  rejected: "bg-rose-100 text-rose-800",
+};
+
+const abstractLabels = { pending: "Pending", accepted: "Accepted", rejected: "Rejected" };
 
 const emailLabels = {
   sent: "Sent",
@@ -73,7 +81,8 @@ export default function AbstractDecisionsPage() {
                 onChange={(event) => setFilter(event.target.value as typeof filter)}
                 className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
               >
-                <option value="all">All decisions</option>
+                <option value="all">All submissions</option>
+                <option value="pending">Pending</option>
                 <option value="accepted">Accepted</option>
                 <option value="rejected">Rejected</option>
               </select>
@@ -89,7 +98,7 @@ export default function AbstractDecisionsPage() {
           </div>
           {loading && <p role="status" className="mb-4 text-sm">Loading decisions…</p>}
           {error && <p role="alert" className="mb-4 rounded-lg bg-rose-50 p-3 text-sm text-rose-800">{error}</p>}
-          {!loading && !error && visible.length === 0 && <p className="rounded-xl border border-slate-200 bg-white p-5 text-sm">No decisions in this view.</p>}
+          {!loading && !error && visible.length === 0 && <p className="rounded-xl border border-slate-200 bg-white p-5 text-sm">No submissions in this view.</p>}
           {!error && visible.length > 0 && (
             <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
               <table className="w-full min-w-180 text-left text-sm">
@@ -103,10 +112,10 @@ export default function AbstractDecisionsPage() {
                 <tbody className="divide-y divide-slate-100">
                   {visible.map((row) => {
                     const paymentReview = row.payment_proof?.review;
-                    const latestStatus = paymentReview?.status ?? row.status;
-                    const decisionLabel = paymentReview
-                      ? latestStatus === "accepted" ? "Payment confirmed" : "Payment rejected"
-                      : latestStatus === "accepted" ? "Accepted" : "Rejected";
+                    const latestStatus = row.status === "pending" ? row.status : paymentReview?.status ?? row.status;
+                    const decisionLabel = paymentReview && latestStatus !== "pending"
+                      ? paymentReview.status === "accepted" ? "Payment confirmed" : "Payment rejected"
+                      : abstractLabels[latestStatus];
 
                     return (
                       <tr key={row.id} className="align-top">
@@ -115,12 +124,12 @@ export default function AbstractDecisionsPage() {
                           <span className="mt-1 block font-normal text-slate-600">{row.author}</span>
                         </th>
                         <td className="px-5 py-4">
-                          <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${latestStatus === "accepted" ? "bg-green-100 text-green-800" : "bg-rose-100 text-rose-800"}`}>
+                          <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${decisionStyles[latestStatus]}`}>
                             {decisionLabel}
                           </span>
                         </td>
                         <td className="px-5 py-4">
-                          <p className="font-semibold">{emailLabels[row.email_status]}</p>
+                          <p className="font-semibold">{row.status === "pending" ? "No decision email yet" : emailLabels[row.email_status]}</p>
                           <p className="mt-1 break-all text-slate-600">{row.email_address}</p>
                           {row.email_sent_at && (
                             <time dateTime={row.email_sent_at} className="mt-1 block text-xs text-slate-600">

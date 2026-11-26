@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useMemo, useState, type FormEvent } from "react";
+import React, { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {FaHome, FaChevronRight, FaSearch, FaUser, FaUserShield, FaUserTie, FaTrash, FaEdit, FaSave, FaTimes, } from "react-icons/fa";
 import { Sidebar } from "@/app/admin/admin-components/Sidebar";
 import { AdminHeader } from "@/app/admin/admin-components/AdminHeader";
+import LoadingIndicator from "@/app/components/LoadingIndicator";
 import { apiFetch } from "../../lib/api";
 
 type Role = "user" | "staff" | "admin" | "evaluator";
@@ -36,6 +37,21 @@ export default function UsersAndRolesPage() {
   const [editName, setEditName] = useState("");
   const [editRole, setEditRole] = useState<Role>("user");
   const [savingId, setSavingId] = useState<number | null>(null);
+
+  const deleteDialog = useRef<HTMLDialogElement>(null);
+  const deleteCancel = useRef<HTMLButtonElement>(null);
+  const deletingRequest = useRef(false);
+  const [deleteTarget, setDeleteTarget] = useState<UserRow | null>(null);
+  const [finalDeleteStep, setFinalDeleteStep] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+  const [deleteMessage, setDeleteMessage] = useState("");
+
+  useEffect(() => {
+    const element = deleteDialog.current;
+    if (deleteTarget && element && !element.open) element.showModal();
+    if (deleteTarget && finalDeleteStep) deleteCancel.current?.focus();
+  }, [deleteTarget, finalDeleteStep]);
 
   const [showEvaluatorForm, setShowEvaluatorForm] = useState(false);
   const [creatingEvaluator, setCreatingEvaluator] = useState(false);
@@ -146,25 +162,38 @@ export default function UsersAndRolesPage() {
     }
   };
 
-  const deleteUser = async (user: UserRow) => {
-    if (user.is_self) return;
-    if (!confirm(`Delete ${user.full_name}? This cannot be undone.`)) return;
+  function requestDelete(user: UserRow) {
+    if (user.is_self || deletingRequest.current) return;
+    setDeleteError("");
+    setDeleteMessage("");
+    setFinalDeleteStep(false);
+    setDeleteTarget(user);
+  }
 
+  async function deleteUser() {
+    if (!deleteTarget || deleteTarget.is_self || !finalDeleteStep || deletingRequest.current) return;
+    const user = deleteTarget;
+    deletingRequest.current = true;
+    setDeleting(true);
+    setDeleteError("");
     try {
-      const res = await apiFetch(`/api/admin/users/${user.id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token()}` },
-      });
+      const res = await apiFetch(`/api/admin/users/${user.id}`, { method: "DELETE" });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.detail || "Failed to delete user");
+        throw new Error(err.detail || "Could not delete the account.");
       }
-      setUsers((prev) => prev.filter((u) => u.id !== user.id));
-      fetchUsers();
-    } catch (err: any) {
-      alert(err.message);
+
+      setUsers((items) => items.filter((item) => item.id !== user.id));
+      setDeleteMessage(`${user.full_name}’s account was deleted.`);
+      deleteDialog.current?.close();
+      await fetchUsers();
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : "Could not delete the account.");
+    } finally {
+      deletingRequest.current = false;
+      setDeleting(false);
     }
-  };
+  }
 
   // ===== Role badge =====
   const RoleBadge = ({ role }: { role: UserRow["role"] }) => {
@@ -265,6 +294,8 @@ export default function UsersAndRolesPage() {
               />
             </div>
           </div>
+
+          {deleteMessage && <p role="status" className="mb-4 rounded-lg bg-green-50 p-3 text-sm text-green-800">{deleteMessage}</p>}
 
           {/* Table */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
@@ -373,7 +404,10 @@ export default function UsersAndRolesPage() {
                                     <FaEdit className="text-xs" />
                                   </button>
                                   <button
-                                    onClick={() => deleteUser(user)}
+                                    type="button"
+                                    aria-haspopup="dialog"
+                                    aria-label={`Delete ${user.full_name}`}
+                                    onClick={() => requestDelete(user)}
                                     disabled={user.is_self}
                                     className={`p-2 rounded ${
                                       user.is_self
@@ -404,6 +438,48 @@ export default function UsersAndRolesPage() {
             </div>
           </div>
         </div>
+        <dialog
+          ref={deleteDialog}
+          aria-labelledby="delete-user-title"
+          aria-describedby="delete-user-description"
+          onCancel={(event) => { if (deletingRequest.current) event.preventDefault(); }}
+          onClose={() => { setDeleteTarget(null); setFinalDeleteStep(false); setDeleteError(""); }}
+          className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border-t-4 border-rose-700 bg-white p-6 text-[#0B2A4A] shadow-2xl backdrop:bg-[#061F39]/65 backdrop:backdrop-blur-sm"
+        >
+          <div className="mb-4 grid size-10 place-items-center rounded-xl bg-rose-50 text-rose-800">
+            <FaTrash aria-hidden="true" />
+          </div>
+          <h2 id="delete-user-title" className="text-xl font-bold">{finalDeleteStep ? "Confirm account deletion" : "Delete this user?"}</h2>
+          {deleteTarget && (
+            <div className="mt-3 space-y-2 text-sm">
+              <div className="rounded-lg bg-slate-50 p-3">
+                <p className="wrap-break-word font-semibold">{deleteTarget.full_name}</p>
+                <p className="wrap-break-word text-slate-600">{deleteTarget.email}</p>
+              </div>
+              <p id="delete-user-description" className="text-slate-600">
+                {finalDeleteStep
+                  ? "This permanently removes the account. Select Delete user to confirm."
+                  : "Review the account details before continuing to the final confirmation."}
+              </p>
+            </div>
+          )}
+          {deleting && <LoadingIndicator label="Deleting user…" className="mt-4 text-sm font-semibold" />}
+          {deleteError && <p role="alert" className="mt-4 text-sm text-rose-800">{deleteError}</p>}
+          <div className={`mt-6 flex flex-wrap gap-2 text-sm font-semibold ${finalDeleteStep ? "flex-row-reverse justify-start" : "justify-end"}`}>
+            <button ref={deleteCancel} type="button" disabled={deleting} onClick={() => deleteDialog.current?.close()} className="rounded-lg border border-slate-200 px-4 py-2 hover:bg-slate-50 disabled:opacity-60">
+              Cancel
+            </button>
+            {finalDeleteStep ? (
+              <button key="delete" type="button" disabled={deleting} onClick={() => void deleteUser()} className="rounded-lg bg-rose-800 px-4 py-2 text-white hover:bg-rose-900 disabled:opacity-60">
+                {deleting ? "Deleting…" : "Delete user"}
+              </button>
+            ) : (
+              <button key="continue" type="button" onClick={() => setFinalDeleteStep(true)} className="rounded-lg bg-[#0B2A4A] px-4 py-2 text-white hover:bg-[#163F59]">
+                Continue
+              </button>
+            )}
+          </div>
+        </dialog>
       </main>
     </div>
   );

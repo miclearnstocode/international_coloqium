@@ -60,10 +60,10 @@ def decision_query():
 def list_decisions():
     rows = decision_query().add_entity(AbstractPaymentProof).outerjoin(
         AbstractPaymentProof, AbstractPaymentProof.submission_id == AbstractSubmission.id,
-    ).filter(AbstractSubmission.status.in_(('accepted', 'rejected'))).all()
+    ).filter(AbstractSubmission.status.in_(('pending', 'accepted', 'rejected'))).all()
     decisions = []
     for submission, acceptance, rejection, proof in rows:
-        notification = acceptance if submission.status == 'accepted' else rejection
+        notification = {'accepted': acceptance, 'rejected': rejection}.get(submission.status)
         sent_at = notification.sent_at if notification else None
         decisions.append({
             'id': submission.id,

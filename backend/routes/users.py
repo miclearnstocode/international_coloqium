@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, current_app, jsonify, request
 from flask_jwt_extended import get_jwt_identity
 import traceback
 from sqlalchemy.exc import IntegrityError
@@ -131,15 +131,17 @@ def delete_user(user_id):
         if user_id == current_user_id:
             return jsonify({"detail": "You cannot delete your own account"}), 400
 
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id, with_for_update=True)
         if not user:
             return jsonify({"detail": "User not found"}), 404
 
         db.session.delete(user)
         db.session.commit()
         return jsonify({"message": "User deleted successfully"}), 200
-    except Exception as e:
+    except IntegrityError:
         db.session.rollback()
-        traceback.print_exc()
-        return jsonify({"detail": str(e)}), 500
-    
+        return jsonify({"detail": "This account could not be deleted because other records reference it."}), 409
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception('Could not delete user %s', user_id)
+        return jsonify({"detail": "Could not delete the account. Please try again."}), 500
