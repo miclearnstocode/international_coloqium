@@ -49,12 +49,17 @@ export default function AbstractDecisionsPage() {
           cache: "no-store",
           signal: controller.signal,
         });
+        if (!response.ok) {
+          const data = await response.json().catch(() => null);
+          throw new Error(data?.detail || `Could not load abstract decisions (HTTP ${response.status}).`);
+        }
         const data = await response.json();
-        if (!response.ok) throw new Error(data.detail || "Could not load abstract decisions.");
         setDecisions(data.decisions);
       } catch (err) {
         if (!controller.signal.aborted) {
-          setError(err instanceof Error ? err.message : "Could not load abstract decisions.");
+          setError(err instanceof TypeError
+            ? "Could not reach the backend. Check that it is running and that the frontend API URL is correct."
+            : err instanceof Error ? err.message : "Could not load abstract decisions.");
         }
       } finally {
         if (!controller.signal.aborted) setLoading(false);
